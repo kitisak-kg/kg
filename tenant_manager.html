@@ -3,112 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จัดการผู้เช่า - หอพัก K&G</title>
+    <title>จัดการผู้เช่า (Excel Style) - หอพัก K&G</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root { --primary: #0284c7; --bg: #f8fafc; }
-        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); padding: 20px; padding-bottom: 80px; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); padding: 20px; padding-bottom: 100px; }
         
-        .header-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .header-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
         
         /* Table Styling */
-        .table-responsive { background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-height: 75vh; }
-        .table-excel { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+        .table-responsive { background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-height: 80vh; overflow-x: auto; }
+        .table-excel { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; min-width: 1200px; }
         .table-excel th { position: sticky; top: 0; background: #f1f5f9; color: #475569; padding: 10px; font-weight: 700; border-bottom: 2px solid #e2e8f0; z-index: 10; text-align: center; white-space: nowrap; }
-        .table-excel td { border-bottom: 1px solid #f1f5f9; padding: 0; height: 45px; vertical-align: middle; }
+        .table-excel td { border-bottom: 1px solid #f1f5f9; padding: 0; height: 38px; vertical-align: middle; border-right: 1px solid #f8fafc; }
         
         /* Input Styling */
-        .cell-input { width: 100%; height: 100%; border: none; padding: 0 8px; outline: none; background: transparent; transition: 0.2s; font-family: 'Sarabun'; font-size: 13px; }
+        .cell-input { width: 100%; height: 100%; border: none; padding: 0 8px; outline: none; background: transparent; transition: 0.1s; font-family: 'Sarabun'; font-size: 13px; }
         .cell-input:focus { background: #e0f2fe; box-shadow: inset 0 0 0 2px var(--primary); }
         .cell-select { width: 100%; height: 100%; border: none; outline: none; background: transparent; padding: 0 5px; cursor: pointer; font-size: 12px; font-weight: 700; }
         
-        /* Specific Columns & Status Colors */
-        .col-id { background: #f8fafc; font-weight: 800; text-align: center; width: 60px; color: #334155; }
+        /* Remove Spinners */
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         
-        /* Status Colors (Backgrounds for Select) */
-        .st-active { color: #166534; background: #dcfce7; }        /* เขียว: อยู่ปกติ */
-        .st-empty { color: #94a3b8; background: #f8fafc; }         /* เทา: ว่าง */
-        .st-moving { color: #854d0e; background: #fef9c3; }        /* เหลือง: แจ้งย้าย */
-        .st-moved-room { color: #0369a1; background: #e0f2fe; }    /* ฟ้า: ย้ายห้อง */
-        .st-runaway { color: #991b1b; background: #fee2e2; border-left: 4px solid #ef4444; } /* แดง: หนี/เชิญออก */
+        /* Colors */
+        .col-id input { text-align: center; font-weight: 800; color: #334155; background: #f8fafc; }
+        .st-active { color: #166534; background: #dcfce7; }
+        .st-empty { color: #94a3b8; background: #f8fafc; }
+        .st-moving { color: #854d0e; background: #fef9c3; }
+        .st-moved-room { color: #0369a1; background: #e0f2fe; }
+        .st-runaway { color: #991b1b; background: #fee2e2; border-left: 4px solid #ef4444; }
 
-        /* Zone & Status Filter Bar */
-        .filter-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; align-items: center; }
-        .btn-filter { border: 1px solid #cbd5e1; background: white; color: #64748b; border-radius: 20px; padding: 4px 15px; font-weight: 700; font-size: 12px; white-space: nowrap; transition: 0.2s; }
-        .btn-filter:hover { background: #f1f5f9; }
-        .btn-filter.active { background: #0f172a; color: white; border-color: #0f172a; }
-        
-        .btn-status-filter { border-radius: 8px; padding: 4px 10px; font-size: 12px; font-weight: bold; border: 1px solid transparent; opacity: 0.6; }
-        .btn-status-filter.active { opacity: 1; transform: scale(1.05); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        
-        .s-run { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
-        .s-move { background: #fef9c3; color: #854d0e; border-color: #fde047; }
-        .s-room { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; }
+        .btn-add-row { width: 100%; padding: 8px; border: 2px dashed #cbd5e1; background: #f8fafc; color: #64748b; font-weight: bold; margin-top: 10px; transition: 0.2s; text-align: center; cursor: pointer; }
+        .btn-add-row:hover { background: #e2e8f0; color: #334155; border-color: #94a3b8; }
+        .del-btn { color: #ef4444; cursor: pointer; opacity: 0.4; border:none; background:none; transition:0.2s; font-size: 16px; }
+        .del-btn:hover { opacity: 1; transform: scale(1.2); }
 
         .status-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 10px 25px; border-radius: 50px; font-size: 13px; z-index: 1000; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
         
-        .wait-item { border-bottom: 1px solid #eee; padding: 8px; background: white; margin-bottom: 5px; border-radius: 6px; position: relative; border:1px solid #e2e8f0;}
-        .room-tag { background: #0f172a; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-right: 5px; }
+        /* Side Panel */
+        .wait-item { border-bottom: 1px solid #eee; padding: 8px; background: white; margin-bottom: 5px; border-radius: 6px; border:1px solid #e2e8f0; position: relative; }
+        .room-tag { background: #0f172a; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-right: 5px; }
     </style>
 </head>
 <body>
 
-<div class="container-fluid" style="max-width: 1600px;">
+<div class="container-fluid" style="max-width: 1800px;">
     
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold m-0"><i class="fas fa-users-cog text-primary"></i> จัดการผู้เช่า (ละเอียด)</h4>
+        <h4 class="fw-bold m-0"><i class="fas fa-table text-primary"></i> จัดการผู้เช่า (Excel Style)</h4>
         <div class="d-flex gap-2">
-            <a href="index.html" class="btn btn-light border fw-bold">กลับเมนู</a>
+            <a href="index.html" class="btn btn-light border fw-bold rounded-pill px-3">กลับเมนู</a>
             <button class="btn btn-success fw-bold px-4 rounded-pill" onclick="saveToCloud()"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row g-3">
         <div class="col-lg-9">
-            <div class="header-card p-2 mb-2">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <div class="filter-bar m-0" id="zoneBar"></div>
-                    
-                    <div class="d-flex gap-2">
-                        <button class="btn-status-filter s-move" onclick="filterStatus('MovingOut')">⚠️ แจ้งย้าย</button>
-                        <button class="btn-status-filter s-run" onclick="filterStatus('RunAway')">🚨 หนี/มีปัญหา</button>
-                        <button class="btn-status-filter s-room" onclick="filterStatus('MovedRoom')">🔄 ย้ายห้อง</button>
-                        <button class="btn-status-filter bg-light border text-dark" onclick="filterStatus('ALL')">แสดงทั้งหมด</button>
-                    </div>
-                </div>
-            </div>
-
             <div class="table-responsive">
                 <table class="table-excel">
                     <thead>
                         <tr>
-                            <th style="width:60px;">ห้อง</th>
-                            <th style="width:50px;">ประวัติ</th>
-                            <th style="width:140px;">สถานะ (ละเอียด)</th>
+                            <th style="width:40px;">#</th>
+                            <th style="width:70px;">ห้อง</th>
+                            <th style="width:130px;">สถานะ</th>
                             <th style="width:180px;">ชื่อ-นามสกุล</th>
                             <th style="width:110px;">เบอร์โทร</th>
-                            <th style="width:80px;">เงินมัดจำ</th>
-                            <th style="width:100px;">วันเริ่มสัญญา</th>
-                            <th style="width:100px;">วันหมดสัญญา</th>
-                            <th style="width:80px;">ค้างชำระ</th>
+                            <th style="width:90px;">เงินมัดจำ</th>
+                            <th style="width:110px;">เริ่มสัญญา</th>
+                            <th style="width:110px;">หมดสัญญา</th>
+                            <th style="width:90px;">ค้างชำระ</th>
                             <th>หมายเหตุ</th>
+                            <th style="width:50px;">ประวัติ</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
+            <button class="btn-add-row" onclick="addNewRow()">+ เพิ่มห้องใหม่ (Add Room)</button>
         </div>
 
         <div class="col-lg-3">
-            <div class="card border-0 shadow-sm p-3 h-100 bg-white" style="border-radius: 12px;">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="fw-bold m-0 text-primary"><i class="fas fa-user-clock"></i> คนจอง / รอห้อง</h6>
-                    <button class="btn btn-sm btn-outline-primary py-0" style="font-size:12px;" onclick="addWaitList()">+ เพิ่ม</button>
+            <div class="card border-0 shadow-sm p-3 h-100 bg-white" style="border-radius: 12px; max-height: 85vh; overflow-y: auto;">
+                <div class="d-flex justify-content-between align-items-center mb-3 sticky-top bg-white pb-2 border-bottom">
+                    <h6 class="fw-bold m-0 text-primary"><i class="fas fa-user-clock"></i> คิวรอห้อง / จอง</h6>
+                    <button class="btn btn-sm btn-outline-primary rounded-pill" onclick="addWaitList()">+ เพิ่ม</button>
                 </div>
-                <div id="waitingListContainer" style="overflow-y: auto; max-height: 80vh;"></div>
+                <div id="waitingListContainer"></div>
             </div>
         </div>
     </div>
@@ -141,10 +124,11 @@
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec"; 
     
+    // ข้อมูลเริ่มต้น (สำหรับ Reset หรือโหลดครั้งแรก)
     const ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
     const ROOMS_PER_ZONE = 20; 
     
-    // 🔥 ข้อมูลล่าสุด (รวมสถานะใหม่ถ้ามี)
+    // 🔥 ข้อมูลล่าสุดที่คุณให้มา (Backup Data)
     const UPDATED_TENANTS = [
         {id:'A3',name:'พิชิยุทธ เสนาสุ',deposit:'3000',start:'2024-05-07',end:'2025-05-07'},
         {id:'A5',name:'วาศกร ปัดสำราญ',deposit:'3000',start:'2024-09-01',end:'2025-09-01',note:'ย้ายจากG1'},
@@ -245,12 +229,9 @@
     ];
 
     let tenants = [], waitingList = [];
-    let currentZone = 'ALL';
-    let currentStatusFilter = 'ALL';
     let currentHistoryId = null;
 
     window.onload = function() {
-        renderZoneButtons();
         loadData();
     };
 
@@ -275,12 +256,13 @@
 
     function generateStructure(loadedData) {
         let newData = [];
+        // สร้างโครงสร้าง A1-P20
         ZONES.forEach(z => {
             for(let i=1; i<=ROOMS_PER_ZONE; i++) {
                 let id = z+i;
                 let found = loadedData.find(t => t.id === id);
                 if(found) {
-                    if(!found.history) found.history = []; 
+                    if(!found.history) found.history = [];
                     newData.push(found);
                 } else {
                     newData.push({
@@ -291,113 +273,63 @@
                 }
             }
         });
-        // Normalize Status
+        
+        // Auto-Status Logic
         newData.forEach(t => {
-            if(!t.status || t.status === 'Active' || t.status === 'Empty') {
+            if(!t.status || t.status==='Active' || t.status==='Empty') {
                 t.status = (t.name && t.name.trim() !== '') ? 'Active' : 'Empty';
             }
         });
         return newData;
     }
 
-    // --- Filters ---
-    function renderZoneButtons() {
-        const bar = document.getElementById('zoneBar');
-        bar.innerHTML = `<button class="btn-filter active" onclick="filterZone('ALL')">ทุกโซน</button>`;
-        ZONES.forEach(z => {
-            bar.innerHTML += `<button class="btn-filter" onclick="filterZone('${z}')">${z}</button>`;
-        });
-    }
-
-    function filterZone(z) {
-        currentZone = z;
-        document.querySelectorAll('#zoneBar .btn-filter').forEach(b => b.classList.toggle('active', b.innerText === (z==='ALL'?'ทุกโซน':z)));
-        renderTable();
-    }
-
-    function filterStatus(s) {
-        currentStatusFilter = s;
-        // Reset active style for buttons (simplified)
-        // In real use, you might want to toggle active classes on these buttons too
-        renderTable();
-    }
-
-    // --- Table Rendering ---
     function renderTable() {
         const tb = document.getElementById('tableBody'); tb.innerHTML = '';
         
-        const REAL_ROOMS = [
-            "A1","A2","A3","A4","A5","A6","A7","A8","A9","A10",
-            "B1","B2","B3","B4","B5","B6","B7","B8","B9","B10",
-            "C1","C2","C3","C4","C5","C6","C7","C8","C9","C10",
-            "D1","D2","D3","D4","D5","D6","D7","D8","D9","D10",
-            "E1","E2","E3","E4","E5","E6","E7","E8","E9","E10",
-            "F1","F2","F3","F4","F5","F6","F7","F8","F9","F10",
-            "G1","G2","G3","G4","G5","G6","G7","G8","G9","G10",
-            "H1","H2","H3","H4","H5","H6","H7","H8","H9","H10",
-            "I1","I2","I3","I4","I5","I6","I7","I8","I9",
-            "J1","J2","J3","J4","J5","J6","J7","J8","J9","J10",
-            "K1","K2","K3","K4","K5",
-            "L1","L2","L3","L4","L5","L6","L7","L8","L9","L10",
-            "M1","M2",
-            "N1","N2","N3","N4","N5","N6","N7","N8","N9","N10"
-        ];
-
-        let displayList = tenants;
-
-        // 1. Filter by Zone
-        if(currentZone !== 'ALL') {
-            displayList = displayList.filter(t => t.id.startsWith(currentZone));
-        } else {
-            displayList = displayList.filter(t => REAL_ROOMS.includes(t.id));
-        }
-
-        // 2. Filter by Status (Quick Filter)
-        if(currentStatusFilter !== 'ALL') {
-            displayList = displayList.filter(t => t.status === currentStatusFilter);
-        }
-
-        displayList.forEach(t => {
-            let idx = tenants.indexOf(t); 
-            
-            // Background class for SELECT element's parent TD
+        tenants.forEach((t, idx) => {
             let statusClass = 'st-empty';
             if(t.status === 'Active') statusClass = 'st-active';
             else if(t.status === 'MovingOut') statusClass = 'st-moving';
             else if(t.status === 'MovedRoom') statusClass = 'st-moved-room';
-            else if(t.status === 'RunAway') statusClass = 'st-runaway';
-            else if(t.status === 'Debt') statusClass = 'st-runaway'; // ใช้แดงเหมือนกัน
+            else if(t.status === 'RunAway' || t.status === 'Debt') statusClass = 'st-runaway';
 
             let tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="col-id">${t.id}</td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-outline-secondary border-0" onclick="openHistory('${t.id}')">
-                        <i class="fas fa-tools ${t.history && t.history.length > 0 ? 'text-primary' : 'text-muted'}"></i>
-                    </button>
-                </td>
+                <td class="text-center"><button class="del-btn" onclick="deleteRow(${idx})">&times;</button></td>
+                <td class="col-id"><input type="text" class="cell-input nav-item fw-bold text-center" data-idx="${idx}" data-field="id" value="${t.id}" oninput="updateData(this)"></td>
                 <td class="${statusClass}">
                     <select class="cell-select nav-item" data-idx="${idx}" data-field="status" onchange="updateStatusColor(this)">
                         <option value="Active" ${t.status==='Active'?'selected':''}>🟢 อยู่ปกติ</option>
                         <option value="Empty" ${t.status==='Empty'?'selected':''}>⚪ ห้องว่าง</option>
-                        <option value="MovingOut" ${t.status==='MovingOut'?'selected':''}>🟡 แจ้งย้ายออก</option>
-                        <option value="MovedRoom" ${t.status==='MovedRoom'?'selected':''}>🔵 ย้ายห้อง (Internal)</option>
+                        <option value="MovingOut" ${t.status==='MovingOut'?'selected':''}>🟡 แจ้งย้าย</option>
+                        <option value="MovedRoom" ${t.status==='MovedRoom'?'selected':''}>🔵 ย้ายห้อง</option>
                         <option value="RunAway" ${t.status==='RunAway'?'selected':''}>🚨 หนี/เชิญออก</option>
-                        <option value="Debt" ${t.status==='Debt'?'selected':''}>🔴 ค้างชำระ</option>
+                        <option value="Debt" ${t.status==='Debt'?'selected':''}>🔴 ค้าง</option>
                     </select>
                 </td>
-                <td><input type="text" class="cell-input nav-item" data-idx="${idx}" data-field="name" value="${t.name}"></td>
-                <td><input type="text" class="cell-input nav-item" data-idx="${idx}" data-field="phone" value="${t.phone}"></td>
-                <td><input type="number" class="cell-input nav-item" data-idx="${idx}" data-field="deposit" value="${t.deposit}"></td>
-                <td><input type="date" class="cell-input nav-item" data-idx="${idx}" data-field="contract_start" value="${t.contract_start}"></td>
-                <td><input type="date" class="cell-input nav-item" data-idx="${idx}" data-field="contract_end" value="${t.contract_end}"></td>
-                <td><input type="number" class="cell-input nav-item text-danger fw-bold" data-idx="${idx}" data-field="debt" value="${t.debt}"></td>
-                <td><input type="text" class="cell-input nav-item" data-idx="${idx}" data-field="note" value="${t.note}"></td>
+                <td><input type="text" class="cell-input nav-item" data-idx="${idx}" data-field="name" value="${t.name||''}" oninput="updateData(this)"></td>
+                <td><input type="text" class="cell-input nav-item" data-idx="${idx}" data-field="phone" value="${t.phone||''}" oninput="updateData(this)"></td>
+                <td><input type="number" class="cell-input nav-item" data-idx="${idx}" data-field="deposit" value="${t.deposit||''}" oninput="updateData(this)"></td>
+                <td><input type="date" class="cell-input nav-item" data-idx="${idx}" data-field="contract_start" value="${t.contract_start||''}" oninput="updateData(this)"></td>
+                <td><input type="date" class="cell-input nav-item" data-idx="${idx}" data-field="contract_end" value="${t.contract_end||''}" oninput="updateData(this)"></td>
+                <td><input type="number" class="cell-input nav-item text-danger fw-bold" data-idx="${idx}" data-field="debt" value="${t.debt||''}" oninput="updateData(this)"></td>
+                <td><input type="text" class="cell-input nav-item" data-idx="${idx}" data-field="note" value="${t.note||''}" oninput="updateData(this)"></td>
+                <td class="text-center">
+                    <button class="btn btn-sm border-0 ${t.history&&t.history.length>0?'text-primary':'text-muted'}" onclick="openHistory('${t.id}')">
+                        <i class="fas fa-tools"></i>
+                    </button>
+                </td>
             `;
             tb.appendChild(tr);
         });
+        
+        setupNavigation();
+    }
 
-        setupEvents();
+    function updateData(input) {
+        let idx = parseInt(input.dataset.idx);
+        let field = input.dataset.field;
+        tenants[idx][field] = input.value;
     }
 
     function updateStatusColor(select) {
@@ -413,7 +345,116 @@
         tenants[idx].status = select.value;
     }
 
-    // --- Waiting List & History Logic (Same as before) ---
+    // --- Dynamic Rows ---
+    function addNewRow() {
+        tenants.push({ id: 'New', name: '', status: 'Empty', history: [] });
+        renderTable();
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function deleteRow(idx) {
+        if(confirm("ลบแถวนี้?")) {
+            tenants.splice(idx, 1);
+            renderTable();
+        }
+    }
+
+    // --- Navigation & Paste ---
+    function setupNavigation() {
+        const inputs = document.querySelectorAll('.nav-item');
+        const gridWidth = 9; // Approx inputs per row
+
+        inputs.forEach((input, i) => {
+            input.onkeydown = (e) => {
+                if(e.key.startsWith('Arrow')) {
+                    e.preventDefault(); // Stop native scroll/select behavior for consistent grid nav
+                    let targetIndex = i;
+                    if(e.key === 'ArrowRight') targetIndex++;
+                    if(e.key === 'ArrowLeft') targetIndex--;
+                    // Simple heuristic for Up/Down: jump by width (approx)
+                    // Better: find input with same field in prev/next row
+                    if(e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                        let currentField = input.dataset.field;
+                        let currentIdx = parseInt(input.dataset.idx);
+                        let nextIdx = (e.key === 'ArrowDown') ? currentIdx + 1 : currentIdx - 1;
+                        let nextInput = document.querySelector(`.nav-item[data-idx="${nextIdx}"][data-field="${currentField}"]`);
+                        if(nextInput) { nextInput.focus(); nextInput.select(); return; }
+                    }
+                    
+                    if(inputs[targetIndex]) {
+                        inputs[targetIndex].focus();
+                        inputs[targetIndex].select();
+                    }
+                }
+            };
+
+            // Smart Paste
+            input.onpaste = (e) => {
+                e.preventDefault();
+                const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+                const rows = pasteData.split(/\r?\n/).filter(v => v !== '');
+                
+                // Get starting position logic
+                // We need to know which visual row/col we are at.
+                // Simple logic: process line by line, find next input with same field for next line
+                
+                let currentField = input.dataset.field;
+                let startRowIdx = parseInt(input.dataset.idx);
+                
+                // This simple paste handles 1 column pasting (vertical) which is most common
+                // If user pastes a 2D block, it's complex. Let's support Vertical Paste primarily.
+                
+                rows.forEach((val, offset) => {
+                    let targetRowIdx = startRowIdx + offset;
+                    // Handle tab separation for 2D paste if needed (simple version)
+                    let cols = val.split('\t');
+                    
+                    // Logic: Find row at targetRowIdx
+                    if (targetRowIdx < tenants.length) {
+                        // If multiple cols, we need to find siblings.
+                        // For now, let's just paste the first col to current field to ensure stability
+                        // or try to support Name -> Phone -> Deposit flow
+                        
+                        // Let's assume user pastes into Name, then Phone, etc.
+                        // Find the input element
+                        let targetInput = document.querySelector(`.nav-item[data-idx="${targetRowIdx}"][data-field="${currentField}"]`);
+                        if(targetInput) {
+                            targetInput.value = cols[0].trim();
+                            tenants[targetRowIdx][currentField] = cols[0].trim();
+                            
+                            // Auto-Active if pasting name
+                            if(currentField === 'name' && cols[0].trim() !== '') {
+                                tenants[targetRowIdx].status = 'Active';
+                                let sel = document.querySelector(`.nav-item[data-idx="${targetRowIdx}"][data-field="status"]`);
+                                if(sel) { sel.value = 'Active'; updateStatusColor(sel); }
+                            }
+                        }
+                        
+                        // Attempt to paste subsequent columns if they exist (Name -> Phone)
+                        if(cols.length > 1) {
+                            // Define field order
+                            const fieldOrder = ['id','status','name','phone','deposit','contract_start','contract_end','debt','note'];
+                            let fieldPos = fieldOrder.indexOf(currentField);
+                            if(fieldPos !== -1) {
+                                for(let c=1; c<cols.length; c++) {
+                                    let nextField = fieldOrder[fieldPos+c];
+                                    if(nextField) {
+                                        let nextInput = document.querySelector(`.nav-item[data-idx="${targetRowIdx}"][data-field="${nextField}"]`);
+                                        if(nextInput) {
+                                            nextInput.value = cols[c].trim();
+                                            tenants[targetRowIdx][nextField] = cols[c].trim();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+        });
+    }
+
+    // --- Waiting List & History (Standard) ---
     function addWaitList() {
         let room = prompt("จองห้อง (ถ้ามี):", "");
         let name = prompt("ชื่อคนจอง:");
@@ -424,81 +465,48 @@
             refreshWaitingList();
         }
     }
-
-    function removeWait(idx) {
-        if(confirm("ลบรายชื่อนี้?")) {
-            waitingList.splice(idx, 1);
-            refreshWaitingList();
-        }
-    }
-
+    function removeWait(idx) { if(confirm("ลบ?")) { waitingList.splice(idx, 1); refreshWaitingList(); } }
     function refreshWaitingList() {
-        const wl = document.getElementById('waitingListContainer'); 
-        wl.innerHTML = '';
+        const wl = document.getElementById('waitingListContainer'); wl.innerHTML = '';
         waitingList.forEach((w,i) => {
             let roomBadge = w.room ? `<span class="room-tag">${w.room}</span>` : '';
-            wl.innerHTML += `
-            <div class="wait-item position-relative">
-                <div class="fw-bold small">${roomBadge}${w.name}</div>
-                <div class="small text-muted"><i class="fas fa-phone"></i> ${w.phone || '-'}</div>
-                ${w.note ? `<div class="small text-warning"><i class="fas fa-sticky-note"></i> ${w.note}</div>` : ''}
-                <button class="btn btn-sm position-absolute top-0 end-0 text-danger" onclick="removeWait(${i})">&times;</button>
-            </div>`;
+            wl.innerHTML += `<div class="wait-item"><div class="fw-bold small">${roomBadge}${w.name}</div><div class="small text-muted"><i class="fas fa-phone"></i> ${w.phone||'-'}</div><button class="btn btn-sm position-absolute top-0 end-0 text-danger" onclick="removeWait(${i})">&times;</button></div>`;
         });
     }
 
     function openHistory(id) {
         currentHistoryId = id;
         document.getElementById('h_room_id').innerText = id;
-        document.getElementById('h_date').valueAsDate = new Date();
-        document.getElementById('h_text').value = '';
         renderHistoryList();
         new bootstrap.Modal(document.getElementById('historyModal')).show();
     }
-
     function renderHistoryList() {
         const list = document.getElementById('historyList'); list.innerHTML = '';
         const t = tenants.find(x => x.id === currentHistoryId);
         if(!t || !t.history) return;
-        [...t.history].reverse().forEach((h, i) => {
-            list.innerHTML += `<div class="border-bottom p-2 bg-white mb-1 rounded"><small class="text-muted fw-bold">${new Date(h.date).toLocaleDateString('th-TH')}</small><div class="small">${h.text}</div></div>`;
+        [...t.history].reverse().forEach((h,i) => {
+            list.innerHTML += `<div class="border-bottom p-2 bg-white mb-1 rounded"><small class="text-muted fw-bold">${h.date}</small> <div class="small">${h.text}</div></div>`;
         });
     }
-
     function addHistoryItem() {
-        const date = document.getElementById('h_date').value;
-        const text = document.getElementById('h_text').value;
-        if(!text) return;
         const t = tenants.find(x => x.id === currentHistoryId);
         if(t) {
             if(!t.history) t.history = [];
-            t.history.push({ date: date, text: text });
+            t.history.push({ date: document.getElementById('h_date').value, text: document.getElementById('h_text').value });
             document.getElementById('h_text').value = ''; renderHistoryList(); renderTable();
         }
     }
 
-    // --- Standard Events ---
-    function setupEvents() {
-        document.querySelectorAll('.nav-item').forEach(input => {
-            input.onpaste = (e) => {
-                e.preventDefault();
-                const pasteData = (e.clipboardData || window.clipboardData).getData('text');
-                const values = pasteData.split(/\r?\n/).filter(v => v.trim() !== '');
-                const field = e.target.dataset.field;
-                const allVisibleInputs = Array.from(document.querySelectorAll(`.nav-item[data-field="${field}"]`));
-                const startPos = allVisibleInputs.indexOf(input);
-                values.forEach((val, i) => {
-                    if (startPos + i < allVisibleInputs.length) {
-                        const targetInput = allVisibleInputs[startPos + i];
-                        const targetIdx = parseInt(targetInput.dataset.idx);
-                        targetInput.value = val.trim();
-                        tenants[targetIdx][field] = val.trim(); 
-                        if(field === 'name' && val.trim() !== '') {
-                            tenants[targetIdx].status = 'Active';
-                            let sel = document.querySelector(`.nav-item[data-idx="${targetIdx}"][data-field="status"]`);
-                            if(sel) { sel.value = 'Active'; updateStatusColor(sel); }
-                        }
-                    }
-                });
-            };
-            input.oninput = (e) => { tenants[parseInt(e.target.dataset.idx)][e.target.dataset.field] = e.target.
+    function saveToCloud() {
+        updateStatus("กำลังบันทึก...", true);
+        fetch(API_URL + "?action=saveTenants", { method: "POST", body: JSON.stringify({ tenants, waiting: waitingList }) })
+        .then(r=>r.json()).then(res => { if(res.status==="success") { alert("✅ บันทึกเรียบร้อย"); updateStatus("พร้อมใช้งาน"); } else alert("❌ Error: "+res.message); })
+        .catch(() => updateStatus("❌ บันทึกไม่สำเร็จ", false));
+    }
+
+    function updateStatus(msg, loading=false) {
+        document.getElementById('statusMsg').innerHTML = loading ? `<i class="fas fa-spinner fa-spin text-warning"></i> ${msg}` : `<i class="fas fa-check-circle text-success"></i> ${msg}`;
+    }
+</script>
+</body>
+</html>
