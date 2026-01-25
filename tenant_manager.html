@@ -3,510 +3,397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จัดการผู้เช่า (Excel Style) - หอพัก K&G</title>
+    <title>จัดการผู้เช่า (V.1 Core) - K&G</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --primary: #0284c7; --bg: #f8fafc; }
-        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); padding: 20px; padding-bottom: 100px; }
+        :root { --primary: #0284c7; --bg: #f3f6f9; --border: #cbd5e1; }
         
-        .header-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background-color: var(--bg); 
+            padding: 20px; padding-bottom: 80px;
+        }
+
+        /* 1. Layout: Centered & Stable */
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto; /* กึ่งกลาง */
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        /* 2. Table: Excel Grid Style */
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            max-height: 80vh; /* Scroll แนวตั้งได้ถ้าข้อมูลเยอะ */
+        }
         
-        /* Table Styling */
-        .table-responsive { background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-height: 80vh; overflow-x: auto; }
-        .table-excel { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; min-width: 1200px; }
-        .table-excel th { position: sticky; top: 0; background: #f1f5f9; color: #475569; padding: 10px; font-weight: 700; border-bottom: 2px solid #e2e8f0; z-index: 10; text-align: center; white-space: nowrap; }
-        .table-excel td { border-bottom: 1px solid #f1f5f9; padding: 0; height: 38px; vertical-align: middle; border-right: 1px solid #f8fafc; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            min-width: 1200px; /* บังคับกว้างขั้นต่ำ กันบีบ */
+        }
         
-        /* Input Styling */
-        .cell-input { width: 100%; height: 100%; border: none; padding: 0 8px; outline: none; background: transparent; transition: 0.1s; font-family: 'Sarabun'; font-size: 13px; }
+        th { 
+            position: sticky; top: 0; 
+            background: #f8fafc; color: #475569; 
+            padding: 8px; border: 1px solid var(--border);
+            font-size: 13px; text-align: center; z-index: 10;
+            white-space: nowrap;
+        }
+        
+        td { 
+            border: 1px solid var(--border); 
+            padding: 0; height: 35px; vertical-align: middle;
+        }
+
+        /* 3. Input Mechanics (Non-Negotiable) */
+        /* ลบ Spinner ออกให้เกลี้ยง */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .cell-input {
+            width: 100%; height: 100%; border: none; padding: 0 8px; 
+            font-family: 'Sarabun'; font-size: 13px; outline: none; background: transparent;
+            transition: background 0.1s; display: block;
+        }
+        
+        /* Focus State: ชัดเจนแต่ไม่แสบตา */
         .cell-input:focus { background: #e0f2fe; box-shadow: inset 0 0 0 2px var(--primary); }
-        .cell-select { width: 100%; height: 100%; border: none; outline: none; background: transparent; padding: 0 5px; cursor: pointer; font-size: 12px; font-weight: 700; }
         
-        /* Remove Spinners */
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        
-        /* Colors */
-        .col-id input { text-align: center; font-weight: 800; color: #334155; background: #f8fafc; }
+        .cell-select {
+            width: 100%; height: 100%; border: none; padding: 0 5px; 
+            font-family: 'Sarabun'; font-size: 13px; outline: none; background: transparent; cursor: pointer;
+        }
+        .cell-select:focus { background: #e0f2fe; }
+
+        /* Status Colors (Visual Aid) */
         .st-active { color: #166534; background: #dcfce7; }
         .st-empty { color: #94a3b8; background: #f8fafc; }
         .st-moving { color: #854d0e; background: #fef9c3; }
-        .st-moved-room { color: #0369a1; background: #e0f2fe; }
-        .st-runaway { color: #991b1b; background: #fee2e2; border-left: 4px solid #ef4444; }
+        .st-debt { color: #991b1b; background: #fee2e2; }
 
-        .btn-add-row { width: 100%; padding: 8px; border: 2px dashed #cbd5e1; background: #f8fafc; color: #64748b; font-weight: bold; margin-top: 10px; transition: 0.2s; text-align: center; cursor: pointer; }
-        .btn-add-row:hover { background: #e2e8f0; color: #334155; border-color: #94a3b8; }
-        .del-btn { color: #ef4444; cursor: pointer; opacity: 0.4; border:none; background:none; transition:0.2s; font-size: 16px; }
+        /* Buttons & UI */
+        .del-btn { color: #ef4444; border: none; background: none; cursor: pointer; opacity: 0.3; transition: 0.2s; font-size: 14px; }
         .del-btn:hover { opacity: 1; transform: scale(1.2); }
-
-        .status-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 10px 25px; border-radius: 50px; font-size: 13px; z-index: 1000; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
         
-        /* Side Panel */
-        .wait-item { border-bottom: 1px solid #eee; padding: 8px; background: white; margin-bottom: 5px; border-radius: 6px; border:1px solid #e2e8f0; position: relative; }
-        .room-tag { background: #0f172a; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-right: 5px; }
+        .btn-add { 
+            width: 100%; padding: 10px; 
+            background: #f1f5f9; border: 2px dashed var(--border); 
+            color: #64748b; font-weight: bold; margin-top: 15px; 
+            cursor: pointer; transition: 0.2s; 
+        }
+        .btn-add:hover { background: #e2e8f0; color: #334155; border-color: #94a3b8; }
+
+        .status-bar { 
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            background: #0f172a; color: white; padding: 8px 25px; 
+            border-radius: 30px; font-size: 12px; z-index: 1000; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+        }
+        
+        /* Waiting List Side Panel Style */
+        .wait-item { border: 1px solid #e2e8f0; padding: 8px; margin-bottom: 5px; border-radius: 6px; position: relative; background: #fff; }
     </style>
 </head>
 <body>
 
-<div class="container-fluid" style="max-width: 1800px;">
-    
+<div class="main-container">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold m-0"><i class="fas fa-table text-primary"></i> จัดการผู้เช่า (Excel Style)</h4>
-        <div class="d-flex gap-2">
-            <a href="index.html" class="btn btn-light border fw-bold rounded-pill px-3">กลับเมนู</a>
-            <button class="btn btn-success fw-bold px-4 rounded-pill" onclick="saveToCloud()"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
+        <h4 class="m-0 fw-bold text-primary"><i class="fas fa-users-cog"></i> จัดการผู้เช่า (Tenant Manager)</h4>
+        <div>
+            <a href="index.html" class="btn btn-sm btn-light border fw-bold me-2 rounded-pill px-3">กลับเมนู</a>
+            <button class="btn btn-sm btn-success fw-bold px-4 rounded-pill" onclick="saveToCloud()"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
         </div>
     </div>
 
-    <div class="row g-3">
+    <div class="row">
         <div class="col-lg-9">
-            <div class="table-responsive">
-                <table class="table-excel">
+            <div class="table-container">
+                <table id="tenantTable">
                     <thead>
                         <tr>
-                            <th style="width:40px;">#</th>
-                            <th style="width:70px;">ห้อง</th>
-                            <th style="width:130px;">สถานะ</th>
-                            <th style="width:180px;">ชื่อ-นามสกุล</th>
-                            <th style="width:110px;">เบอร์โทร</th>
-                            <th style="width:90px;">เงินมัดจำ</th>
-                            <th style="width:110px;">เริ่มสัญญา</th>
-                            <th style="width:110px;">หมดสัญญา</th>
-                            <th style="width:90px;">ค้างชำระ</th>
-                            <th>หมายเหตุ</th>
-                            <th style="width:50px;">ประวัติ</th>
+                            <th style="width: 40px;">#</th>
+                            <th style="width: 80px;">ห้อง</th>
+                            <th style="width: 130px;">สถานะ</th>
+                            <th style="width: 180px;">ชื่อ-นามสกุล</th>
+                            <th style="width: 120px;">เบอร์โทร</th>
+                            <th style="width: 100px;">เงินมัดจำ</th>
+                            <th style="width: 110px;">เริ่มสัญญา</th>
+                            <th style="width: 110px;">หมดสัญญา</th>
+                            <th style="width: 100px;">ค้างชำระ</th>
+                            <th style="width: 150px;">หมายเหตุ</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
-            <button class="btn-add-row" onclick="addNewRow()">+ เพิ่มห้องใหม่ (Add Room)</button>
+            <button class="btn-add" onclick="addNewRow()">+ เพิ่มห้องใหม่</button>
         </div>
 
         <div class="col-lg-3">
-            <div class="card border-0 shadow-sm p-3 h-100 bg-white" style="border-radius: 12px; max-height: 85vh; overflow-y: auto;">
-                <div class="d-flex justify-content-between align-items-center mb-3 sticky-top bg-white pb-2 border-bottom">
-                    <h6 class="fw-bold m-0 text-primary"><i class="fas fa-user-clock"></i> คิวรอห้อง / จอง</h6>
-                    <button class="btn btn-sm btn-outline-primary rounded-pill" onclick="addWaitList()">+ เพิ่ม</button>
+            <div class="p-3 bg-white border rounded-3 shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                    <h6 class="m-0 fw-bold text-secondary">คิวรอห้อง / จอง</h6>
+                    <button class="btn btn-sm btn-outline-primary py-0" style="font-size:12px" onclick="addWaitList()">+ เพิ่ม</button>
                 </div>
-                <div id="waitingListContainer"></div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<div class="modal fade" id="historyModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-light py-2">
-                <h6 class="modal-title fw-bold"><i class="fas fa-tools"></i> ประวัติห้อง: <span id="h_room_id" class="text-primary"></span></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="input-group mb-3">
-                    <input type="date" id="h_date" class="form-control form-control-sm" style="max-width: 130px;">
-                    <input type="text" id="h_text" class="form-control form-control-sm" placeholder="เช่น เจาะผนัง, ซ่อมก๊อก">
-                    <button class="btn btn-primary btn-sm" onclick="addHistoryItem()">เพิ่ม</button>
-                </div>
-                <div id="historyList" style="max-height: 300px; overflow-y: auto; background: #f8fafc; border-radius: 8px; padding: 10px;"></div>
+                <div id="waitingListContainer" style="max-height: 70vh; overflow-y: auto;"></div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="status-bar" id="statusMsg"><i class="fas fa-check-circle text-success"></i> พร้อมใช้งาน</div>
+<div class="status-bar" id="statusMsg">พร้อมใช้งาน</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec"; 
+    // --- Config ---
+    const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec";
     
-    // ข้อมูลเริ่มต้น (สำหรับ Reset หรือโหลดครั้งแรก)
+    // Default Data (A1-P20) - Safety Net
     const ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
-    const ROOMS_PER_ZONE = 20; 
-    
-    // 🔥 ข้อมูลล่าสุดที่คุณให้มา (Backup Data)
-    const UPDATED_TENANTS = [
-        {id:'A3',name:'พิชิยุทธ เสนาสุ',deposit:'3000',start:'2024-05-07',end:'2025-05-07'},
-        {id:'A5',name:'วาศกร ปัดสำราญ',deposit:'3000',start:'2024-09-01',end:'2025-09-01',note:'ย้ายจากG1'},
-        {id:'A6',note:'ติดแอร์'},
-        {id:'A9',name:'วีรวุฒิ นารี',deposit:'3000',start:'2024-01-12',end:'2025-01-12',note:'แทนคนเก่า ทำสัญญาใหม่'},
-        {id:'A10',name:'กุลชาติ ริตศิลา',deposit:'2000',start:'2022-11-01',end:'2023-01-11'},
-        {id:'B1',name:'ของชํ่า',deposit:'4000',note:'ไฟ2000 ประกันห้อง4000 จ่ายเข้าอยู่10,000'},
-        {id:'B3',name:'วัชชิรพงศ์ สินทรัพย์',deposit:'3000',start:'2024-01-11',end:'2025-01-11',note:'ขาดบัตร'},
-        {id:'B4',name:'สุทธิพงษ์ วิไชยวงษ์',deposit:'3000',start:'2024-01-05',end:'2025-01-05'},
-        {id:'B5',name:'รชานนท์ พิลาดี',deposit:'3000',start:'2024-01-05',end:'2025-01-05'},
-        {id:'B6',note:'พงศธร พลทา (บังเเล)'},
-        {id:'B7',name:'น.ส.ฟ้า ศรีบุญ',phone:'099-3989377',deposit:'3000'},
-        {id:'B9',name:'นงลักษณ์ สุนสาย',phone:'089-7176050',deposit:'3000'},
-        {id:'B10',name:'นิรชา เรือนน้อย',deposit:'3000',start:'2024-01-03',end:'2025-01-03'},
-        {id:'C5',name:'ยุพา วรรณพ่อ',deposit:'2000',note:'ไม่ลงวันที่'},
-        {id:'C7',name:'ยุทธชาติ รูปทอง',phone:'0832992304',deposit:'3000',start:'2025-01-02',end:'2026-01-02'},
-        {id:'C8',name:'ธิติ เพชรล้า',deposit:'2000',start:'2022-01-11',end:'2023-01-12'},
-        {id:'C10',name:'ดวงพร อิ่มประสงค์',deposit:'2000',start:'2023-01-12',end:'2024-01-06'},
-        {id:'D1',name:'อภิรักษ์ รัตรบุรี',phone:'092-0685807',deposit:'3000',start:'2025-01-09',end:'2026-01-03'},
-        {id:'D2',name:'ศิรพัชร์ มหาศรี',phone:'062-4794430',deposit:'3000',start:'2025-01-11',end:'2569-01-05'},
-        {id:'D4',name:'ณัฐชา กลิ่นอาจ',deposit:'3000',start:'2024-01-03',end:'2025-01-03'},
-        {id:'D5',name:'ปวีณา แพงอ่อน',phone:'088-0891523',deposit:'3000',note:'ยังไม่ทำ'},
-        {id:'D6',name:'ชญานนท์ วงศ์ศร',phone:'096-2475120',deposit:'3000',start:'2025-01-05',end:'2026-01-05'},
-        {id:'D8',name:'อุมาพร หวังผล',phone:'093-5739023',deposit:'3000',start:'2025-01-09',end:'2026-01-03'},
-        {id:'D10',name:'อัจฉรา การภักดี',phone:'091-6829609',deposit:'3000'},
-        {id:'E1',name:'จุฑามณี สีทาราช',deposit:'3000',start:'2024-01-04',end:'2024-01-10'},
-        {id:'E3',name:'ณัฐพล คงช้าง',deposit:'3000',start:'2024-01-05',end:'2025-01-05'},
-        {id:'E4',name:'ฐิตืพร กิ่งมาลา',deposit:'2000',end:'2023-01-06'},
-        {id:'E6',name:'ณัฐพล มนทอง',deposit:'3000',start:'2025-04-01',end:'2026-01-04'},
-        {id:'E7',name:'ภัครวัต คำแสนเดช',deposit:'3000',start:'2025-01-03',end:'2026-01-03'},
-        {id:'E8',name:'ชลดา ยอดคำมี',phone:'091-0492453',deposit:'3000',start:'2024-01-06',end:'2024-01-12'},
-        {id:'E10',name:'เจษฎา ห้องตรง',deposit:'2000',start:'2023-01-07',end:'2024-01-07'},
-        {id:'F1',name:'อรทัย สวนสกุล',phone:'093-5146429',deposit:'3000',start:'2025-01-01',end:'2025-01-07'},
-        {id:'F2',name:'ทัชพร รวมศิริ',deposit:'2000',start:'2023-12-31',end:'2023-12-31'},
-        {id:'F3',name:'ไกรเดช แคภูเขียว',deposit:'3000',start:'2024-05-08',end:'2025-05-01'},
-        {id:'F4',name:'ปฏิภัทร กระรัมย์',phone:'096-2783548',deposit:'3000',start:'2025-01-03',end:'2025-01-09'},
-        {id:'F5',name:'อำภา ดวงศรี',phone:'096-8767341',deposit:'3000',start:'2025-01-05',end:'2025-01-11',note:'มีแปะผนัง2จุด'},
-        {id:'F6',name:'ณัฐตพงษ์ แสงสี',phone:'064-5822926',deposit:'3000',start:'2025-01-07',end:'2026-01-01'},
-        {id:'F7',name:'พงศธร ระดาเบต',deposit:'2000',start:'2023-01-01',end:'2024-01-01'},
-        {id:'F8',name:'สมประสงค์ สามสี',deposit:'2000',start:'2023-01-01',end:'2024-01-07'},
-        {id:'F9',name:'อินทิรา โยชการ',phone:'094-3494453',deposit:'3000',start:'2024-01-06',end:'2025-01-06'},
-        {id:'F10',name:'ทินกร ตะเคียนเกลี้ยง',phone:'061-0376291',deposit:'3000',start:'2025-01-09',end:'2026-01-09'},
-        {id:'G1',name:'เกียีติศักดิ์ วรชิน',phone:'095-2929073',deposit:'3000',start:'2025-01-09',end:'2026-01-03'},
-        {id:'G3',name:'คมสัน ปกป้อง',deposit:'3000',start:'2024-01-11',end:'2025-01-11'},
-        {id:'G4',name:'ดาริกา สีทาราช',deposit:'3000',start:'2024-01-04',end:'2024-01-10'},
-        {id:'G7',note:'สัญญา6เดือน'},
-        {id:'G8',name:'อลงกรณ์ ภิบาลชนม์',deposit:'3000',start:'2023-01-03',end:'2024-01-03'},
-        {id:'G9',name:'ปริญญา มิทราวงศ์',deposit:'3000',start:'2023-12-03',end:'2024-12-03'},
-        {id:'G10',name:'รุ่งสุริยา โครตรัตน์',deposit:'3000',start:'2023-12-03',end:'2024-12-03'},
-        {id:'H1',name:'ปนันดา อันพิมพ์',deposit:'3000',start:'2023-01-03',end:'2023-01-09'},
-        {id:'H2',name:'บุปผา สุวรรณวิจิต',deposit:'3000',start:'2023-01-03',end:'2024-01-03'},
-        {id:'H3',name:'พัฒนพงษ์ โมงขุนทด',deposit:'3000',start:'2023-01-03',end:'2024-01-03'},
-        {id:'H4',name:'ภมรรัตน์ ธรรมสูงเนิน',deposit:'3000',start:'2025-01-06',end:'2026-01-06'},
-        {id:'H5',name:'จารุวรรณ โคโตสี',phone:'0611957641'},
-        {id:'H6',name:'ธีระวัฒน์ แสพลกรัง',deposit:'3000',start:'2024-01-11',end:'2025-01-11',note:'แฟนยุแทน'},
-        {id:'H7',note:'ออก31/8/2024'},
-        {id:'H9',name:'วุฒิพงษ์ สุพรม',deposit:'3000',start:'2023-01-03',end:'2024-01-03'},
-        {id:'H10',name:'อนุสรา กีนะขาม',deposit:'3000',start:'2024-01-05',end:'2024-01-11'},
-        {id:'I1',name:'ณัฐวัฒน์ สุยดำไฮ',deposit:'3000',start:'2025-01-05',end:'2025-01-11'},
-        {id:'I3',name:'อุดร ดวงมาลา',deposit:'3000',start:'2023-01-09'},
-        {id:'I4',name:'เกียรติศักดิ์ เหล่าโครต',deposit:'3000',start:'2024-01-08',end:'2025-01-08'},
-        {id:'I5',name:'นิติวัฒน์ เครือฟอง',deposit:'3000',start:'2025-01-06',end:'2025-01-11'},
-        {id:'I6',name:'กาญจนา อาษาจิตร',deposit:'3000',start:'2023-01-09',end:'2024-01-03'},
-        {id:'I7',name:'ชนิษา ดวงศรีจันทร์',phone:'066-1274677',deposit:'3000',start:'2025-03-03',end:'2025-03-09'},
-        {id:'I8',name:'อรอุษา สุขคุ้ม',deposit:'3000',start:'2024-01-07',end:'2025-01-01'},
-        {id:'I9',name:'ปัญณวัฒน์ ดวงศรี',deposit:'3000',start:'2023-01-12',end:'2024-01-05'},
-        {id:'J1',name:'นางสาวสุภาพร นาชาน',phone:'0885035695',deposit:'3000'},
-        {id:'J2',name:'กำพล ทองบรรหา',phone:'093-4304980',deposit:'3000'},
-        {id:'J3',name:'ธีระวัฒน์ เสรีสมบูรณ์',deposit:'3000',start:'2025-01-06',end:'2026-01-06',note:'ยังไม่ทำ'},
-        {id:'J4',name:'พัณริสา มีแก้ว',phone:'063-4304504',deposit:'3000',start:'2023-01-08'},
-        {id:'J5',name:'ศุภศิษฎ์ ศรีประไหม',deposit:'3000',start:'2023-01-08',end:'2024-01-08'},
-        {id:'J6',name:'ศรัณญู นาชัยดูล',deposit:'3000',start:'2024-01-10',end:'2025-01-03'},
-        {id:'J7',name:'เกศปัญญา ลาทอง',deposit:'3000',start:'2024-01-08',end:'2025-01-08'},
-        {id:'J8',name:'ไพรินทร์ แย้มประโคน',deposit:'3000',start:'2023-01-08',end:'2024-01-08'},
-        {id:'J9',name:'ชุลีพร อัศวภูมิ',deposit:'3000',start:'2023-01-08',end:'2024-01-08'},
-        {id:'J10',name:'ภากร ตรงคง',phone:'085-5164557',deposit:'3000',start:'2025-01-07',end:'2026-01-07'},
-        {id:'K1',name:'เอกยุทธ แขมคำ',phone:'093-4966427',deposit:'3000'},
-        {id:'K2',name:'ณรงค์ศักดิ์ สุพรรณ์',deposit:'3000',start:'2023-01-12',end:'2024-01-12'},
-        {id:'K3',name:'อนันท์ แจ่มจันทร',deposit:'3000',start:'2025-01-09',end:'2026-01-09'},
-        {id:'K4',name:'จิตรกร วันสม',deposit:'3000',start:'2024-01-04',end:'2025-01-04'},
-        {id:'L1',name:'ธีระยุทธ มะปะเท',phone:'089-9843862',deposit:'3000',start:'3025-01-03',end:'2026-01-03',note:'เจาะแอร์'},
-        {id:'L2',name:'ณัฐพล ชัยหา',phone:'0645272459',deposit:'3000',start:'2025-01-03',end:'2026-01-03',note:'แอร์'},
-        {id:'L3',name:'ไชยารัตน์ พลอินต๊ะ',phone:'063-1400247',deposit:'3000',start:'2025-01-03',end:'2026-01-03'},
-        {id:'L4',name:'กัลยรัตน์ แท้กระโทก',phone:'064-0547871',deposit:'3000',start:'2025-01-03',end:'2026-01-03',note:'รอทำสัญญส'},
-        {id:'L5',name:'อมรรัตน์ คำสอน',phone:'062-3676169',deposit:'3000',start:'2025-01-03',end:'2026-01-03'},
-        {id:'L7',name:'ธวัชชัย นันทะจันทร์',phone:'065-8258772',deposit:'3000',start:'2025-01-03',end:'2025-01-09'},
-        {id:'L8',name:'อำพล ไชยโพธิ์',phone:'098-1856529',deposit:'3000',start:'2025-01-03',end:'2026-01-03'},
-        {id:'L9',name:'มงคล สโมสร',phone:'095-9898240',deposit:'3000',start:'2025-01-03',end:'2025-01-09'},
-        {id:'L10',name:'อภิเชษฐ์ เย็นจิตร์',phone:'061-7623774',deposit:'3000'},
-        {id:'N1',name:'สมยศ มีรอด',phone:'098-8796221',deposit:'3000',start:'2025-01-08',end:'2026-01-08'},
-        {id:'N3',name:'กฤษฎา แดบขุนทด',phone:'096-1566103',deposit:'3000',start:'2025-01-08',end:'2026-01-02'},
-        {id:'N4',name:'อริญชย์ วัชพืช',phone:'098-5357165',deposit:'3000',start:'2025-01-08',end:'2026-01-08'},
-        {id:'N5',name:'สุชานุล คำพันธ์',phone:'064-6189363',deposit:'3000',start:'2025-01-08',end:'2026-01-02'},
-        {id:'N6',name:'สุริยะ ภูมิชิน',phone:'061-6251091',deposit:'3000',start:'2025-01-08',end:'2026-01-02'},
-        {id:'N7',name:'เจษฎาภรณ์ จำปาสา',phone:'094-4905850',deposit:'3000',start:'2025-01-08',end:'2026-01-08'},
-        {id:'N8',name:'ดุลยทรรศน์ ศรีโครต',phone:'085-6033592',deposit:'3000',start:'2025-01-08',end:'2026-01-02'},
-        {id:'N9',name:'ธนาคาร ทองโครต',phone:'082-9086146',deposit:'3000',start:'2025-01-08',end:'2026-01-08'}
-    ];
+    const ROOMS_PER_ZONE = 20;
 
-    let tenants = [], waitingList = [];
-    let currentHistoryId = null;
+    let tenants = [];
+    let waitingList = [];
 
     window.onload = function() {
         loadData();
     };
 
+    // --- 1. Data Loading & Safety ---
     function loadData() {
         updateStatus("กำลังโหลด...", true);
-        fetch(API_URL + "?action=loadTenants").then(r=>r.json()).then(res => {
-            if(res.status==="success" && res.tenants && res.tenants.length > 0) {
-                tenants = generateStructure(res.tenants);
-                waitingList = res.waiting || [];
-            } else {
-                tenants = generateStructure(UPDATED_TENANTS);
-            }
-            renderTable();
-            refreshWaitingList();
-            updateStatus("ข้อมูลล่าสุด");
-        }).catch(() => {
-            tenants = generateStructure(UPDATED_TENANTS);
-            renderTable();
-            updateStatus("โหลด Local");
-        });
+        fetch(API_URL + "?action=loadTenants")
+            .then(r => r.json())
+            .then(res => {
+                if(res.status==="success") {
+                    // Check if data exists, if not generate default
+                    if (res.tenants && res.tenants.length > 0) {
+                        tenants = res.tenants;
+                    } else {
+                        tenants = generateDefaultRooms();
+                    }
+                    waitingList = res.waiting || [];
+                } else {
+                    tenants = generateDefaultRooms();
+                }
+                renderTable();
+                renderWaitingList();
+                updateStatus("ข้อมูลล่าสุด");
+            })
+            .catch(err => {
+                console.error(err);
+                tenants = generateDefaultRooms(); // Offline fallback
+                renderTable();
+                updateStatus("โหมดออฟไลน์ (โหลดไม่สำเร็จ)");
+            });
     }
 
-    function generateStructure(loadedData) {
-        let newData = [];
-        // สร้างโครงสร้าง A1-P20
+    function generateDefaultRooms() {
+        let arr = [];
         ZONES.forEach(z => {
             for(let i=1; i<=ROOMS_PER_ZONE; i++) {
-                let id = z+i;
-                let found = loadedData.find(t => t.id === id);
-                if(found) {
-                    if(!found.history) found.history = [];
-                    newData.push(found);
-                } else {
-                    newData.push({
-                        id: id, name: '', phone: '', deposit: '', 
-                        contract_start: '', contract_end: '', status: 'Empty', debt: 0, note: '',
-                        history: []
-                    });
-                }
+                arr.push(createEmptyRow(z+i));
             }
         });
-        
-        // Auto-Status Logic
-        newData.forEach(t => {
-            if(!t.status || t.status==='Active' || t.status==='Empty') {
-                t.status = (t.name && t.name.trim() !== '') ? 'Active' : 'Empty';
-            }
-        });
-        return newData;
+        return arr;
     }
 
-    function renderTable() {
-        const tb = document.getElementById('tableBody'); tb.innerHTML = '';
-        
-        tenants.forEach((t, idx) => {
-            let statusClass = 'st-empty';
-            if(t.status === 'Active') statusClass = 'st-active';
-            else if(t.status === 'MovingOut') statusClass = 'st-moving';
-            else if(t.status === 'MovedRoom') statusClass = 'st-moved-room';
-            else if(t.status === 'RunAway' || t.status === 'Debt') statusClass = 'st-runaway';
+    function createEmptyRow(id) {
+        return { id: id, status: 'Empty', name: '', phone: '', deposit: '', start: '', end: '', debt: '', note: '' };
+    }
 
-            let tr = document.createElement('tr');
+    // --- 2. Core Rendering ---
+    function renderTable() {
+        const tb = document.getElementById('tableBody');
+        tb.innerHTML = '';
+
+        tenants.forEach((t, idx) => {
+            let stClass = 'st-empty';
+            if(t.status === 'Active') stClass = 'st-active';
+            else if(t.status === 'MovingOut') stClass = 'st-moving';
+            else if(t.status === 'Debt') stClass = 'st-debt';
+
+            const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="text-center"><button class="del-btn" onclick="deleteRow(${idx})">&times;</button></td>
-                <td class="col-id"><input type="text" class="cell-input nav-item fw-bold text-center" data-idx="${idx}" data-field="id" value="${t.id}" oninput="updateData(this)"></td>
-                <td class="${statusClass}">
-                    <select class="cell-select nav-item" data-idx="${idx}" data-field="status" onchange="updateStatusColor(this)">
+                <td class="text-center"><button class="del-btn" tabindex="-1" onclick="deleteRow(${idx})">&times;</button></td>
+                <td><input type="text" class="cell-input text-center fw-bold nav-item" data-r="${idx}" data-c="0" value="${t.id}" onchange="updateData(${idx}, 'id', this.value)"></td>
+                <td class="${stClass}">
+                    <select class="cell-select nav-item" data-r="${idx}" data-c="1" onchange="updateStatus(${idx}, this.value)">
                         <option value="Active" ${t.status==='Active'?'selected':''}>🟢 อยู่ปกติ</option>
-                        <option value="Empty" ${t.status==='Empty'?'selected':''}>⚪ ห้องว่าง</option>
+                        <option value="Empty" ${t.status==='Empty'?'selected':''}>⚪ ว่าง</option>
                         <option value="MovingOut" ${t.status==='MovingOut'?'selected':''}>🟡 แจ้งย้าย</option>
-                        <option value="MovedRoom" ${t.status==='MovedRoom'?'selected':''}>🔵 ย้ายห้อง</option>
-                        <option value="RunAway" ${t.status==='RunAway'?'selected':''}>🚨 หนี/เชิญออก</option>
-                        <option value="Debt" ${t.status==='Debt'?'selected':''}>🔴 ค้าง</option>
+                        <option value="Debt" ${t.status==='Debt'?'selected':''}>🔴 ค้าง/หนี</option>
                     </select>
                 </td>
-                <td><input type="text" class="cell-input nav-item" data-idx="${idx}" data-field="name" value="${t.name||''}" oninput="updateData(this)"></td>
-                <td><input type="text" class="cell-input nav-item" data-idx="${idx}" data-field="phone" value="${t.phone||''}" oninput="updateData(this)"></td>
-                <td><input type="number" class="cell-input nav-item" data-idx="${idx}" data-field="deposit" value="${t.deposit||''}" oninput="updateData(this)"></td>
-                <td><input type="date" class="cell-input nav-item" data-idx="${idx}" data-field="contract_start" value="${t.contract_start||''}" oninput="updateData(this)"></td>
-                <td><input type="date" class="cell-input nav-item" data-idx="${idx}" data-field="contract_end" value="${t.contract_end||''}" oninput="updateData(this)"></td>
-                <td><input type="number" class="cell-input nav-item text-danger fw-bold" data-idx="${idx}" data-field="debt" value="${t.debt||''}" oninput="updateData(this)"></td>
-                <td><input type="text" class="cell-input nav-item" data-idx="${idx}" data-field="note" value="${t.note||''}" oninput="updateData(this)"></td>
-                <td class="text-center">
-                    <button class="btn btn-sm border-0 ${t.history&&t.history.length>0?'text-primary':'text-muted'}" onclick="openHistory('${t.id}')">
-                        <i class="fas fa-tools"></i>
-                    </button>
-                </td>
+                <td><input type="text" class="cell-input nav-item" data-r="${idx}" data-c="2" value="${t.name||''}" onchange="updateData(${idx}, 'name', this.value)"></td>
+                <td><input type="text" class="cell-input nav-item" data-r="${idx}" data-c="3" value="${t.phone||''}" onchange="updateData(${idx}, 'phone', this.value)"></td>
+                <td><input type="number" class="cell-input nav-item text-end" data-r="${idx}" data-c="4" value="${t.deposit||''}" onchange="updateData(${idx}, 'deposit', this.value)"></td>
+                <td><input type="date" class="cell-input nav-item" data-r="${idx}" data-c="5" value="${t.start||''}" onchange="updateData(${idx}, 'start', this.value)"></td>
+                <td><input type="date" class="cell-input nav-item" data-r="${idx}" data-c="6" value="${t.end||''}" onchange="updateData(${idx}, 'end', this.value)"></td>
+                <td><input type="number" class="cell-input nav-item text-danger text-end fw-bold" data-r="${idx}" data-c="7" value="${t.debt||''}" onchange="updateData(${idx}, 'debt', this.value)"></td>
+                <td><input type="text" class="cell-input nav-item" data-r="${idx}" data-c="8" value="${t.note||''}" onchange="updateData(${idx}, 'note', this.value)"></td>
             `;
             tb.appendChild(tr);
         });
-        
-        setupNavigation();
+
+        attachNavEvents();
     }
 
-    function updateData(input) {
-        let idx = parseInt(input.dataset.idx);
-        let field = input.dataset.field;
-        tenants[idx][field] = input.value;
+    // --- 3. Data Mechanics ---
+    function updateData(idx, field, val) {
+        tenants[idx][field] = val;
+        // Auto-Status Logic: If Name filled & Status is Empty -> Active
+        if (field === 'name' && val.trim() !== '' && tenants[idx].status === 'Empty') {
+            tenants[idx].status = 'Active';
+            renderTable(); // Re-render to show Green color
+        }
     }
 
-    function updateStatusColor(select) {
-        let td = select.parentElement;
-        td.className = ''; 
-        if(select.value === 'Active') td.classList.add('st-active');
-        else if(select.value === 'Empty') td.classList.add('st-empty');
-        else if(select.value === 'MovingOut') td.classList.add('st-moving');
-        else if(select.value === 'MovedRoom') td.classList.add('st-moved-room');
-        else if(select.value === 'RunAway' || select.value === 'Debt') td.classList.add('st-runaway');
-        
-        let idx = parseInt(select.dataset.idx);
-        tenants[idx].status = select.value;
-    }
-
-    // --- Dynamic Rows ---
-    function addNewRow() {
-        tenants.push({ id: 'New', name: '', status: 'Empty', history: [] });
+    function updateStatus(idx, val) {
+        tenants[idx].status = val;
         renderTable();
+    }
+
+    function addNewRow() {
+        tenants.push(createEmptyRow("New"));
+        renderTable();
+        // Scroll to bottom
         window.scrollTo(0, document.body.scrollHeight);
     }
 
     function deleteRow(idx) {
-        if(confirm("ลบแถวนี้?")) {
+        if(confirm("ยืนยันลบแถวนี้?")) {
             tenants.splice(idx, 1);
             renderTable();
         }
     }
 
-    // --- Navigation & Paste ---
-    function setupNavigation() {
+    // --- 4. Navigation & Paste (The Important Part) ---
+    function attachNavEvents() {
         const inputs = document.querySelectorAll('.nav-item');
-        const gridWidth = 9; // Approx inputs per row
-
-        inputs.forEach((input, i) => {
+        
+        inputs.forEach(input => {
+            // Navigation
             input.onkeydown = (e) => {
-                if(e.key.startsWith('Arrow')) {
-                    e.preventDefault(); // Stop native scroll/select behavior for consistent grid nav
-                    let targetIndex = i;
-                    if(e.key === 'ArrowRight') targetIndex++;
-                    if(e.key === 'ArrowLeft') targetIndex--;
-                    // Simple heuristic for Up/Down: jump by width (approx)
-                    // Better: find input with same field in prev/next row
-                    if(e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                        let currentField = input.dataset.field;
-                        let currentIdx = parseInt(input.dataset.idx);
-                        let nextIdx = (e.key === 'ArrowDown') ? currentIdx + 1 : currentIdx - 1;
-                        let nextInput = document.querySelector(`.nav-item[data-idx="${nextIdx}"][data-field="${currentField}"]`);
-                        if(nextInput) { nextInput.focus(); nextInput.select(); return; }
-                    }
-                    
-                    if(inputs[targetIndex]) {
-                        inputs[targetIndex].focus();
-                        inputs[targetIndex].select();
+                const key = e.key;
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(key)) {
+                    // Logic to prioritize Navigation over Text Cursor
+                    if (key === 'ArrowLeft' && input.selectionStart > 0) return;
+                    if (key === 'ArrowRight' && input.selectionStart < input.value.length) return;
+
+                    e.preventDefault();
+
+                    const r = parseInt(input.dataset.r);
+                    const c = parseInt(input.dataset.c);
+                    let nextR = r, nextC = c;
+
+                    if (key === 'ArrowUp') nextR--;
+                    if (key === 'ArrowDown' || key === 'Enter') nextR++;
+                    if (key === 'ArrowLeft') nextC--;
+                    if (key === 'ArrowRight') nextC++;
+
+                    // Find target
+                    const target = document.querySelector(`.nav-item[data-r="${nextR}"][data-c="${nextC}"]`);
+                    if (target) {
+                        target.focus();
+                        if (target.select) target.select();
                     }
                 }
             };
 
-            // Smart Paste
+            // Smart Paste (Multi-Row/Col)
             input.onpaste = (e) => {
                 e.preventDefault();
-                const pasteData = (e.clipboardData || window.clipboardData).getData('text');
-                const rows = pasteData.split(/\r?\n/).filter(v => v !== '');
+                const text = (e.clipboardData || window.clipboardData).getData('text');
+                const rows = text.split(/\r?\n/).filter(x => x !== '');
                 
-                // Get starting position logic
-                // We need to know which visual row/col we are at.
-                // Simple logic: process line by line, find next input with same field for next line
-                
-                let currentField = input.dataset.field;
-                let startRowIdx = parseInt(input.dataset.idx);
-                
-                // This simple paste handles 1 column pasting (vertical) which is most common
-                // If user pastes a 2D block, it's complex. Let's support Vertical Paste primarily.
-                
-                rows.forEach((val, offset) => {
-                    let targetRowIdx = startRowIdx + offset;
-                    // Handle tab separation for 2D paste if needed (simple version)
-                    let cols = val.split('\t');
-                    
-                    // Logic: Find row at targetRowIdx
-                    if (targetRowIdx < tenants.length) {
-                        // If multiple cols, we need to find siblings.
-                        // For now, let's just paste the first col to current field to ensure stability
-                        // or try to support Name -> Phone -> Deposit flow
+                const startR = parseInt(input.dataset.r);
+                const startC = parseInt(input.dataset.c);
+                const fields = ['id','status','name','phone','deposit','start','end','debt','note'];
+
+                rows.forEach((rowStr, rOffset) => {
+                    const cells = rowStr.split('\t');
+                    cells.forEach((val, cOffset) => {
+                        const targetR = startR + rOffset;
+                        const targetC = startC + cOffset;
                         
-                        // Let's assume user pastes into Name, then Phone, etc.
-                        // Find the input element
-                        let targetInput = document.querySelector(`.nav-item[data-idx="${targetRowIdx}"][data-field="${currentField}"]`);
-                        if(targetInput) {
-                            targetInput.value = cols[0].trim();
-                            tenants[targetRowIdx][currentField] = cols[0].trim();
+                        if (tenants[targetR] && fields[targetC]) {
+                            const fieldName = fields[targetC];
+                            tenants[targetR][fieldName] = val.trim();
                             
-                            // Auto-Active if pasting name
-                            if(currentField === 'name' && cols[0].trim() !== '') {
-                                tenants[targetRowIdx].status = 'Active';
-                                let sel = document.querySelector(`.nav-item[data-idx="${targetRowIdx}"][data-field="status"]`);
-                                if(sel) { sel.value = 'Active'; updateStatusColor(sel); }
+                            // Paste Trigger: Auto-Active
+                            if(fieldName === 'name' && val.trim() !== '') {
+                                tenants[targetR].status = 'Active';
                             }
                         }
-                        
-                        // Attempt to paste subsequent columns if they exist (Name -> Phone)
-                        if(cols.length > 1) {
-                            // Define field order
-                            const fieldOrder = ['id','status','name','phone','deposit','contract_start','contract_end','debt','note'];
-                            let fieldPos = fieldOrder.indexOf(currentField);
-                            if(fieldPos !== -1) {
-                                for(let c=1; c<cols.length; c++) {
-                                    let nextField = fieldOrder[fieldPos+c];
-                                    if(nextField) {
-                                        let nextInput = document.querySelector(`.nav-item[data-idx="${targetRowIdx}"][data-field="${nextField}"]`);
-                                        if(nextInput) {
-                                            nextInput.value = cols[c].trim();
-                                            tenants[targetRowIdx][nextField] = cols[c].trim();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    });
                 });
+                renderTable();
             };
         });
     }
 
-    // --- Waiting List & History (Standard) ---
+    // --- 5. Waiting List Logic ---
     function addWaitList() {
-        let room = prompt("จองห้อง (ถ้ามี):", "");
         let name = prompt("ชื่อคนจอง:");
         if(name) {
+            let room = prompt("จองห้อง (ถ้ามี):", "");
             let phone = prompt("เบอร์โทร:");
-            let note = prompt("หมายเหตุ:", "");
-            waitingList.push({ room: room, name: name, phone: phone, note: note });
-            refreshWaitingList();
+            waitingList.push({ name, room, phone });
+            renderWaitingList();
         }
     }
-    function removeWait(idx) { if(confirm("ลบ?")) { waitingList.splice(idx, 1); refreshWaitingList(); } }
-    function refreshWaitingList() {
-        const wl = document.getElementById('waitingListContainer'); wl.innerHTML = '';
-        waitingList.forEach((w,i) => {
-            let roomBadge = w.room ? `<span class="room-tag">${w.room}</span>` : '';
-            wl.innerHTML += `<div class="wait-item"><div class="fw-bold small">${roomBadge}${w.name}</div><div class="small text-muted"><i class="fas fa-phone"></i> ${w.phone||'-'}</div><button class="btn btn-sm position-absolute top-0 end-0 text-danger" onclick="removeWait(${i})">&times;</button></div>`;
+    function removeWait(i) {
+        if(confirm("ลบ?")) { waitingList.splice(i, 1); renderWaitingList(); }
+    }
+    function renderWaitingList() {
+        const c = document.getElementById('waitingListContainer'); c.innerHTML = '';
+        waitingList.forEach((w, i) => {
+            c.innerHTML += `
+            <div class="wait-item position-relative">
+                <small class="text-primary fw-bold">[${w.room||'ไม่ระบุ'}]</small> <b>${w.name}</b>
+                <div class="small text-muted">${w.phone||'-'}</div>
+                <button class="btn btn-sm text-danger position-absolute top-0 end-0" onclick="removeWait(${i})">&times;</button>
+            </div>`;
         });
     }
 
-    function openHistory(id) {
-        currentHistoryId = id;
-        document.getElementById('h_room_id').innerText = id;
-        renderHistoryList();
-        new bootstrap.Modal(document.getElementById('historyModal')).show();
-    }
-    function renderHistoryList() {
-        const list = document.getElementById('historyList'); list.innerHTML = '';
-        const t = tenants.find(x => x.id === currentHistoryId);
-        if(!t || !t.history) return;
-        [...t.history].reverse().forEach((h,i) => {
-            list.innerHTML += `<div class="border-bottom p-2 bg-white mb-1 rounded"><small class="text-muted fw-bold">${h.date}</small> <div class="small">${h.text}</div></div>`;
-        });
-    }
-    function addHistoryItem() {
-        const t = tenants.find(x => x.id === currentHistoryId);
-        if(t) {
-            if(!t.history) t.history = [];
-            t.history.push({ date: document.getElementById('h_date').value, text: document.getElementById('h_text').value });
-            document.getElementById('h_text').value = ''; renderHistoryList(); renderTable();
-        }
-    }
-
+    // --- 6. Save ---
     function saveToCloud() {
         updateStatus("กำลังบันทึก...", true);
-        fetch(API_URL + "?action=saveTenants", { method: "POST", body: JSON.stringify({ tenants, waiting: waitingList }) })
-        .then(r=>r.json()).then(res => { if(res.status==="success") { alert("✅ บันทึกเรียบร้อย"); updateStatus("พร้อมใช้งาน"); } else alert("❌ Error: "+res.message); })
-        .catch(() => updateStatus("❌ บันทึกไม่สำเร็จ", false));
+        fetch(API_URL + "?action=saveTenants", { 
+            method: "POST", 
+            body: JSON.stringify({ tenants: tenants, waiting: waitingList }) 
+        })
+        .then(r => r.json())
+        .then(res => {
+            if(res.status === "success") {
+                updateStatus("✅ บันทึกสำเร็จ");
+                alert("บันทึกเรียบร้อยครับ!");
+            } else {
+                updateStatus("❌ Error");
+                alert("เกิดข้อผิดพลาด: " + res.message);
+            }
+        })
+        .catch(err => {
+            updateStatus("❌ เชื่อมต่อไม่ได้");
+            console.error(err);
+        });
     }
 
     function updateStatus(msg, loading=false) {
-        document.getElementById('statusMsg').innerHTML = loading ? `<i class="fas fa-spinner fa-spin text-warning"></i> ${msg}` : `<i class="fas fa-check-circle text-success"></i> ${msg}`;
+        const el = document.getElementById('statusMsg');
+        el.innerHTML = loading ? `<i class="fas fa-spinner fa-spin"></i> ${msg}` : msg;
     }
 </script>
+
 </body>
 </html>
