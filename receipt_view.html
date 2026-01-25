@@ -10,45 +10,46 @@
     
     <style>
         :root {
-            --primary-color: #0284c7;
-            --bg-color: #f3f6f9;
+            --primary: #0284c7;
+            --bg: #f3f6f9;
             --a5-width: 148mm;
             --a5-height: 209mm; 
         }
 
         body { 
             font-family: 'Sarabun', sans-serif; 
-            background-color: var(--bg-color); 
+            background-color: var(--bg); 
             color: #334155;
             display: flex; flex-direction: column; align-items: center;
             padding: 30px 20px;
         }
 
-        /* Control Panel (Hide on Print) */
+        /* Control Panel (Hidden on Print) */
         .control-card {
-            background: white; padding: 15px 25px; border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            background: white; padding: 15px 25px; border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
             display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap;
-            margin-bottom: 30px; width: 100%; max-width: 1200px; z-index: 1000; border: 1px solid #e2e8f0;
+            margin-bottom: 30px; width: 100%; max-width: 1000px; border: 1px solid #e2e8f0;
         }
         
         .filter-group {
-            display: flex; align-items: center; gap: 8px; 
+            display: flex; align-items: center; gap: 10px; 
             background: #f8fafc; padding: 5px 15px; border-radius: 30px; border: 1px solid #cbd5e1;
         }
         .filter-label { font-weight: bold; font-size: 13px; color: #64748b; }
         .filter-select { border: none; background: transparent; font-weight: bold; color: #0f172a; outline: none; font-size: 14px; }
 
         .btn-print {
-            background: var(--primary-color); color: white; border: none; padding: 8px 20px; 
+            background: var(--primary); color: white; border: none; padding: 8px 25px; 
             border-radius: 30px; font-weight: 600; font-size: 14px; transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
         }
-        .btn-print:hover { transform: translateY(-2px); background: #0369a1; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3); }
+        .btn-print:hover { transform: translateY(-2px); background: #0369a1; }
 
-        /* Receipt Page */
+        /* Receipt Page (A5 Layout) */
         .receipt-page {
             width: var(--a5-width);
-            min-height: var(--a5-height); /* Force A5 height */
+            min-height: var(--a5-height);
             background: white; padding: 10mm;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             position: relative;
@@ -74,16 +75,21 @@
         .table-sum { width: 100%; font-size: 11pt; }
         .table-sum td { padding: 3px 5px; }
         .table-sum .value { text-align: right; font-weight: 700; }
+        
         .grand-total {
             background-color: #0f172a; color: white; font-size: 14pt; font-weight: 800;
             padding: 8px 15px; border-radius: 6px; margin-top: 10px;
             display: flex; justify-content: space-between; align-items: center;
         }
+        
         .footer { margin-top: 15px; font-size: 9pt; color: #64748b; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px dashed #cbd5e1; }
+
+        /* Editable Hint */
+        [contenteditable]:hover { background-color: rgba(255, 255, 0, 0.1); cursor: text; outline: 1px dashed #ccc; }
 
         @media print {
             body { background: white; padding: 0; display: block; }
-            .control-card { display: none !important; }
+            .control-card, .status-bar, #loadingMsg, #noDataMsg { display: none !important; }
             .receipt-page { box-shadow: none; margin: 0; width: 100%; height: auto; border: none; page-break-after: always; }
             @page { size: A5 portrait; margin: 0; }
         }
@@ -92,7 +98,7 @@
 <body>
 
     <div class="control-card">
-        <h5 class="m-0 fw-bold text-primary me-3"><i class="fas fa-print"></i> พิมพ์ใบเสร็จ</h5>
+        <h5 class="m-0 fw-bold text-primary me-3"><i class="fas fa-receipt"></i> พิมพ์ใบเสร็จ</h5>
         
         <div class="filter-group">
             <span class="filter-label">เดือน:</span>
@@ -102,7 +108,7 @@
         <div class="filter-group">
             <span class="filter-label">พิมพ์:</span>
             <select id="printScope" class="filter-select" onchange="toggleFilter()">
-                <option value="ALL">ทั้งหมด (100+ ห้อง)</option>
+                <option value="ALL">ทั้งหมด (Batch Print)</option>
                 <option value="ZONE">แยกตามตึก (Zone)</option>
                 <option value="SINGLE">ห้องเดียว (Single)</option>
             </select>
@@ -118,6 +124,7 @@
                 <option value="I">ตึก I</option><option value="J">ตึก J</option>
                 <option value="K">ตึก K</option><option value="L">ตึก L</option>
                 <option value="M">ตึก M</option><option value="N">ตึก N</option>
+                <option value="O">ตึก O</option><option value="P">ตึก P</option>
             </select>
         </div>
 
@@ -232,21 +239,25 @@
         if (roomsToPrint.length === 0) return;
 
         roomsToPrint.forEach(r => {
+            // Calculation Logic (ตรงกับ record_monthly.html ใหม่)
             const wn=parseFloat(r.w_new)||0, wo=parseFloat(r.w_old)||0, wr=parseFloat(r.w_rate)||0;
             let wu=0, wt=0; 
-            if(r.w_new && wn>=wo){ let d=wn-wo; wu=d; if(d<4 && !r.isCommon) d=4; wt=d*wr; }
+            if(r.w_new && r.w_old){ 
+                let d=wn-wo; 
+                wu=(d<4?4:d); // Min 4 units logic displayed as Used units? Usually displaying Actual unit, but charging Min 4. 
+                // Let's stick to showing Actual, but Price based on Min 4.
+                // Or better: Show actual usage, but note if min applied.
+                let chargeUnits = (d<4) ? 4 : d;
+                wt = chargeUnits * wr;
+            }
             
             const en=parseFloat(r.e_new)||0, eo=parseFloat(r.e_old)||0, er=parseFloat(r.e_rate)||0;
-            let eu=0, et=0; if(r.e_new && en>=eo){ eu=en-eo; et=eu*er; }
+            let eu=0, et=0; if(r.e_new && r.e_old){ eu=en-eo; et=eu*er; }
 
             const rent=parseFloat(r.rent)||0, cust=parseFloat(r.custom)||0, net=parseFloat(r.internet)||0;
-            let exHtml = ''; let exSum=0;
-            if(r.extras){ r.extras.forEach(x=>{ 
-                exHtml += `<tr><td>${x.name}</td><td class="value text-danger">${parseFloat(x.price).toLocaleString()}</td></tr>`;
-                exSum+=parseFloat(x.price);
-            });}
+            const extra=parseFloat(r.extra)||0; // New Extra/Debt field
 
-            const total = rent + cust + net + wt + et + exSum;
+            const total = rent + cust + net + wt + et + extra;
 
             const html = `
             <div class="receipt-page">
@@ -263,42 +274,44 @@
                 </div>
 
                 <div class="mb-2">
-                    <div class="th-water"><i class="fas fa-tint"></i> ค่าน้ำประปา</div>
+                    <div class="th-water"><i class="fas fa-tint"></i> ค่าน้ำประปา (Water)</div>
                     <table class="table-util">
-                        <tr><td>เลขมิเตอร์ครั้งนี้</td><td class="val-col">${r.w_new}</td></tr>
-                        <tr><td>เลขมิเตอร์ครั้งก่อน</td><td class="val-col">${r.w_old}</td></tr>
-                        <tr><td>หน่วยที่ใช้ ${wu<4?'(ขั้นต่ำ 4)':''}</td><td class="val-col">${wu}</td></tr>
+                        <tr><td>จดครั้งนี้ (New)</td><td class="val-col" contenteditable="true">${r.w_new}</td></tr>
+                        <tr><td>จดครั้งก่อน (Old)</td><td class="val-col" contenteditable="true">${r.w_old}</td></tr>
+                        <tr><td>หน่วยที่ใช้ (Units) ${(wn-wo)<4?'(ขั้นต่ำ 4)':''}</td><td class="val-col">${wn-wo}</td></tr>
                         <tr class="sum-row"><td>รวมค่าน้ำ (${wr}บ./หน่วย)</td><td class="val-col">${wt.toLocaleString()}</td></tr>
                     </table>
                 </div>
 
                 <div class="mb-2">
-                    <div class="th-elec"><i class="fas fa-bolt"></i> ค่าไฟฟ้า</div>
+                    <div class="th-elec"><i class="fas fa-bolt"></i> ค่าไฟฟ้า (Electricity)</div>
                     <table class="table-util">
-                        <tr><td>เลขมิเตอร์ครั้งนี้</td><td class="val-col">${r.e_new}</td></tr>
-                        <tr><td>เลขมิเตอร์ครั้งก่อน</td><td class="val-col">${r.e_old}</td></tr>
-                        <tr><td>หน่วยที่ใช้</td><td class="val-col">${eu}</td></tr>
+                        <tr><td>จดครั้งนี้ (New)</td><td class="val-col" contenteditable="true">${r.e_new}</td></tr>
+                        <tr><td>จดครั้งก่อน (Old)</td><td class="val-col" contenteditable="true">${r.e_old}</td></tr>
+                        <tr><td>หน่วยที่ใช้ (Units)</td><td class="val-col">${eu}</td></tr>
                         <tr class="sum-row"><td>รวมค่าไฟ (${er}บ./หน่วย)</td><td class="val-col">${et.toLocaleString()}</td></tr>
                     </table>
                 </div>
 
                 <div class="summary-box">
                     <table class="table-sum">
-                        <tr><td>ค่าเช่าห้อง</td><td class="value">${(rent+cust).toLocaleString()}</td></tr>
-                        ${net > 0 ? `<tr><td>ค่าอินเทอร์เน็ต WiFi</td><td class="value">${net.toLocaleString()}</td></tr>` : ''}
-                        <tr><td>ค่าน้ำ</td><td class="value">${wt.toLocaleString()}</td></tr>
-                        <tr><td>ค่าไฟ</td><td class="value">${et.toLocaleString()}</td></tr>
-                        ${exHtml}
+                        <tr><td>ค่าเช่าห้อง (Rent)</td><td class="value" contenteditable="true">${rent.toLocaleString()}</td></tr>
+                        <tr><td>ค่าส่วนกลาง (Common Fee)</td><td class="value" contenteditable="true">${cust.toLocaleString()}</td></tr>
+                        ${net > 0 ? `<tr><td>ค่าอินเทอร์เน็ต (WiFi)</td><td class="value" contenteditable="true">${net.toLocaleString()}</td></tr>` : ''}
+                        ${extra != 0 ? `<tr><td class="text-danger">อื่นๆ / หนี้ค้าง (Other/Debt)</td><td class="value text-danger" contenteditable="true">${extra.toLocaleString()}</td></tr>` : ''}
+                        
+                        <tr><td>รวมค่าน้ำ</td><td class="value">${wt.toLocaleString()}</td></tr>
+                        <tr><td>รวมค่าไฟ</td><td class="value">${et.toLocaleString()}</td></tr>
                     </table>
                     <div class="grand-total">
                         <span>ยอดสุทธิ (Total)</span>
-                        <span>${total.toLocaleString()} บาท</span>
+                        <span contenteditable="true">${total.toLocaleString()} บาท</span>
                     </div>
                 </div>
 
                 <div class="footer">
                     <div class="d-flex justify-content-between align-items-end">
-                        <div>
+                        <div contenteditable="true">
                             <strong>กำหนดชำระ:</strong> ภายในวันที่ 5 ของเดือน<br>
                             <strong>ช่องทางชำระ:</strong> โอนเข้าบัญชี หรือ เงินสดที่สำนักงาน<br>
                             <span class="text-danger small">*ชำระล่าช้ามีค่าปรับวันละ 100 บาท</span>
@@ -310,6 +323,7 @@
                     </div>
                 </div>
             </div>`;
+            
             container.insertAdjacentHTML('beforeend', html);
         });
     }
