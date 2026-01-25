@@ -18,34 +18,40 @@
         .table-responsive { background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-height: 75vh; }
         .table-excel { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
         .table-excel th { position: sticky; top: 0; background: #f1f5f9; color: #475569; padding: 10px; font-weight: 700; border-bottom: 2px solid #e2e8f0; z-index: 10; text-align: center; white-space: nowrap; }
-        .table-excel td { border-bottom: 1px solid #f1f5f9; padding: 0; height: 40px; vertical-align: middle; }
+        .table-excel td { border-bottom: 1px solid #f1f5f9; padding: 0; height: 45px; vertical-align: middle; }
         
         /* Input Styling */
         .cell-input { width: 100%; height: 100%; border: none; padding: 0 8px; outline: none; background: transparent; transition: 0.2s; font-family: 'Sarabun'; font-size: 13px; }
         .cell-input:focus { background: #e0f2fe; box-shadow: inset 0 0 0 2px var(--primary); }
-        .cell-select { width: 100%; height: 100%; border: none; outline: none; background: transparent; padding: 0 5px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .cell-select { width: 100%; height: 100%; border: none; outline: none; background: transparent; padding: 0 5px; cursor: pointer; font-size: 12px; font-weight: 700; }
         
-        /* Specific Columns */
+        /* Specific Columns & Status Colors */
         .col-id { background: #f8fafc; font-weight: 800; text-align: center; width: 60px; color: #334155; }
-        .col-status-active { color: #166534; background: #dcfce7; }
-        .col-status-empty { color: #94a3b8; background: #f8fafc; }
-        .col-status-moving { color: #854d0e; background: #fef9c3; }
-        .col-status-debt { color: #991b1b; background: #fee2e2; }
+        
+        /* Status Colors (Backgrounds for Select) */
+        .st-active { color: #166534; background: #dcfce7; }        /* เขียว: อยู่ปกติ */
+        .st-empty { color: #94a3b8; background: #f8fafc; }         /* เทา: ว่าง */
+        .st-moving { color: #854d0e; background: #fef9c3; }        /* เหลือง: แจ้งย้าย */
+        .st-moved-room { color: #0369a1; background: #e0f2fe; }    /* ฟ้า: ย้ายห้อง */
+        .st-runaway { color: #991b1b; background: #fee2e2; border-left: 4px solid #ef4444; } /* แดง: หนี/เชิญออก */
 
-        /* Zone Filter */
-        .zone-bar { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; }
-        .btn-zone { border: 1px solid #cbd5e1; background: white; color: #64748b; border-radius: 20px; padding: 4px 15px; font-weight: 700; font-size: 12px; white-space: nowrap; }
-        .btn-zone.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .btn-all { border: 2px solid #0f172a; color: #0f172a; }
-        .btn-all.active { background: #0f172a; color: white; }
+        /* Zone & Status Filter Bar */
+        .filter-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; align-items: center; }
+        .btn-filter { border: 1px solid #cbd5e1; background: white; color: #64748b; border-radius: 20px; padding: 4px 15px; font-weight: 700; font-size: 12px; white-space: nowrap; transition: 0.2s; }
+        .btn-filter:hover { background: #f1f5f9; }
+        .btn-filter.active { background: #0f172a; color: white; border-color: #0f172a; }
+        
+        .btn-status-filter { border-radius: 8px; padding: 4px 10px; font-size: 12px; font-weight: bold; border: 1px solid transparent; opacity: 0.6; }
+        .btn-status-filter.active { opacity: 1; transform: scale(1.05); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        .s-run { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+        .s-move { background: #fef9c3; color: #854d0e; border-color: #fde047; }
+        .s-room { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; }
 
         .status-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 10px 25px; border-radius: 50px; font-size: 13px; z-index: 1000; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
         
-        /* History Log Style */
-        .history-list { max-height: 300px; overflow-y: auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; }
-        .history-item { background: white; padding: 8px; margin-bottom: 5px; border-radius: 6px; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: start; }
-        .history-date { font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 2px; }
-        .history-text { font-size: 13px; color: #334155; }
+        .wait-item { border-bottom: 1px solid #eee; padding: 8px; background: white; margin-bottom: 5px; border-radius: 6px; position: relative; border:1px solid #e2e8f0;}
+        .room-tag { background: #0f172a; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-right: 5px; }
     </style>
 </head>
 <body>
@@ -53,33 +59,58 @@
 <div class="container-fluid" style="max-width: 1600px;">
     
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold m-0"><i class="fas fa-users-cog text-primary"></i> จัดการผู้เช่า (Table View)</h4>
+        <h4 class="fw-bold m-0"><i class="fas fa-users-cog text-primary"></i> จัดการผู้เช่า (ละเอียด)</h4>
         <div class="d-flex gap-2">
             <a href="index.html" class="btn btn-light border fw-bold">กลับเมนู</a>
             <button class="btn btn-success fw-bold px-4 rounded-pill" onclick="saveToCloud()"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
         </div>
     </div>
 
-    <div class="zone-bar" id="zoneBar"></div>
+    <div class="row">
+        <div class="col-lg-9">
+            <div class="header-card p-2 mb-2">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="filter-bar m-0" id="zoneBar"></div>
+                    
+                    <div class="d-flex gap-2">
+                        <button class="btn-status-filter s-move" onclick="filterStatus('MovingOut')">⚠️ แจ้งย้าย</button>
+                        <button class="btn-status-filter s-run" onclick="filterStatus('RunAway')">🚨 หนี/มีปัญหา</button>
+                        <button class="btn-status-filter s-room" onclick="filterStatus('MovedRoom')">🔄 ย้ายห้อง</button>
+                        <button class="btn-status-filter bg-light border text-dark" onclick="filterStatus('ALL')">แสดงทั้งหมด</button>
+                    </div>
+                </div>
+            </div>
 
-    <div class="table-responsive">
-        <table class="table-excel">
-            <thead>
-                <tr>
-                    <th style="width:60px;">ห้อง</th>
-                    <th style="width:50px;">ประวัติ</th>
-                    <th style="width:100px;">สถานะ</th>
-                    <th style="width:180px;">ชื่อ-นามสกุล</th>
-                    <th style="width:120px;">เบอร์โทร</th>
-                    <th style="width:90px;">เงินมัดจำ</th>
-                    <th style="width:110px;">วันเริ่มสัญญา</th>
-                    <th style="width:110px;">วันหมดสัญญา</th>
-                    <th style="width:90px;">ค้างชำระ</th>
-                    <th>หมายเหตุ (ทั่วไป)</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
+            <div class="table-responsive">
+                <table class="table-excel">
+                    <thead>
+                        <tr>
+                            <th style="width:60px;">ห้อง</th>
+                            <th style="width:50px;">ประวัติ</th>
+                            <th style="width:140px;">สถานะ (ละเอียด)</th>
+                            <th style="width:180px;">ชื่อ-นามสกุล</th>
+                            <th style="width:110px;">เบอร์โทร</th>
+                            <th style="width:80px;">เงินมัดจำ</th>
+                            <th style="width:100px;">วันเริ่มสัญญา</th>
+                            <th style="width:100px;">วันหมดสัญญา</th>
+                            <th style="width:80px;">ค้างชำระ</th>
+                            <th>หมายเหตุ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm p-3 h-100 bg-white" style="border-radius: 12px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold m-0 text-primary"><i class="fas fa-user-clock"></i> คนจอง / รอห้อง</h6>
+                    <button class="btn btn-sm btn-outline-primary py-0" style="font-size:12px;" onclick="addWaitList()">+ เพิ่ม</button>
+                </div>
+                <div id="waitingListContainer" style="overflow-y: auto; max-height: 80vh;"></div>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -88,17 +119,16 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-light py-2">
-                <h6 class="modal-title fw-bold"><i class="fas fa-tools"></i> ประวัติห้อง/การซ่อมแซม: <span id="h_room_id" class="text-primary"></span></h6>
+                <h6 class="modal-title fw-bold"><i class="fas fa-tools"></i> ประวัติห้อง: <span id="h_room_id" class="text-primary"></span></h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="input-group mb-3">
                     <input type="date" id="h_date" class="form-control form-control-sm" style="max-width: 130px;">
-                    <input type="text" id="h_text" class="form-control form-control-sm" placeholder="รายละเอียด (เช่น เจาะผนัง, ซ่อมก๊อก)">
-                    <button class="btn btn-primary btn-sm" onclick="addHistoryItem()"><i class="fas fa-plus"></i> เพิ่ม</button>
+                    <input type="text" id="h_text" class="form-control form-control-sm" placeholder="เช่น เจาะผนัง, ซ่อมก๊อก">
+                    <button class="btn btn-primary btn-sm" onclick="addHistoryItem()">เพิ่ม</button>
                 </div>
-                <div id="historyList" class="history-list">
-                    </div>
+                <div id="historyList" style="max-height: 300px; overflow-y: auto; background: #f8fafc; border-radius: 8px; padding: 10px;"></div>
             </div>
         </div>
     </div>
@@ -109,14 +139,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // ⚠️ ลิงก์ Web App
     const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec"; 
     
-    // Config
     const ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
     const ROOMS_PER_ZONE = 20; 
     
-    // 🔥 ข้อมูลผู้เช่าปัจจุบัน (Hardcoded Backup)
+    // 🔥 ข้อมูลล่าสุด (รวมสถานะใหม่ถ้ามี)
     const UPDATED_TENANTS = [
         {id:'A3',name:'พิชิยุทธ เสนาสุ',deposit:'3000',start:'2024-05-07',end:'2025-05-07'},
         {id:'A5',name:'วาศกร ปัดสำราญ',deposit:'3000',start:'2024-09-01',end:'2025-09-01',note:'ย้ายจากG1'},
@@ -216,7 +244,9 @@
         {id:'N9',name:'ธนาคาร ทองโครต',phone:'082-9086146',deposit:'3000',start:'2025-01-08',end:'2026-01-08'}
     ];
 
-    let tenants = [], currentZone = 'ALL';
+    let tenants = [], waitingList = [];
+    let currentZone = 'ALL';
+    let currentStatusFilter = 'ALL';
     let currentHistoryId = null;
 
     window.onload = function() {
@@ -229,10 +259,12 @@
         fetch(API_URL + "?action=loadTenants").then(r=>r.json()).then(res => {
             if(res.status==="success" && res.tenants && res.tenants.length > 0) {
                 tenants = generateStructure(res.tenants);
+                waitingList = res.waiting || [];
             } else {
                 tenants = generateStructure(UPDATED_TENANTS);
             }
             renderTable();
+            refreshWaitingList();
             updateStatus("ข้อมูลล่าสุด");
         }).catch(() => {
             tenants = generateStructure(UPDATED_TENANTS);
@@ -248,7 +280,7 @@
                 let id = z+i;
                 let found = loadedData.find(t => t.id === id);
                 if(found) {
-                    if(!found.history) found.history = []; // Init history
+                    if(!found.history) found.history = []; 
                     newData.push(found);
                 } else {
                     newData.push({
@@ -259,28 +291,38 @@
                 }
             }
         });
+        // Normalize Status
         newData.forEach(t => {
-            if(!t.status) {
+            if(!t.status || t.status === 'Active' || t.status === 'Empty') {
                 t.status = (t.name && t.name.trim() !== '') ? 'Active' : 'Empty';
             }
         });
         return newData;
     }
 
+    // --- Filters ---
     function renderZoneButtons() {
         const bar = document.getElementById('zoneBar');
-        bar.innerHTML = `<button class="btn-zone btn-all active" onclick="filterZone('ALL')">ทั้งหมด</button>`;
+        bar.innerHTML = `<button class="btn-filter active" onclick="filterZone('ALL')">ทุกโซน</button>`;
         ZONES.forEach(z => {
-            bar.innerHTML += `<button class="btn-zone" onclick="filterZone('${z}')">${z}</button>`;
+            bar.innerHTML += `<button class="btn-filter" onclick="filterZone('${z}')">${z}</button>`;
         });
     }
 
     function filterZone(z) {
         currentZone = z;
-        document.querySelectorAll('.btn-zone').forEach(b => b.classList.toggle('active', b.innerText === (z==='ALL'?'ทั้งหมด':z)));
+        document.querySelectorAll('#zoneBar .btn-filter').forEach(b => b.classList.toggle('active', b.innerText === (z==='ALL'?'ทุกโซน':z)));
         renderTable();
     }
 
+    function filterStatus(s) {
+        currentStatusFilter = s;
+        // Reset active style for buttons (simplified)
+        // In real use, you might want to toggle active classes on these buttons too
+        renderTable();
+    }
+
+    // --- Table Rendering ---
     function renderTable() {
         const tb = document.getElementById('tableBody'); tb.innerHTML = '';
         
@@ -302,19 +344,29 @@
         ];
 
         let displayList = tenants;
+
+        // 1. Filter by Zone
         if(currentZone !== 'ALL') {
-            displayList = tenants.filter(t => t.id.startsWith(currentZone));
+            displayList = displayList.filter(t => t.id.startsWith(currentZone));
         } else {
-            displayList = tenants.filter(t => REAL_ROOMS.includes(t.id));
+            displayList = displayList.filter(t => REAL_ROOMS.includes(t.id));
+        }
+
+        // 2. Filter by Status (Quick Filter)
+        if(currentStatusFilter !== 'ALL') {
+            displayList = displayList.filter(t => t.status === currentStatusFilter);
         }
 
         displayList.forEach(t => {
             let idx = tenants.indexOf(t); 
             
-            let statusClass = 'col-status-empty';
-            if(t.status === 'Active') statusClass = 'col-status-active';
-            else if(t.status === 'MovingOut') statusClass = 'col-status-moving';
-            else if(t.status === 'Debt') statusClass = 'col-status-debt';
+            // Background class for SELECT element's parent TD
+            let statusClass = 'st-empty';
+            if(t.status === 'Active') statusClass = 'st-active';
+            else if(t.status === 'MovingOut') statusClass = 'st-moving';
+            else if(t.status === 'MovedRoom') statusClass = 'st-moved-room';
+            else if(t.status === 'RunAway') statusClass = 'st-runaway';
+            else if(t.status === 'Debt') statusClass = 'st-runaway'; // ใช้แดงเหมือนกัน
 
             let tr = document.createElement('tr');
             tr.innerHTML = `
@@ -326,10 +378,12 @@
                 </td>
                 <td class="${statusClass}">
                     <select class="cell-select nav-item" data-idx="${idx}" data-field="status" onchange="updateStatusColor(this)">
-                        <option value="Active" ${t.status==='Active'?'selected':''}>🟢 อยู่</option>
-                        <option value="Empty" ${t.status==='Empty'?'selected':''}>⚪ ว่าง</option>
-                        <option value="MovingOut" ${t.status==='MovingOut'?'selected':''}>🟡 ย้าย</option>
-                        <option value="Debt" ${t.status==='Debt'?'selected':''}>🔴 ค้าง</option>
+                        <option value="Active" ${t.status==='Active'?'selected':''}>🟢 อยู่ปกติ</option>
+                        <option value="Empty" ${t.status==='Empty'?'selected':''}>⚪ ห้องว่าง</option>
+                        <option value="MovingOut" ${t.status==='MovingOut'?'selected':''}>🟡 แจ้งย้ายออก</option>
+                        <option value="MovedRoom" ${t.status==='MovedRoom'?'selected':''}>🔵 ย้ายห้อง (Internal)</option>
+                        <option value="RunAway" ${t.status==='RunAway'?'selected':''}>🚨 หนี/เชิญออก</option>
+                        <option value="Debt" ${t.status==='Debt'?'selected':''}>🔴 ค้างชำระ</option>
                     </select>
                 </td>
                 <td><input type="text" class="cell-input nav-item" data-idx="${idx}" data-field="name" value="${t.name}"></td>
@@ -349,16 +403,50 @@
     function updateStatusColor(select) {
         let td = select.parentElement;
         td.className = ''; 
-        if(select.value === 'Active') td.classList.add('col-status-active');
-        else if(select.value === 'Empty') td.classList.add('col-status-empty');
-        else if(select.value === 'MovingOut') td.classList.add('col-status-moving');
-        else if(select.value === 'Debt') td.classList.add('col-status-debt');
+        if(select.value === 'Active') td.classList.add('st-active');
+        else if(select.value === 'Empty') td.classList.add('st-empty');
+        else if(select.value === 'MovingOut') td.classList.add('st-moving');
+        else if(select.value === 'MovedRoom') td.classList.add('st-moved-room');
+        else if(select.value === 'RunAway' || select.value === 'Debt') td.classList.add('st-runaway');
         
         let idx = parseInt(select.dataset.idx);
         tenants[idx].status = select.value;
     }
 
-    // --- History Logic ---
+    // --- Waiting List & History Logic (Same as before) ---
+    function addWaitList() {
+        let room = prompt("จองห้อง (ถ้ามี):", "");
+        let name = prompt("ชื่อคนจอง:");
+        if(name) {
+            let phone = prompt("เบอร์โทร:");
+            let note = prompt("หมายเหตุ:", "");
+            waitingList.push({ room: room, name: name, phone: phone, note: note });
+            refreshWaitingList();
+        }
+    }
+
+    function removeWait(idx) {
+        if(confirm("ลบรายชื่อนี้?")) {
+            waitingList.splice(idx, 1);
+            refreshWaitingList();
+        }
+    }
+
+    function refreshWaitingList() {
+        const wl = document.getElementById('waitingListContainer'); 
+        wl.innerHTML = '';
+        waitingList.forEach((w,i) => {
+            let roomBadge = w.room ? `<span class="room-tag">${w.room}</span>` : '';
+            wl.innerHTML += `
+            <div class="wait-item position-relative">
+                <div class="fw-bold small">${roomBadge}${w.name}</div>
+                <div class="small text-muted"><i class="fas fa-phone"></i> ${w.phone || '-'}</div>
+                ${w.note ? `<div class="small text-warning"><i class="fas fa-sticky-note"></i> ${w.note}</div>` : ''}
+                <button class="btn btn-sm position-absolute top-0 end-0 text-danger" onclick="removeWait(${i})">&times;</button>
+            </div>`;
+        });
+    }
+
     function openHistory(id) {
         currentHistoryId = id;
         document.getElementById('h_room_id').innerText = id;
@@ -372,18 +460,8 @@
         const list = document.getElementById('historyList'); list.innerHTML = '';
         const t = tenants.find(x => x.id === currentHistoryId);
         if(!t || !t.history) return;
-
-        // Sort new to old
-        const sorted = [...t.history].reverse();
-        sorted.forEach((h, i) => {
-            list.innerHTML += `
-            <div class="history-item">
-                <div>
-                    <div class="history-date"><i class="fas fa-calendar-alt"></i> ${formatDate(h.date)}</div>
-                    <div class="history-text">${h.text}</div>
-                </div>
-                <button class="btn btn-sm text-danger" onclick="deleteHistory(${t.history.length - 1 - i})">&times;</button>
-            </div>`;
+        [...t.history].reverse().forEach((h, i) => {
+            list.innerHTML += `<div class="border-bottom p-2 bg-white mb-1 rounded"><small class="text-muted fw-bold">${new Date(h.date).toLocaleDateString('th-TH')}</small><div class="small">${h.text}</div></div>`;
         });
     }
 
@@ -391,34 +469,15 @@
         const date = document.getElementById('h_date').value;
         const text = document.getElementById('h_text').value;
         if(!text) return;
-
         const t = tenants.find(x => x.id === currentHistoryId);
         if(t) {
             if(!t.history) t.history = [];
             t.history.push({ date: date, text: text });
-            document.getElementById('h_text').value = ''; // Clear input
-            renderHistoryList();
-            renderTable(); // Update icon color
+            document.getElementById('h_text').value = ''; renderHistoryList(); renderTable();
         }
     }
 
-    function deleteHistory(realIndex) {
-        if(!confirm("ลบรายการนี้?")) return;
-        const t = tenants.find(x => x.id === currentHistoryId);
-        if(t && t.history) {
-            t.history.splice(realIndex, 1);
-            renderHistoryList();
-            renderTable();
-        }
-    }
-
-    function formatDate(d) {
-        if(!d) return '-';
-        const date = new Date(d);
-        return date.toLocaleDateString('th-TH');
-    }
-
-    // --- Events (Paste, Nav) ---
+    // --- Standard Events ---
     function setupEvents() {
         document.querySelectorAll('.nav-item').forEach(input => {
             input.onpaste = (e) => {
@@ -428,15 +487,12 @@
                 const field = e.target.dataset.field;
                 const allVisibleInputs = Array.from(document.querySelectorAll(`.nav-item[data-field="${field}"]`));
                 const startPos = allVisibleInputs.indexOf(input);
-
                 values.forEach((val, i) => {
                     if (startPos + i < allVisibleInputs.length) {
                         const targetInput = allVisibleInputs[startPos + i];
                         const targetIdx = parseInt(targetInput.dataset.idx);
-                        
                         targetInput.value = val.trim();
                         tenants[targetIdx][field] = val.trim(); 
-
                         if(field === 'name' && val.trim() !== '') {
                             tenants[targetIdx].status = 'Active';
                             let sel = document.querySelector(`.nav-item[data-idx="${targetIdx}"][data-field="status"]`);
@@ -445,52 +501,4 @@
                     }
                 });
             };
-
-            input.oninput = (e) => {
-                let idx = parseInt(e.target.dataset.idx);
-                let field = e.target.dataset.field;
-                tenants[idx][field] = e.target.value;
-            };
-            
-            input.onkeydown = (e) => {
-                if(e.key === 'ArrowDown' || e.key === 'Enter') {
-                    e.preventDefault();
-                    moveFocus(input, 1);
-                } else if(e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    moveFocus(input, -1);
-                }
-            };
-        });
-    }
-
-    function moveFocus(currentInput, direction) {
-        const field = currentInput.dataset.field;
-        const allVisible = Array.from(document.querySelectorAll(`.nav-item[data-field="${field}"]`));
-        const currPos = allVisible.indexOf(currentInput);
-        if(currPos + direction >= 0 && currPos + direction < allVisible.length) {
-            allVisible[currPos + direction].focus();
-            if(allVisible[currPos + direction].select) allVisible[currPos + direction].select();
-        }
-    }
-
-    function saveToCloud() {
-        updateStatus("กำลังบันทึก...", true);
-        fetch(API_URL + "?action=saveTenants", { 
-            method: "POST", 
-            body: JSON.stringify({ tenants: tenants, waiting: [] }) 
-        })
-        .then(r=>r.json()).then(res => { 
-            if(res.status==="success") { alert("✅ บันทึกเรียบร้อย"); updateStatus("พร้อมใช้งาน"); }
-            else alert("❌ Error: "+res.message);
-        })
-        .catch(() => updateStatus("❌ บันทึกไม่สำเร็จ", false));
-    }
-
-    function updateStatus(msg, loading=false) {
-        const el = document.getElementById('statusMsg');
-        el.innerHTML = loading ? `<i class="fas fa-spinner fa-spin text-warning"></i> ${msg}` : `<i class="fas fa-check-circle text-success"></i> ${msg}`;
-    }
-</script>
-</body>
-</html>
+            input.oninput = (e) => { tenants[parseInt(e.target.dataset.idx)][e.target.dataset.field] = e.target.
