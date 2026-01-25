@@ -2,120 +2,231 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Checklist A4 - K&G</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบเช็คลิสต์เก็บเงิน - หอพัก K&G</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --primary: #0284c7; --bg-app: #f1f5f9; }
-        body { font-family: 'Sarabun', sans-serif; margin: 0; padding: 0; background-color: var(--bg-app); color: #1e293b; }
-        .no-print { padding: 20px; text-align: center; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-family: 'Sarabun'; margin: 0 5px; }
-        .btn-print { background-color: var(--primary); color: white; }
-        .btn-back { background-color: #e2e8f0; color: #475569; text-decoration: none; display: inline-block; }
-        
-        .page-a4 { width: 210mm; min-height: 297mm; background: white; margin: 0 auto 20px auto; padding: 10mm; box-sizing: border-box; box-shadow: 0 0 10px rgba(0,0,0,0.1); position: relative; }
-        .page-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
-        .zone-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        
-        .room-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 11pt; border: 1px solid #000; }
-        .room-table td { border: 1px solid #ccc; padding: 3px 6px; vertical-align: middle; }
-        .txt-room { font-size: 14pt; font-weight: 800; color: #000; }
-        .txt-total { font-size: 14pt; font-weight: 800; float: right; }
-        .change-info { font-size: 9pt; color: #666; margin-top: 2px; }
-        .checkbox-box { width: 20px; height: 20px; border: 1px solid #000; display: inline-block; margin-right: 5px; }
+        :root {
+            --primary: #0284c7;
+            --bg: #f3f6f9;
+        }
 
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background-color: var(--bg); 
+            color: #334155;
+            padding: 20px;
+        }
+
+        /* Control Panel (Hide on Print) */
+        .control-card {
+            background: white; padding: 15px 20px; border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+            display: flex; gap: 15px; align-items: center; flex-wrap: wrap;
+            margin-bottom: 20px; border: 1px solid #e2e8f0;
+        }
+        
+        .filter-group {
+            display: flex; align-items: center; gap: 8px; 
+            background: #f8fafc; padding: 5px 15px; border-radius: 20px; border: 1px solid #cbd5e1;
+        }
+        .filter-select { border: none; background: transparent; font-weight: bold; color: #0f172a; outline: none; }
+
+        .btn-print {
+            background: var(--primary); color: white; border: none; padding: 6px 20px; 
+            border-radius: 20px; font-weight: 600; transition: 0.2s;
+        }
+        .btn-print:hover { transform: translateY(-1px); background: #0369a1; }
+
+        /* A4 Paper Style */
+        .a4-page {
+            background: white; width: 210mm; min-height: 297mm; 
+            margin: 0 auto; padding: 10mm; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px; position: relative;
+        }
+
+        /* Table Style */
+        .check-table { width: 100%; border-collapse: collapse; font-size: 11pt; }
+        .check-table th { 
+            background-color: #f1f5f9; border: 1px solid #94a3b8; 
+            padding: 5px; text-align: center; font-weight: 700; color: #334155;
+        }
+        .check-table td { 
+            border: 1px solid #cbd5e1; padding: 4px 6px; vertical-align: middle;
+        }
+        
+        .room-col { font-weight: 800; text-align: center; font-size: 12pt; }
+        .num-col { text-align: right; }
+        .total-col { font-weight: 800; text-align: right; background-color: #f8fafc; }
+        .chk-col { text-align: center; color: #cbd5e1; }
+        .chk-box { width: 15px; height: 15px; border: 1px solid #94a3b8; display: inline-block; vertical-align: middle; }
+
+        /* Print Settings */
         @media print {
-            body { background: none; }
-            .no-print { display: none; }
-            .page-a4 { box-shadow: none; margin: 0; page-break-after: always; width: 100%; }
+            body { background: white; padding: 0; }
+            .control-card, .status-bar, #loadingMsg { display: none !important; }
+            .a4-page { box-shadow: none; margin: 0; width: 100%; page-break-after: always; border: none; }
+            @page { size: A4; margin: 0; }
         }
     </style>
 </head>
 <body>
 
-    <div class="no-print">
-        <h2 style="margin:0 0 10px 0;">ใบเช็คลิสต์เก็บเงิน (A4)</h2>
-        <label>เดือน: <input type="month" id="monthSelector" onchange="loadData()"></label>
-        <button class="btn btn-print" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์</button>
-        <a href="index.html" class="btn btn-back">กลับ</a>
+    <div class="control-card">
+        <h5 class="m-0 fw-bold text-primary me-3"><i class="fas fa-clipboard-list"></i> ใบเช็คลิสต์</h5>
+        
+        <div class="filter-group">
+            <span class="small fw-bold text-muted">เดือน:</span>
+            <input type="month" id="monthSelector" class="filter-select" onchange="loadData()">
+        </div>
+
+        <div class="filter-group">
+            <span class="small fw-bold text-muted">โซน:</span>
+            <select id="zoneSelector" class="filter-select" onchange="renderChecklist()">
+                <option value="ALL">ทั้งหมด</option>
+                <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                <option value="G">G</option><option value="H">H</option><option value="I">I</option>
+                <option value="J">J</option><option value="K">K</option><option value="L">L</option>
+                <option value="M">M</option><option value="N">N</option>
+            </select>
+        </div>
+
+        <button class="btn-print ms-auto" onclick="window.print()">
+            <i class="fas fa-print"></i> พิมพ์
+        </button>
+        <a href="index.html" class="btn btn-light border rounded-pill ms-2 fw-bold" style="font-size:13px;">กลับ</a>
+    </div>
+
+    <div id="loadingMsg" class="text-center mt-5" style="display:none;">
+        <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+        <p class="mt-2 text-muted">กำลังโหลดข้อมูล...</p>
     </div>
 
     <div id="printArea"></div>
 
 <script>
-    // ⚠️ แก้ลิงก์ตรงนี้ด้วยนะครับ
     const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec"; 
-    
+    let currentData = [], monthNames=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+
     window.onload = function() {
-        document.getElementById('monthSelector').value = new Date().toISOString().slice(0, 7);
+        const now = new Date();
+        document.getElementById('monthSelector').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
         loadData();
     };
 
     function loadData() {
         const k = document.getElementById('monthSelector').value;
-        if(API_URL) fetch(API_URL+"?action=load&key="+k).then(r=>r.json()).then(res=>{ if(res.status==="success"&&res.data) renderPages(JSON.parse(res.data)); });
+        document.getElementById('loadingMsg').style.display = 'block';
+        document.getElementById('printArea').innerHTML = '';
+
+        fetch(API_URL+"?action=load&key="+k)
+        .then(r=>r.json())
+        .then(res=>{ 
+            document.getElementById('loadingMsg').style.display = 'none';
+            if(res.status==="success" && res.data) {
+                const d = JSON.parse(res.data);
+                currentData = Array.isArray(d) ? d : d.rooms||[];
+                renderChecklist();
+            } else { currentData=[]; renderChecklist(); }
+        })
+        .catch(()=>{ document.getElementById('loadingMsg').style.display = 'none'; currentData=[]; renderChecklist(); });
     }
 
-    function renderPages(data) {
-        const container = document.getElementById('printArea'); container.innerHTML = '';
-        const rooms = Array.isArray(data) ? data : data.rooms||[];
-        const zones = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+    function renderChecklist() {
+        const container = document.getElementById('printArea');
+        container.innerHTML = '';
         
-        // แบ่งโซนละหน้า หรือ 2 โซนต่อหน้าก็ได้ (ในที่นี้ลอง 2 โซน/หน้า)
-        for (let i = 0; i < zones.length; i += 2) {
-            const page = document.createElement('div'); page.className = 'page-a4';
-            const zone1 = zones[i], zone2 = zones[i+1];
-            
-            let html = `<div class="page-header"><h1>Zone ${zone1} & ${zone2}</h1><span>${document.getElementById('monthSelector').value}</span></div><div class="zone-grid">`;
-            
-            // Col 1
-            html += `<div>`;
-            rooms.filter(r=>r.id.startsWith(zone1)).forEach(r => html += createCard(r));
-            html += `</div>`;
-            
-            // Col 2
-            if(zone2) {
-                html += `<div>`;
-                rooms.filter(r=>r.id.startsWith(zone2)).forEach(r => html += createCard(r));
-                html += `</div>`;
-            }
-            
-            html += `</div>`;
-            page.innerHTML = html;
-            container.appendChild(page);
+        const zone = document.getElementById('zoneSelector').value;
+        const mKey = document.getElementById('monthSelector').value;
+        const [y,m] = mKey.split('-').map(Number);
+        const headerStr = `ประจำเดือน: ${monthNames[m-1]} ${y+543}`;
+
+        // Filter Rooms
+        let rooms = currentData.filter(r => !r.isCommon);
+        if(zone !== 'ALL') rooms = rooms.filter(r => r.id.startsWith(zone));
+
+        if(rooms.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted mt-5">ไม่พบข้อมูล (กรุณากด "บันทึก" ที่หน้าจดมิเตอร์ก่อน)</div>';
+            return;
         }
-    }
 
-    function createCard(r) {
-        let total = (parseFloat(r.rent)||0) + (parseFloat(r.custom)||0) + (parseFloat(r.internet)||0);
-        
-        // Calculate Utilities
-        let wn=parseFloat(r.w_new)||0, wo=parseFloat(r.w_old)||0, wr=parseFloat(r.w_rate)||0;
-        if(r.w_new && wn>wo) { let d=wn-wo; if(d<4) d=4; total += d*wr; }
-        
-        let en=parseFloat(r.e_new)||0, eo=parseFloat(r.e_old)||0, er=parseFloat(r.e_rate)||0;
-        if(r.e_new && en>eo) total += (en-eo)*er;
+        // Split into pages (approx 25 rows per page)
+        const ROWS_PER_PAGE = 25;
+        for (let i = 0; i < rooms.length; i += ROWS_PER_PAGE) {
+            const chunk = rooms.slice(i, i + ROWS_PER_PAGE);
+            
+            let html = `
+            <div class="a4-page">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold m-0">📋 ใบเช็คลิสต์เก็บเงิน (K&G)</h4>
+                    <div class="text-end">
+                        <div class="fw-bold">${headerStr}</div>
+                        <div class="small text-muted">โซน: ${zone === 'ALL' ? 'ทั้งหมด' : zone}</div>
+                    </div>
+                </div>
 
-        if(r.extras) r.extras.forEach(x => total += parseFloat(x.price));
+                <table class="check-table">
+                    <thead>
+                        <tr>
+                            <th style="width:10%;">ห้อง</th>
+                            <th style="width:15%;">ค่าเช่า+ส่วนกลาง</th>
+                            <th style="width:15%;">ค่าน้ำ</th>
+                            <th style="width:15%;">ค่าไฟ</th>
+                            <th style="width:10%;">อื่นๆ/หนี้</th>
+                            <th style="width:15%;">รวมสุทธิ</th>
+                            <th style="width:10%;">สถานะ</th>
+                            <th style="width:10%;">หมายเหตุ</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
 
-        let pay1000 = Math.ceil(total/1000)*1000; if(pay1000===total) pay1000+=1000;
-        let pay500 = Math.ceil(total/500)*500; if(pay500===total) pay500+=500; if(pay500===pay1000) pay500-=500;
+            chunk.forEach(r => {
+                // Calc
+                const wn=parseFloat(r.w_new)||0, wo=parseFloat(r.w_old)||0, wr=parseFloat(r.w_rate)||0;
+                let wt=0; 
+                if(r.w_new && wn>=wo){ 
+                    let d=wn-wo; 
+                    let chargeUnits = (d<4) ? 4 : d;
+                    wt = chargeUnits * wr;
+                }
 
-        return `
-        <table class="room-table">
-            <tr>
-                <td style="width:60%;">
-                    <span class="txt-room">${r.id}</span>
-                    <div class="change-info">รับ ${pay1000} ทอน <b>${pay1000-total}</b></div>
-                    <div class="change-info">รับ ${pay500} ทอน <b>${pay500-total}</b></div>
-                </td>
-                <td style="text-align:right;">
-                    <span class="txt-total">${total.toLocaleString()}</span><br>
-                    <div style="margin-top:5px;"><span class="checkbox-box"></span> จ่ายแล้ว</div>
-                </td>
-            </tr>
-        </table>`;
+                const en=parseFloat(r.e_new)||0, eo=parseFloat(r.e_old)||0, er=parseFloat(r.e_rate)||0;
+                let et=0; if(r.e_new && en>=eo){ let d=en-eo; et=d*er; }
+
+                const rent = (parseFloat(r.rent)||0) + (parseFloat(r.custom)||0) + (parseFloat(r.internet)||0);
+                const extra = parseFloat(r.extra)||0;
+                const total = rent + wt + et + extra;
+
+                html += `
+                <tr>
+                    <td class="room-col">${r.id}</td>
+                    <td class="num-col" contenteditable="true">${rent.toLocaleString()}</td>
+                    <td class="num-col small" contenteditable="true">${wt.toLocaleString()}</td>
+                    <td class="num-col small" contenteditable="true">${et.toLocaleString()}</td>
+                    <td class="num-col text-danger" contenteditable="true">${extra!=0 ? extra.toLocaleString() : '-'}</td>
+                    <td class="total-col" contenteditable="true">${total.toLocaleString()}</td>
+                    <td class="chk-col">
+                        <div class="chk-box"></div> สด<br>
+                        <div class="chk-box"></div> โอน
+                    </td>
+                    <td contenteditable="true"></td>
+                </tr>`;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+                <div class="position-absolute bottom-0 end-0 p-4 small text-muted">
+                    ผู้ตรวจสอบ ........................................ วันที่ .......................
+                </div>
+            </div>`;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
     }
 </script>
 </body>
