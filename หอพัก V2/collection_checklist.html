@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Checklist A4 - K&G</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root { --primary: #0284c7; --bg-app: #f1f5f9; }
+        body { font-family: 'Sarabun', sans-serif; margin: 0; padding: 0; background-color: var(--bg-app); color: #1e293b; }
+        .no-print { padding: 20px; text-align: center; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-family: 'Sarabun'; margin: 0 5px; }
+        .btn-print { background-color: var(--primary); color: white; }
+        .btn-back { background-color: #e2e8f0; color: #475569; text-decoration: none; display: inline-block; }
+        
+        .page-a4 { width: 210mm; min-height: 297mm; background: white; margin: 0 auto 20px auto; padding: 10mm; box-sizing: border-box; box-shadow: 0 0 10px rgba(0,0,0,0.1); position: relative; }
+        .page-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
+        .zone-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        
+        .room-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 11pt; border: 1px solid #000; }
+        .room-table td { border: 1px solid #ccc; padding: 3px 6px; vertical-align: middle; }
+        .txt-room { font-size: 14pt; font-weight: 800; color: #000; }
+        .txt-total { font-size: 14pt; font-weight: 800; float: right; }
+        .change-info { font-size: 9pt; color: #666; margin-top: 2px; }
+        .checkbox-box { width: 20px; height: 20px; border: 1px solid #000; display: inline-block; margin-right: 5px; }
+
+        @media print {
+            body { background: none; }
+            .no-print { display: none; }
+            .page-a4 { box-shadow: none; margin: 0; page-break-after: always; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <h2 style="margin:0 0 10px 0;">ใบเช็คลิสต์เก็บเงิน (A4)</h2>
+        <label>เดือน: <input type="month" id="monthSelector" onchange="loadData()"></label>
+        <button class="btn btn-print" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์</button>
+        <a href="index.html" class="btn btn-back">กลับ</a>
+    </div>
+
+    <div id="printArea"></div>
+
+<script>
+    // ⚠️ แก้ลิงก์ตรงนี้ด้วยนะครับ
+    const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec"; 
+    
+    window.onload = function() {
+        document.getElementById('monthSelector').value = new Date().toISOString().slice(0, 7);
+        loadData();
+    };
+
+    function loadData() {
+        const k = document.getElementById('monthSelector').value;
+        if(API_URL) fetch(API_URL+"?action=load&key="+k).then(r=>r.json()).then(res=>{ if(res.status==="success"&&res.data) renderPages(JSON.parse(res.data)); });
+    }
+
+    function renderPages(data) {
+        const container = document.getElementById('printArea'); container.innerHTML = '';
+        const rooms = Array.isArray(data) ? data : data.rooms||[];
+        const zones = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+        
+        // แบ่งโซนละหน้า หรือ 2 โซนต่อหน้าก็ได้ (ในที่นี้ลอง 2 โซน/หน้า)
+        for (let i = 0; i < zones.length; i += 2) {
+            const page = document.createElement('div'); page.className = 'page-a4';
+            const zone1 = zones[i], zone2 = zones[i+1];
+            
+            let html = `<div class="page-header"><h1>Zone ${zone1} & ${zone2}</h1><span>${document.getElementById('monthSelector').value}</span></div><div class="zone-grid">`;
+            
+            // Col 1
+            html += `<div>`;
+            rooms.filter(r=>r.id.startsWith(zone1)).forEach(r => html += createCard(r));
+            html += `</div>`;
+            
+            // Col 2
+            if(zone2) {
+                html += `<div>`;
+                rooms.filter(r=>r.id.startsWith(zone2)).forEach(r => html += createCard(r));
+                html += `</div>`;
+            }
+            
+            html += `</div>`;
+            page.innerHTML = html;
+            container.appendChild(page);
+        }
+    }
+
+    function createCard(r) {
+        let total = (parseFloat(r.rent)||0) + (parseFloat(r.custom)||0) + (parseFloat(r.internet)||0);
+        
+        // Calculate Utilities
+        let wn=parseFloat(r.w_new)||0, wo=parseFloat(r.w_old)||0, wr=parseFloat(r.w_rate)||0;
+        if(r.w_new && wn>wo) { let d=wn-wo; if(d<4) d=4; total += d*wr; }
+        
+        let en=parseFloat(r.e_new)||0, eo=parseFloat(r.e_old)||0, er=parseFloat(r.e_rate)||0;
+        if(r.e_new && en>eo) total += (en-eo)*er;
+
+        if(r.extras) r.extras.forEach(x => total += parseFloat(x.price));
+
+        let pay1000 = Math.ceil(total/1000)*1000; if(pay1000===total) pay1000+=1000;
+        let pay500 = Math.ceil(total/500)*500; if(pay500===total) pay500+=500; if(pay500===pay1000) pay500-=500;
+
+        return `
+        <table class="room-table">
+            <tr>
+                <td style="width:60%;">
+                    <span class="txt-room">${r.id}</span>
+                    <div class="change-info">รับ ${pay1000} ทอน <b>${pay1000-total}</b></div>
+                    <div class="change-info">รับ ${pay500} ทอน <b>${pay500-total}</b></div>
+                </td>
+                <td style="text-align:right;">
+                    <span class="txt-total">${total.toLocaleString()}</span><br>
+                    <div style="margin-top:5px;"><span class="checkbox-box"></span> จ่ายแล้ว</div>
+                </td>
+            </tr>
+        </table>`;
+    }
+</script>
+</body>
+</html>
