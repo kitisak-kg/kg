@@ -152,7 +152,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="input-group mb-3">
-                        <input type="text" id="newItemName" class="form-control" placeholder="ชื่อรายการ (เช่น หลอดไฟ, ค่าซ่อม)">
+                        <input type="text" id="newItemName" class="form-control" placeholder="ชื่อรายการ (เช่น หลอดไฟ)">
                         <input type="number" id="newItemPrice" class="form-control" placeholder="ราคา" style="max-width: 100px;">
                         <button class="btn btn-primary" onclick="addItemToRoom()">+ เพิ่ม</button>
                     </div>
@@ -174,15 +174,20 @@
         <div class="row">
             <div class="col-md-6">
                 <ul class="mb-0 ps-3">
-                    <li class="mb-1"><b>1. เลือกเดือน:</b> เลือกเดือนที่ต้องการจดมิเตอร์ หากไม่ขึ้นให้กด <span class="badge bg-info text-dark">อัปเดต</span></li>
-                    <li class="mb-1"><b>2. ค่าเน็ต (Auto):</b> หากเดือนที่แล้วมีการจ่ายค่าเน็ต ระบบจะขึ้น 300 บาทให้อัตโนมัติในเดือนถัดไป (ถ้าเพิ่งติดครั้งแรก ให้ใส่เองในช่องอื่นๆ หรือช่องเน็ตก็ได้)</li>
-                    <li class="mb-1"><b>3. ช่องอื่นๆ:</b> กดปุ่ม <b>+ เพิ่ม</b> เพื่อแตกรายการย่อย (เช่น ค่าเราเตอร์ 1000, ค่าก๊อกน้ำ 100)</li>
+                    <li class="mb-1"><b>1. เลือกเดือน:</b> เลือกเดือนที่ต้องการ หากข้อมูลไม่ขึ้นให้กด <span class="badge bg-info text-dark">อัปเดต</span></li>
+                    <li class="mb-1"><b>2. การจดเลข:</b> ใส่เลขมิเตอร์ในช่อง <b>"ใหม่"</b> ระบบจะคำนวณเงินให้อัตโนมัติ</li>
+                    <li class="mb-1"><b>3. การนำทาง (Excel Mode):</b> 
+                        ใช้ปุ่มลูกศร <b>⬆️⬇️⬅️➡️</b> เพื่อเลื่อนช่อง / 
+                        กด <b>Enter</b> เพื่อลงล่าง / 
+                        กด <b>Tab</b> เพื่อไปทางขวา 
+                    </li>
                 </ul>
             </div>
             <div class="col-md-6">
                 <ul class="mb-0 ps-3">
-                    <li class="mb-1"><b>4. การนำทาง:</b> ใช้ลูกศร <b>⬆️⬇️⬅️➡️</b> เลื่อนช่อง, <b>Enter</b> ลง, <b>Tab</b> ขวา</li>
-                    <li class="mb-1"><b>5. การบันทึก:</b> กดปุ่ม <span class="badge bg-success">บันทึก</span> ทุกครั้งเมื่อทำรายการเสร็จ</li>
+                    <li class="mb-1"><b>4. ส่วนกลาง:</b> เลือกแท็บ "อื่นๆ (ส่วนกลาง)" ด้านบน</li>
+                    <li class="mb-1"><b>5. ช่องอื่นๆ:</b> กดปุ่ม <b>+ เพิ่ม</b> เพื่อแตกรายการย่อย (เช่น ค่าก๊อกน้ำ 100)</li>
+                    <li class="mb-1"><b>6. การบันทึก:</b> กดปุ่ม <span class="badge bg-success">บันทึก</span> ทุกครั้งเมื่อทำรายการเสร็จ</li>
                 </ul>
             </div>
         </div>
@@ -197,7 +202,6 @@
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec"; 
     
-    // Config: ตัด Internet (Air) ออก, เปลี่ยน Custom เป็น Net, Extra เป็น Others
     let currentData = [];
     let currentHeaders = { rent:'ค่าเช่า', custom:'ค่าเน็ต', extra:'อื่นๆ' }; 
     let currentZone = 'ALL';
@@ -217,52 +221,29 @@
     function loadData() {
         const k = document.getElementById('monthPicker').value;
         updateStatus("กำลังโหลด...", true);
-        
-        fetch(API_URL + "?action=load&key=" + k)
-        .then(r => r.json())
-        .then(res => {
+        fetch(API_URL + "?action=load&key=" + k).then(r => r.json()).then(res => {
             if(res.status==="success" && res.data) {
                 const d = JSON.parse(res.data);
                 currentData = Array.isArray(d) ? d : d.rooms||[];
                 if(d.headers) currentHeaders = d.headers;
-            } else {
-                createDefaultStructure();
-            }
-            applyHeaders();
-            renderTable();
-            updateStatus("ข้อมูลล่าสุด");
-        })
-        .catch(err => {
-            createDefaultStructure();
-            renderTable();
-            updateStatus("โหมดออฟไลน์ (หรือเดือนใหม่)");
-        });
+            } else { createDefaultStructure(); }
+            applyHeaders(); renderTable(); updateStatus("ข้อมูลล่าสุด");
+        }).catch(err => { createDefaultStructure(); renderTable(); updateStatus("โหมดออฟไลน์"); });
     }
 
     function createDefaultStructure() {
         currentData = [];
-        ZONES.forEach(z => {
-            for(let i=1; i<=ROOMS_PER_ZONE; i++) currentData.push(createEmptyRow(z+i));
-        });
-        ["ปั้มบาดาล1","ปั้มบาดาล2","ปั้มส่งแท้ง+3","ตู้ซักผ้า","กล้องA","กล้องC","กล้องG","กล้องF","ของชํ่าป่ายาง"].forEach(c => {
-            currentData.push(createEmptyRow(c, true));
-        });
+        ZONES.forEach(z => { for(let i=1; i<=ROOMS_PER_ZONE; i++) currentData.push(createEmptyRow(z+i)); });
+        ["ปั้มบาดาล1","ปั้มบาดาล2","ปั้มส่งแท้ง+3","ตู้ซักผ้า","กล้องA","กล้องC","กล้องG","กล้องF","ของชํ่าป่ายาง"].forEach(c => { currentData.push(createEmptyRow(c, true)); });
     }
 
     function createEmptyRow(id, isCommon=false) {
         let rent = 3300; 
         if(id === 'B1') rent = 4000;
         else if(id === 'M1' || isCommon) rent = 0;
-
-        return {
-            id: id, w_old: '', w_new: '', w_rate: 30, e_old: '', e_new: '', e_rate: 8,
-            rent: rent, custom: 0, 
-            extra: 0, extra_items: [],
-            isCommon: isCommon
-        };
+        return { id: id, w_old: '', w_new: '', w_rate: 30, e_old: '', e_new: '', e_rate: 8, rent: rent, custom: 0, extra: 0, extra_items: [], isCommon: isCommon };
     }
 
-    // --- Headers ---
     function applyHeaders() {
         document.getElementById('head_rent').value = currentHeaders.rent || 'ค่าเช่า';
         document.getElementById('head_custom').value = currentHeaders.custom || 'ค่าเน็ต';
@@ -274,7 +255,6 @@
         currentHeaders.extra = document.getElementById('head_extra').value;
     }
 
-    // --- Toolbar ---
     function renderToolbar() {
         const tb = document.getElementById('toolbarContainer');
         let html = `<button class="btn-zone btn-all active" onclick="filterZone('ALL')">ทั้งหมด</button>`;
@@ -293,22 +273,15 @@
         renderTable();
     }
 
-    // --- Render Table ---
     function renderTable() {
-        const tb = document.getElementById('tableBody');
-        tb.innerHTML = '';
-
+        const tb = document.getElementById('tableBody'); tb.innerHTML = '';
         let displayData = [];
         if(currentZone === 'ALL') displayData = currentData;
-        else if (currentZone === 'OTHERS') displayData = currentData.filter(r => {
-            const startsWithZone = ZONES.some(z => r.id.startsWith(z) && !isNaN(parseInt(r.id.substring(z.length))));
-            return !startsWithZone; 
-        });
+        else if (currentZone === 'OTHERS') displayData = currentData.filter(r => { const startsWithZone = ZONES.some(z => r.id.startsWith(z) && !isNaN(parseInt(r.id.substring(z.length)))); return !startsWithZone; });
         else displayData = currentData.filter(r => r.id.startsWith(currentZone) && !isNaN(parseInt(r.id.substring(currentZone.length))));
 
         displayData.forEach(r => {
             let realIdx = currentData.indexOf(r);
-            
             let hasItems = r.extra_items && r.extra_items.length > 0;
             let extraBtnClass = hasItems ? "btn-extra-add has-items" : "btn-extra-add";
             let extraText = r.extra > 0 ? parseFloat(r.extra).toLocaleString() : "+ เพิ่ม";
@@ -336,87 +309,19 @@
                 <td><input type="number" class="cell-input nav-input col-money" value="${r.rent}" oninput="updateData(${realIdx}, 'rent', this.value)"></td>
                 <td><input type="number" class="cell-input nav-input" value="${r.custom}" oninput="updateData(${realIdx}, 'custom', this.value)"></td>
                 
-                <td>
-                    <button class="${extraBtnClass}" onclick="openExtraModal(${realIdx})" id="btn_extra_${realIdx}">
-                        ${extraText}
-                    </button>
-                </td>
-                
+                <td><button class="${extraBtnClass}" onclick="openExtraModal(${realIdx})" id="btn_extra_${realIdx}">${extraText}</button></td>
                 <td><input type="text" id="grand_total_${realIdx}" class="cell-input col-money text-success fw-bold text-end pe-2" readonly value="0" tabindex="-1"></td>
             `;
             tb.appendChild(tr);
             calculateRowUI(realIdx);
         });
-        
         setupNavigation();
     }
 
-    // --- Modal Logic ---
-    function openExtraModal(idx) {
-        activeModalIdx = idx;
-        const r = currentData[idx];
-        document.getElementById('modalRoomId').innerText = r.id;
-        document.getElementById('newItemName').value = '';
-        document.getElementById('newItemPrice').value = '';
-        renderExtraList();
-        extraModal.show();
-    }
-
-    function renderExtraList() {
-        const list = document.getElementById('extraList');
-        list.innerHTML = '';
-        let total = 0;
-        
-        const r = currentData[activeModalIdx];
-        if(!r.extra_items) r.extra_items = []; 
-
-        r.extra_items.forEach((item, i) => {
-            total += parseFloat(item.price)||0;
-            list.innerHTML += `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="fw-bold">${item.name}</span> <span class="text-muted">(${parseFloat(item.price).toLocaleString()} บ.)</span>
-                    </div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeItemFromRoom(${i})">ลบ</button>
-                </li>
-            `;
-        });
-
-        document.getElementById('modalTotal').innerText = total.toLocaleString() + " บาท";
-        
-        r.extra = total;
-        calculateRowUI(activeModalIdx);
-        
-        const btn = document.getElementById(`btn_extra_${activeModalIdx}`);
-        if(btn) {
-            btn.innerText = total > 0 ? total.toLocaleString() : "+ เพิ่ม";
-            btn.className = r.extra_items.length > 0 ? "btn-extra-add has-items" : "btn-extra-add";
-        }
-    }
-
-    function addItemToRoom() {
-        const name = document.getElementById('newItemName').value.trim();
-        const price = parseFloat(document.getElementById('newItemPrice').value);
-        if(name && price) {
-            currentData[activeModalIdx].extra_items.push({ name: name, price: price });
-            renderExtraList();
-            document.getElementById('newItemName').value = '';
-            document.getElementById('newItemPrice').value = '';
-            document.getElementById('newItemName').focus();
-        } else {
-            alert("กรุณาใส่ชื่อรายการและราคา");
-        }
-    }
-
-    function removeItemFromRoom(itemIdx) {
-        currentData[activeModalIdx].extra_items.splice(itemIdx, 1);
-        renderExtraList();
-    }
-
-    // --- Calculation & Nav ---
+    // ✅ FIXED: Grid Width = 9 (นับจำนวนช่อง .nav-input ให้ตรงเป๊ะ)
     function setupNavigation() {
         const inputs = Array.from(document.querySelectorAll('.nav-input'));
-        const gridWidth = 10; // Adjusted for 1 less column
+        const gridWidth = 9; // Room(1)+W(3)+E(3)+Rent(1)+Net(1) = 9
         inputs.forEach((input, i) => {
             input.onkeydown = (e) => {
                 if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
@@ -429,8 +334,62 @@
                     if (inputs[nextIdx]) { inputs[nextIdx].focus(); if(inputs[nextIdx].select) inputs[nextIdx].select(); }
                 }
             };
+            input.onpaste = (e) => {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text');
+                const rows = text.split(/\r?\n/).filter(x => x !== '');
+                let startIdx = i;
+                rows.forEach((rowStr, rOffset) => {
+                    const cells = rowStr.split('\t');
+                    cells.forEach((val, cOffset) => {
+                        let targetIdx = startIdx + (rOffset * gridWidth) + cOffset;
+                        if(inputs[targetIdx]) {
+                            inputs[targetIdx].value = val.trim();
+                            inputs[targetIdx].dispatchEvent(new Event('input'));
+                        }
+                    });
+                });
+            };
         });
     }
+
+    function openExtraModal(idx) {
+        activeModalIdx = idx;
+        const r = currentData[idx];
+        document.getElementById('modalRoomId').innerText = r.id;
+        document.getElementById('newItemName').value = '';
+        document.getElementById('newItemPrice').value = '';
+        renderExtraList();
+        extraModal.show();
+    }
+
+    function renderExtraList() {
+        const list = document.getElementById('extraList'); list.innerHTML = '';
+        let total = 0;
+        const r = currentData[activeModalIdx];
+        if(!r.extra_items) r.extra_items = []; 
+        r.extra_items.forEach((item, i) => {
+            total += parseFloat(item.price)||0;
+            list.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center"><div><span class="fw-bold">${item.name}</span> <span class="text-muted">(${parseFloat(item.price).toLocaleString()} บ.)</span></div><button class="btn btn-sm btn-outline-danger" onclick="removeItemFromRoom(${i})">ลบ</button></li>`;
+        });
+        document.getElementById('modalTotal').innerText = total.toLocaleString() + " บาท";
+        r.extra = total;
+        calculateRowUI(activeModalIdx);
+        const btn = document.getElementById(`btn_extra_${activeModalIdx}`);
+        if(btn) { btn.innerText = total > 0 ? total.toLocaleString() : "+ เพิ่ม"; btn.className = r.extra_items.length > 0 ? "btn-extra-add has-items" : "btn-extra-add"; }
+    }
+
+    function addItemToRoom() {
+        const name = document.getElementById('newItemName').value.trim();
+        const price = parseFloat(document.getElementById('newItemPrice').value);
+        if(name && price) {
+            currentData[activeModalIdx].extra_items.push({ name: name, price: price });
+            renderExtraList();
+            document.getElementById('newItemName').value = ''; document.getElementById('newItemPrice').value = ''; document.getElementById('newItemName').focus();
+        } else { alert("กรุณาใส่ชื่อรายการและราคา"); }
+    }
+
+    function removeItemFromRoom(itemIdx) { currentData[activeModalIdx].extra_items.splice(itemIdx, 1); renderExtraList(); }
 
     function calc(idx, type, val, field) {
         if(field === 'old') currentData[idx][type+'_old'] = val;
@@ -439,35 +398,22 @@
         calculateRowUI(idx);
     }
 
-    function updateData(idx, field, val) {
-        currentData[idx][field] = val;
-        calculateRowUI(idx);
-    }
+    function updateData(idx, field, val) { currentData[idx][field] = val; calculateRowUI(idx); }
 
     function calculateRowUI(idx) {
         const r = currentData[idx];
         let wn = parseFloat(r.w_new)||0, wo = parseFloat(r.w_old)||0, wr = parseFloat(r.w_rate)||0;
         let wUnits = 0, wTotal = 0;
-
-        if(r.w_new && r.w_old) {
-            let diff = Math.max(0, wn - wo);
-            wUnits = (!r.isCommon && diff < 4) ? 4 : diff; 
-            wTotal = wUnits * wr;
-        } else if (r.isCommon && r.w_new) {
-             let diff = Math.max(0, wn - wo);
-             wUnits = diff; wTotal = diff * wr;
-        }
+        if(r.w_new && r.w_old) { let diff = Math.max(0, wn - wo); wUnits = (!r.isCommon && diff < 4) ? 4 : diff; wTotal = wUnits * wr; } 
+        else if (r.isCommon && r.w_new) { let diff = Math.max(0, wn - wo); wUnits = diff; wTotal = diff * wr; }
         
         let en = parseFloat(r.e_new)||0, eo = parseFloat(r.e_old)||0, er = parseFloat(r.e_rate)||0;
         let eUnits = 0, eTotal = 0;
         if(r.e_new && r.e_old) { eUnits = Math.max(0, en - eo); eTotal = eUnits * er; }
 
-        document.getElementById(`w_unit_${idx}`).value = wUnits; 
-        document.getElementById(`w_total_${idx}`).value = wTotal;
-        document.getElementById(`e_unit_${idx}`).value = eUnits;
-        document.getElementById(`e_total_${idx}`).value = eTotal;
+        document.getElementById(`w_unit_${idx}`).value = wUnits; document.getElementById(`w_total_${idx}`).value = wTotal;
+        document.getElementById(`e_unit_${idx}`).value = eUnits; document.getElementById(`e_total_${idx}`).value = eTotal;
 
-        // Formula: Rent + Custom(Net) + Extra(Others) + Water + Elec
         let total = (parseFloat(r.rent)||0) + (parseFloat(r.custom)||0) + (parseFloat(r.extra)||0) + wTotal + eTotal;
         document.getElementById(`grand_total_${idx}`).value = total.toLocaleString();
     }
@@ -481,10 +427,7 @@
     function addNewRowSmart() {
         let newId="New", isCom=false;
         if(currentZone==='OTHERS') { newId="ส่วนกลางใหม่"; isCom=true; }
-        else if(currentZone!=='ALL') {
-            let max=0; currentData.forEach(r=>{ if(r.id.startsWith(currentZone)) { let n=parseInt(r.id.replace(currentZone,'')); if(!isNaN(n) && n>max) max=n; }});
-            newId = currentZone + (max+1);
-        }
+        else if(currentZone!=='ALL') { let max=0; currentData.forEach(r=>{ if(r.id.startsWith(currentZone)) { let n=parseInt(r.id.replace(currentZone,'')); if(!isNaN(n) && n>max) max=n; }}); newId = currentZone + (max+1); }
         currentData.push(createEmptyRow(newId, isCom)); renderTable();
         window.scrollTo(0, document.body.scrollHeight);
     }
@@ -502,9 +445,7 @@
         }).catch(() => updateStatus("❌ บันทึกไม่สำเร็จ", false));
     }
 
-    function updateStatus(msg, loading=false) {
-        document.getElementById('statusMsg').innerHTML = loading ? `<i class="fas fa-spinner fa-spin text-warning"></i> ${msg}` : `<i class="fas fa-check-circle text-success"></i> ${msg}`;
-    }
+    function updateStatus(msg, loading=false) { document.getElementById('statusMsg').innerHTML = loading ? `<i class="fas fa-spinner fa-spin text-warning"></i> ${msg}` : `<i class="fas fa-check-circle text-success"></i> ${msg}`; }
 </script>
 </body>
 </html>
