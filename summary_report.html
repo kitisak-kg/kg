@@ -15,7 +15,7 @@
         .control-card {
             background: white; padding: 15px 25px; border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 20px;
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
         }
 
         /* Dashboard Cards */
@@ -37,7 +37,10 @@
         .report-table { width: 100%; font-size: 13px; border-collapse: collapse; background: white; }
         .report-table th { background: #f1f5f9; padding: 8px; text-align: center; border: 1px solid #e2e8f0; color: #475569; }
         .report-table td { padding: 6px 8px; border: 1px solid #e2e8f0; vertical-align: middle; }
+        
         .row-zone-header { background: #e0f2fe; font-weight: 800; color: #0369a1; text-align: left !important; padding-left: 15px !important; }
+        .row-common-header { background: #ffedd5; font-weight: 800; color: #c2410c; text-align: left !important; padding-left: 15px !important; }
+        
         .col-money { text-align: right; font-weight: 600; }
         .col-total { text-align: right; font-weight: 800; color: #0f172a; background: #f8fafc; }
 
@@ -67,7 +70,7 @@
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-primary rounded-pill fw-bold px-4" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์รายงาน</button>
-            <a href="index.html" class="btn btn-light border rounded-pill fw-bold">กลับ</a>
+            <a href="index.html" class="btn btn-light border rounded-pill fw-bold">กลับเมนู</a>
         </div>
     </div>
 
@@ -93,7 +96,7 @@
                 <i class="fas fa-tint stat-icon text-info"></i>
                 <div class="stat-title">ค่าน้ำ + ค่าไฟ</div>
                 <div class="stat-value text-info" id="card_util_total">0</div>
-                <div class="stat-sub">กำไรสาธารณูปโภค</div>
+                <div class="stat-sub">รายได้สาธารณูปโภค</div>
             </div>
         </div>
         <div class="col-md-3 col-6">
@@ -138,8 +141,11 @@
 </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec"; 
     
+    // โซนปกติ (A-P)
+    const STANDARD_ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+
     window.onload = function() {
         const now = new Date();
         document.getElementById('monthSelector').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
@@ -158,7 +164,7 @@
             if(res.status==="success" && res.data) {
                 renderReport(JSON.parse(res.data));
             } else {
-                renderReport([]); // No data
+                renderReport([]);
                 alert("ไม่พบข้อมูลของเดือนนี้ กรุณากดบันทึกที่หน้า 'จดมิเตอร์' ก่อนครับ");
             }
         })
@@ -172,54 +178,80 @@
         const rooms = Array.isArray(data) ? data : data.rooms||[];
         const tb = document.getElementById('reportBody'); tb.innerHTML = '';
         
-        // Sum Vars
+        // ตัวแปรสำหรับรวมยอด
         let gRent=0, gCust=0, gWater=0, gElec=0, gNet=0, gExtra=0, gTotal=0;
         let countRooms = 0;
 
-        // Group by Zone
+        // Grouping Logic (ใช้ Flag isCommon เป็นหลัก!)
         const zones = {};
+        const commonKey = "COMMON_AREA"; // Key สำหรับส่วนกลาง
+
         rooms.forEach(r => {
-            if(r.isCommon) return; // Skip common areas in revenue report? Or include? Usually exclude expenses.
-            // Let's exclude common items from "Revenue" report
+            let zoneKey = commonKey; // Default ไว้ก่อน
             
-            const zone = r.id.charAt(0); // First letter
-            if(!zones[zone]) zones[zone] = [];
-            zones[zone].push(r);
+            // 1. ถ้ามี Flag ว่าเป็นส่วนกลาง -> โยนเข้า COMMON_AREA ทันที
+            if (r.isCommon === true) {
+                zoneKey = commonKey;
+            } 
+            // 2. ถ้าไม่ใช่ส่วนกลาง -> เช็คตัวอักษรแรก
+            else {
+                const firstChar = r.id.charAt(0).toUpperCase();
+                if (STANDARD_ZONES.includes(firstChar)) {
+                    zoneKey = firstChar;
+                } else {
+                    // ถ้าชื่อแปลกๆ ที่ไม่มีใน A-P แต่ไม่ได้ติ๊กส่วนกลางมา
+                    // ก็ให้ไปอยู่ส่วนกลางเพื่อความปลอดภัย (หรือจะสร้างโซน Other ก็ได้)
+                    zoneKey = commonKey;
+                }
+            }
+
+            if(!zones[zoneKey]) zones[zoneKey] = [];
+            zones[zoneKey].push(r);
         });
 
-        // Sort Zones
-        Object.keys(zones).sort().forEach(zone => {
-            // Header Row
-            tb.innerHTML += `<tr><td colspan="8" class="row-zone-header">ตึก ${zone}</td></tr>`;
-            
-            let zTotal = 0;
+        // Sort: เรียง A-P ขึ้นก่อน, COMMON_AREA ไว้ล่างสุด
+        const sortedKeys = Object.keys(zones).sort((a,b) => {
+            if(a === commonKey) return 1; // Common ไปหลังสุด
+            if(b === commonKey) return -1;
+            return a.localeCompare(b);
+        });
 
+        sortedKeys.forEach(zone => {
+            // สร้าง Header หัวข้อโซน
+            let headerTitle = (zone === commonKey) ? "🔹 ส่วนกลาง / อื่นๆ" : `ตึก ${zone}`;
+            let headerClass = (zone === commonKey) ? "row-common-header" : "row-zone-header";
+            
+            tb.innerHTML += `<tr><td colspan="8" class="${headerClass}">${headerTitle}</td></tr>`;
+            
             zones[zone].forEach(r => {
-                // Calc Values
+                // คำนวณยอดเงิน
                 const rent = parseFloat(r.rent)||0;
                 const cust = parseFloat(r.custom)||0;
                 const net = parseFloat(r.internet)||0;
                 const extra = parseFloat(r.extra)||0;
 
-                // Water
+                // ค่าน้ำ
                 const wn=parseFloat(r.w_new)||0, wo=parseFloat(r.w_old)||0, wr=parseFloat(r.w_rate)||0;
                 let wt=0; 
                 if(r.w_new && wn>=wo){ 
-                    let d=wn-wo; let charge=(d<4)?4:d; wt=charge*wr; 
+                    let d=wn-wo; 
+                    // ถ้าเป็นส่วนกลาง ไม่ต้องมีขั้นต่ำ, ถ้าห้องพักมีขั้นต่ำ 4
+                    let charge = (zone !== commonKey && d<4) ? 4 : d; 
+                    wt = charge*wr; 
                 }
 
-                // Elec
+                // ค่าไฟ
                 const en=parseFloat(r.e_new)||0, eo=parseFloat(r.e_old)||0, er=parseFloat(r.e_rate)||0;
                 let et=0; if(r.e_new && en>=eo){ et=(en-eo)*er; }
 
                 const subTotal = rent + cust + net + extra + wt + et;
 
-                // Add to Grand Totals
+                // รวมยอดเข้ากองกลาง
                 gRent+=rent; gCust+=cust; gNet+=net; gExtra+=extra; gWater+=wt; gElec+=et; gTotal+=subTotal;
-                zTotal += subTotal;
-                countRooms++;
+                
+                // นับห้องเฉพาะที่เป็นตึกพักอาศัย (ส่วนกลางไม่นับเป็น Occupancy)
+                if(zone !== commonKey) countRooms++;
 
-                // Skip showing 0 total rooms? No, show all for completeness
                 tb.innerHTML += `
                 <tr>
                     <td class="text-center">${r.id}</td>
@@ -232,19 +264,16 @@
                     <td class="col-total">${subTotal.toLocaleString()}</td>
                 </tr>`;
             });
-
-            // Zone Summary Row (Optional)
-            // tb.innerHTML += `<tr><td colspan="7" class="text-end fw-bold text-secondary">รวมตึก ${zone}</td><td class="col-total bg-light">${zTotal.toLocaleString()}</td></tr>`;
         });
 
-        // Update Cards
+        // อัปเดตการ์ดสรุปด้านบน
         document.getElementById('card_grand_total').innerText = gTotal.toLocaleString() + " ฿";
         document.getElementById('card_rent_total').innerText = (gRent + gCust).toLocaleString() + " ฿";
         document.getElementById('card_util_total').innerText = (gWater + gElec).toLocaleString() + " ฿";
         document.getElementById('card_other_total').innerText = (gNet + gExtra).toLocaleString() + " ฿";
-        document.getElementById('room_count').innerText = countRooms + " ห้องที่มีข้อมูล";
+        document.getElementById('room_count').innerText = countRooms + " ห้องพัก";
 
-        // Add Final Total Row at bottom of table
+        // แถวรวมยอดสุดท้าย (Footer Row)
         tb.innerHTML += `
             <tr style="border-top: 3px double #000;">
                 <td class="text-center fw-bold bg-primary text-white">รวมทั้งสิ้น</td>
