@@ -27,7 +27,7 @@
         }
         table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1400px; }
         
-        /* --- STICKY HEADER FIX --- */
+        /* Sticky Header */
         thead th { 
             position: sticky; z-index: 20; 
             background: #f1f5f9; color: #475569;
@@ -38,11 +38,9 @@
         thead tr:nth-child(2) th { top: 45px; padding-top: 5px; padding-bottom: 5px; border-top: 1px solid #cbd5e1; }
         thead tr:nth-child(1) th[rowspan="2"] { border-bottom: 1px solid #cbd5e1; z-index: 21; }
 
-        /* Color Headers */
         .th-water { background: #e0f2fe !important; color: #0284c7; }
         .th-elec { background: #ffedd5 !important; color: #c2410c; }
 
-        /* Editable Headers Input */
         .th-edit { 
             background: #fff; border: 1px dashed #cbd5e1; color: #0f172a; 
             cursor: text; padding: 2px 5px; width: 100%; text-align: center; font-weight: bold;
@@ -51,8 +49,10 @@
 
         td { border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; padding: 0; height: 35px; }
 
-        /* Input Styling */
+        /* Input Styling - No Spinner */
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        
         .cell-input {
             width: 100%; height: 100%; border: none; padding: 0 5px; 
             text-align: right; outline: none; font-family: 'Sarabun'; font-size: 13px;
@@ -64,7 +64,7 @@
         .col-calc { background: #f8fafc; color: #64748b; font-weight: 600; pointer-events: none; }
         .col-money { font-weight: bold; color: #0f172a; }
         
-        /* Zone Tabs & Sort */
+        /* Toolbar */
         .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 5px; }
         .btn-zone {
             border: 1px solid #cbd5e1; background: white; color: #64748b; 
@@ -121,12 +121,10 @@
                     <th rowspan="2" style="width:70px;">ห้อง</th>
                     <th colspan="4" class="th-water">💧 ประปา (ขั้นต่ำ 4)</th>
                     <th colspan="4" class="th-elec">⚡ ไฟฟ้า</th>
-                    
                     <th rowspan="2" style="width:80px;"><input type="text" class="th-edit" id="head_rent" value="ค่าเช่า" onchange="saveHeader()"></th>
                     <th rowspan="2" style="width:80px;"><input type="text" class="th-edit" id="head_custom" value="ส่วนกลาง" onchange="saveHeader()"></th>
                     <th rowspan="2" style="width:80px;"><input type="text" class="th-edit" id="head_net" value="เน็ต" onchange="saveHeader()"></th>
                     <th rowspan="2" style="width:100px;"><input type="text" class="th-edit text-danger" id="head_extra" value="อื่นๆ/หนี้" onchange="saveHeader()"></th>
-                    
                     <th rowspan="2" style="width:90px;">รวมสุทธิ</th>
                 </tr>
                 <tr>
@@ -145,17 +143,21 @@
         <div class="row">
             <div class="col-md-6">
                 <ul class="mb-0 ps-3">
-                    <li class="mb-1"><b>1. เลือกเดือน:</b> เลือกเดือนที่ต้องการจดมิเตอร์ที่มุมซ้ายบน หากเคยจดไว้แล้ว ข้อมูลเก่าจะแสดงขึ้นมา</li>
-                    <li class="mb-1"><b>2. กดอัปเดต:</b> หากไม่แน่ใจว่าข้อมูลล่าสุดหรือไม่ ให้กดปุ่ม <span class="badge bg-info text-dark">อัปเดต</span> เพื่อดึงข้อมูลปัจจุบัน</li>
-                    <li class="mb-1"><b>3. การจดเลข:</b> ใส่เลขมิเตอร์ในช่อง <b>"ใหม่"</b> ระบบจะคำนวณเงินให้อัตโนมัติ (ค่าน้ำขั้นต่ำ 4 หน่วย)</li>
-                    <li class="mb-1"><b>4. ส่วนกลาง/อื่นๆ:</b> เลือกแท็บ "อื่นๆ (ส่วนกลาง)" ด้านบน เพื่อจดมิเตอร์น้ำ-ไฟ ส่วนกลาง แยกต่างหาก</li>
+                    <li class="mb-1"><b>1. เลือกเดือน:</b> เลือกเดือนที่ต้องการจดมิเตอร์ที่มุมซ้ายบน หากข้อมูลไม่ขึ้น ให้กดปุ่ม <span class="badge bg-info text-dark">อัปเดต</span></li>
+                    <li class="mb-1"><b>2. การจดเลข:</b> ใส่เลขมิเตอร์ในช่อง <b>"ใหม่"</b> ระบบจะคำนวณเงินให้อัตโนมัติ</li>
+                    <li class="mb-1"><b>3. การนำทาง (Keyboard):</b> 
+                        ใช้ปุ่มลูกศร <b>⬆️⬇️⬅️➡️</b> เพื่อเลื่อนช่อง (เลขจะไม่เปลี่ยน) / 
+                        กด <b>Enter</b> เพื่อลงล่าง / 
+                        กด <b>Tab</b> เพื่อไปทางขวา 
+                    </li>
+                    <li class="mb-1"><b>4. ส่วนกลาง:</b> เลือกแท็บ "อื่นๆ (ส่วนกลาง)" เพื่อจดมิเตอร์น้ำ-ไฟ ส่วนกลาง</li>
                 </ul>
             </div>
             <div class="col-md-6">
                 <ul class="mb-0 ps-3">
-                    <li class="mb-1"><b>5. แยกบิล (Split Bill):</b> กรณีผู้เช่าอยู่ไม่ครบเดือน ให้กดปุ่ม ➗ เพื่อแยกห้องเป็น 2 แถว แล้วคิดเงินแยกช่วงเวลา</li>
-                    <li class="mb-1"><b>6. แก้ไขหัวข้อ:</b> ชื่อหัวข้อ "ส่วนกลาง/เน็ต/อื่นๆ" สามารถคลิกแล้วพิมพ์เปลี่ยนชื่อได้ตามต้องการ</li>
-                    <li class="mb-1"><b>7. การบันทึก:</b> เมื่อตรวจสอบความถูกต้องแล้ว ต้องกดปุ่ม <span class="badge bg-success">บันทึก</span> ทุกครั้ง</li>
+                    <li class="mb-1"><b>5. แยกบิล:</b> กรณีอยู่ไม่ครบเดือน กดปุ่ม ➗ เพื่อแยกห้องเป็น 2 แถว แล้วคิดเงินแยกช่วงเวลา</li>
+                    <li class="mb-1"><b>6. การวางข้อมูล (Paste):</b> สามารถก๊อปปี้ตัวเลขจาก Excel มาวางทับได้ทีละหลายช่อง</li>
+                    <li class="mb-1"><b>7. การบันทึก:</b> เมื่อเสร็จแล้ว ต้องกดปุ่ม <span class="badge bg-success">บันทึก</span> เสมอ เพื่อส่งข้อมูลเข้า Google Sheet</li>
                 </ul>
             </div>
         </div>
@@ -166,7 +168,7 @@
 <div class="status-bar" id="statusMsg"><i class="fas fa-check-circle text-success"></i> พร้อมใช้งาน</div>
 
 <script>
-    // 🔥 LINK UPDATED: เชื่อมต่อกับ หอพัก v.2
+    // ✅ ลิงก์ที่ถูกต้อง (หอพัก v.2)
     const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec"; 
     
     let currentData = [];
@@ -195,7 +197,7 @@
                 currentData = Array.isArray(d) ? d : d.rooms||[];
                 if(d.headers) currentHeaders = d.headers;
             } else {
-                createDefaultStructure(); // Fallback if empty or new month
+                createDefaultStructure();
             }
             applyHeaders();
             renderTable();
@@ -248,19 +250,15 @@
         const tb = document.getElementById('toolbarContainer');
         let html = `<button class="btn-zone btn-all active" onclick="filterZone('ALL')">ทั้งหมด</button>`;
         ZONES.forEach(z => html += `<button class="btn-zone" onclick="filterZone('${z}')">${z}</button>`);
-        
         html += `<button class="btn-zone" onclick="filterZone('OTHERS')">อื่นๆ (ส่วนกลาง)</button>`;
         html += `<button class="btn-sort" onclick="sortRooms()"><i class="fas fa-sort-alpha-down"></i> เรียงห้อง (Sort)</button>`;
-        
         tb.innerHTML = html;
     }
 
     function filterZone(z) {
         currentZone = z;
         document.querySelectorAll('.btn-zone').forEach(b => {
-            let isActive = (z==='ALL' && b.innerText==='ทั้งหมด') || 
-                           (z==='OTHERS' && b.innerText.includes('อื่นๆ')) || 
-                           (b.innerText === z);
+            let isActive = (z==='ALL' && b.innerText==='ทั้งหมด') || (z==='OTHERS' && b.innerText.includes('อื่นๆ')) || (b.innerText === z);
             b.classList.toggle('active', isActive);
         });
         renderTable();
@@ -272,52 +270,92 @@
         tb.innerHTML = '';
 
         let displayData = [];
-        if(currentZone === 'ALL') {
-            displayData = currentData;
-        } else if (currentZone === 'OTHERS') {
-            displayData = currentData.filter(r => {
-                const startsWithZone = ZONES.some(z => r.id.startsWith(z) && !isNaN(parseInt(r.id.substring(z.length))));
-                return !startsWithZone; 
-            });
-        } else {
-            displayData = currentData.filter(r => r.id.startsWith(currentZone) && !isNaN(parseInt(r.id.substring(currentZone.length))));
-        }
+        if(currentZone === 'ALL') displayData = currentData;
+        else if (currentZone === 'OTHERS') displayData = currentData.filter(r => {
+            const startsWithZone = ZONES.some(z => r.id.startsWith(z) && !isNaN(parseInt(r.id.substring(z.length))));
+            return !startsWithZone; 
+        });
+        else displayData = currentData.filter(r => r.id.startsWith(currentZone) && !isNaN(parseInt(r.id.substring(currentZone.length))));
 
         displayData.forEach(r => {
             let realIdx = currentData.indexOf(r);
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="text-center" style="white-space:nowrap;">
-                    <button class="action-btn btn-split" onclick="splitRow(${realIdx})" title="แยกบิล">➗</button>
-                    <button class="action-btn btn-del" onclick="deleteRow(${realIdx})" title="ลบ">🗑️</button>
+                    <button class="action-btn btn-split" onclick="splitRow(${realIdx})" tabindex="-1">➗</button>
+                    <button class="action-btn btn-del" onclick="deleteRow(${realIdx})" tabindex="-1">🗑️</button>
                 </td>
                 <td class="col-room"><input type="text" class="cell-input nav-input fw-bold text-center" value="${r.id}" onchange="updateData(${realIdx}, 'id', this.value)"></td>
                 
                 <td><input type="number" class="cell-input nav-input" value="${r.w_old}" oninput="calc(${realIdx}, 'w', this.value, 'old')"></td>
                 <td><input type="number" class="cell-input nav-input fw-bold" value="${r.w_new}" oninput="calc(${realIdx}, 'w', this.value, 'new')"></td>
                 <td><input type="number" class="cell-input nav-input text-center text-muted" value="${r.w_rate}" oninput="calc(${realIdx}, 'w', this.value, 'rate')"></td>
-                <td><input type="text" id="w_total_${realIdx}" class="cell-input col-calc text-primary" readonly value="0"></td>
+                <td><input type="text" id="w_total_${realIdx}" class="cell-input col-calc text-primary" readonly value="0" tabindex="-1"></td>
                 
                 <td><input type="number" class="cell-input nav-input" value="${r.e_old}" oninput="calc(${realIdx}, 'e', this.value, 'old')"></td>
                 <td><input type="number" class="cell-input nav-input fw-bold" value="${r.e_new}" oninput="calc(${realIdx}, 'e', this.value, 'new')"></td>
                 <td><input type="number" class="cell-input nav-input text-center text-muted" value="${r.e_rate}" oninput="calc(${realIdx}, 'e', this.value, 'rate')"></td>
-                <td><input type="text" id="e_total_${realIdx}" class="cell-input col-calc text-danger" readonly value="0"></td>
+                <td><input type="text" id="e_total_${realIdx}" class="cell-input col-calc text-danger" readonly value="0" tabindex="-1"></td>
                 
                 <td><input type="number" class="cell-input nav-input col-money" value="${r.rent}" oninput="updateData(${realIdx}, 'rent', this.value)"></td>
                 <td><input type="number" class="cell-input nav-input" value="${r.custom}" oninput="updateData(${realIdx}, 'custom', this.value)"></td>
                 <td><input type="number" class="cell-input nav-input" value="${r.internet}" oninput="updateData(${realIdx}, 'internet', this.value)"></td>
                 <td><input type="number" class="cell-input nav-input text-danger" value="${r.extra||0}" oninput="updateData(${realIdx}, 'extra', this.value)"></td>
                 
-                <td><input type="text" id="grand_total_${realIdx}" class="cell-input col-money text-success fw-bold text-end pe-2" readonly value="0"></td>
+                <td><input type="text" id="grand_total_${realIdx}" class="cell-input col-money text-success fw-bold text-end pe-2" readonly value="0" tabindex="-1"></td>
             `;
             tb.appendChild(tr);
             calculateRowUI(realIdx);
         });
         
-        setupNavigation();
+        setupNavigation(); 
     }
 
-    // --- Calculation & Actions ---
+    // ✅ FIXED: Navigation Logic (No Spinner, Arrow Keys Move)
+    function setupNavigation() {
+        const inputs = Array.from(document.querySelectorAll('.nav-input'));
+        // Count actual Navigable Inputs per row:
+        // Room(1) + W(3) + E(3) + Money(4) = 11 inputs
+        const gridWidth = 11;
+
+        inputs.forEach((input, i) => {
+            input.onkeydown = (e) => {
+                const key = e.key;
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(key)) {
+                    e.preventDefault(); // STOP Browser from changing number
+                    
+                    let nextIdx = i;
+                    if (key === 'ArrowRight' || key === 'Tab') nextIdx = i + 1;
+                    if (key === 'ArrowLeft') nextIdx = i - 1;
+                    if (key === 'ArrowDown' || key === 'Enter') nextIdx = i + gridWidth;
+                    if (key === 'ArrowUp') nextIdx = i - gridWidth;
+
+                    if (inputs[nextIdx]) {
+                        inputs[nextIdx].focus();
+                        if(inputs[nextIdx].select) inputs[nextIdx].select();
+                    }
+                }
+            };
+            
+            input.onpaste = (e) => {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text');
+                const rows = text.split(/\r?\n/).filter(x => x !== '');
+                let startIdx = i;
+                rows.forEach((rowStr, rOffset) => {
+                    const cells = rowStr.split('\t');
+                    cells.forEach((val, cOffset) => {
+                        let targetIdx = startIdx + (rOffset * gridWidth) + cOffset;
+                        if(inputs[targetIdx]) {
+                            inputs[targetIdx].value = val.trim();
+                            inputs[targetIdx].dispatchEvent(new Event('input'));
+                        }
+                    });
+                });
+            };
+        });
+    }
+
     function calc(idx, type, val, field) {
         if(field === 'old') currentData[idx][type+'_old'] = val;
         if(field === 'new') currentData[idx][type+'_new'] = val;
@@ -332,128 +370,53 @@
 
     function calculateRowUI(idx) {
         const r = currentData[idx];
+        let wn = parseFloat(r.w_new)||0, wo = parseFloat(r.w_old)||0, wr = parseFloat(r.w_rate)||0;
+        let wTotal = (r.w_new && r.w_old) ? (Math.max(4, (!r.isCommon && Math.max(0,wn-wo)<4)?4:Math.max(0,wn-wo)) * wr) : 0;
+        if(r.isCommon && r.w_new) wTotal = Math.max(0, wn-wo) * wr; 
         
-        let wn = parseFloat(r.w_new) || 0, wo = parseFloat(r.w_old) || 0, wr = parseFloat(r.w_rate) || 0;
-        let wTotal = 0;
-        if(r.w_new && r.w_old) {
-            let diff = Math.max(0, wn - wo);
-            let units = (!r.isCommon && diff < 4) ? 4 : diff; 
-            wTotal = units * wr;
-        }
-        let wElem = document.getElementById(`w_total_${idx}`);
-        if(wElem) wElem.value = wTotal;
+        let en = parseFloat(r.e_new)||0, eo = parseFloat(r.e_old)||0, er = parseFloat(r.e_rate)||0;
+        let eTotal = (r.e_new && r.e_old) ? Math.max(0, en-eo) * er : 0;
 
-        let en = parseFloat(r.e_new) || 0, eo = parseFloat(r.e_old) || 0, er = parseFloat(r.e_rate) || 0;
-        let eTotal = 0;
-        if(r.e_new && r.e_old) {
-            eTotal = Math.max(0, en - eo) * er;
-        }
-        let eElem = document.getElementById(`e_total_${idx}`);
-        if(eElem) eElem.value = eTotal;
+        document.getElementById(`w_total_${idx}`).value = wTotal;
+        document.getElementById(`e_total_${idx}`).value = eTotal;
 
         let total = (parseFloat(r.rent)||0) + (parseFloat(r.custom)||0) + (parseFloat(r.internet)||0) + (parseFloat(r.extra)||0) + wTotal + eTotal;
-        let gElem = document.getElementById(`grand_total_${idx}`);
-        if(gElem) gElem.value = total.toLocaleString();
+        document.getElementById(`grand_total_${idx}`).value = total.toLocaleString();
     }
 
     function splitRow(idx) {
-        let original = currentData[idx];
-        let newRow = JSON.parse(JSON.stringify(original));
-        newRow.w_old = ''; newRow.w_new = '';
-        newRow.e_old = ''; newRow.e_new = '';
-        newRow.extra = 0; 
-        currentData.splice(idx + 1, 0, newRow);
-        renderTable();
+        let newRow = JSON.parse(JSON.stringify(currentData[idx]));
+        newRow.w_old=''; newRow.w_new=''; newRow.e_old=''; newRow.e_new=''; newRow.extra=0;
+        currentData.splice(idx+1, 0, newRow); renderTable();
     }
 
     function addNewRowSmart() {
-        let newId = "New";
-        let isCom = false;
-        
-        if(currentZone === 'OTHERS') {
-            newId = "ส่วนกลางใหม่";
-            isCom = true;
-        } else if (currentZone !== 'ALL') {
-            let maxNum = 0;
-            currentData.forEach(r => {
-                if(r.id.startsWith(currentZone)) {
-                    let num = parseInt(r.id.replace(currentZone, ''));
-                    if(!isNaN(num) && num > maxNum) maxNum = num;
-                }
-            });
-            newId = currentZone + (maxNum + 1);
+        let newId="New", isCom=false;
+        if(currentZone==='OTHERS') { newId="ส่วนกลางใหม่"; isCom=true; }
+        else if(currentZone!=='ALL') {
+            let max=0; currentData.forEach(r=>{ if(r.id.startsWith(currentZone)) { let n=parseInt(r.id.replace(currentZone,'')); if(!isNaN(n) && n>max) max=n; }});
+            newId = currentZone + (max+1);
         }
-        currentData.push(createEmptyRow(newId, isCom));
-        renderTable();
+        currentData.push(createEmptyRow(newId, isCom)); renderTable();
         window.scrollTo(0, document.body.scrollHeight);
     }
 
-    function deleteRow(idx) {
-        if(confirm("ลบแถวนี้?")) {
-            currentData.splice(idx, 1);
-            renderTable();
-        }
-    }
-
+    function deleteRow(idx) { if(confirm("ลบ?")) { currentData.splice(idx,1); renderTable(); }}
+    
     function sortRooms() {
-        if(!confirm("ต้องการเรียงลำดับห้องใหม่?")) return;
-        currentData.sort((a, b) => {
-            const parse = (id) => {
-                const match = id.match(/^([A-Z]+)(\d+)$/);
-                if (match) return [match[1], parseInt(match[2])];
-                return ['ZZZ', id];
-            };
-            const [zA, nA] = parse(a.id);
-            const [zB, nB] = parse(b.id);
-            if (zA < zB) return -1;
-            if (zA > zB) return 1;
-            if (typeof nA === 'number' && typeof nB === 'number') return nA - nB;
-            return a.id.localeCompare(b.id);
-        });
+        if(!confirm("เรียง?")) return;
+        currentData.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric: true, sensitivity: 'base'}));
         renderTable();
-    }
-
-    function setupNavigation() {
-        const inputs = document.querySelectorAll('.nav-input');
-        const gridWidth = 11; 
-        inputs.forEach((input, i) => {
-            input.onkeydown = (e) => {
-                if(e.key.startsWith('Arrow')) { /* Nav Logic */ }
-            };
-             input.onpaste = (e) => {
-                e.preventDefault();
-                const pasteData = (e.clipboardData || window.clipboardData).getData('text');
-                const rows = pasteData.split(/\r?\n/).filter(v => v !== '');
-                let startIdx = i; 
-                rows.forEach((rowStr, rOffset) => {
-                    const cols = rowStr.split('\t');
-                    cols.forEach((val, cOffset) => {
-                        let targetIdx = startIdx + (rOffset * gridWidth) + cOffset;
-                        if(inputs[targetIdx]) {
-                            inputs[targetIdx].value = val.trim();
-                            inputs[targetIdx].dispatchEvent(new Event('input')); 
-                            inputs[targetIdx].dispatchEvent(new Event('change')); 
-                        }
-                    });
-                });
-            };
-        });
     }
 
     function saveToCloud() {
         updateStatus("กำลังบันทึก...", true);
         fetch(API_URL + "?action=save&key=" + document.getElementById('monthPicker').value, {
-            method: "POST",
-            body: JSON.stringify({ rooms: currentData, headers: currentHeaders })
-        })
-        .then(r => r.json())
-        .then(res => {
-            if(res.status==="success") {
-                updateStatus("บันทึกแล้ว " + new Date().toLocaleTimeString());
-                alert("✅ บันทึกสำเร็จ!");
-            } else { alert("Error: " + res.message); }
-        })
-        .catch(() => updateStatus("❌ บันทึกไม่สำเร็จ", false));
+            method: "POST", body: JSON.stringify({ rooms: currentData, headers: currentHeaders })
+        }).then(r => r.json()).then(res => {
+            if(res.status==="success") { updateStatus("บันทึกแล้ว " + new Date().toLocaleTimeString()); alert("✅ บันทึกสำเร็จ!"); }
+            else alert("Error: " + res.message);
+        }).catch(() => updateStatus("❌ บันทึกไม่สำเร็จ", false));
     }
 
     function updateStatus(msg, loading=false) {
