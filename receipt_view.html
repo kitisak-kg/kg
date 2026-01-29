@@ -12,7 +12,6 @@
         :root { --primary: #0284c7; --bg: #f3f6f9; --a5-width: 148mm; --a5-height: 209mm; }
         body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); color: #334155; display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
 
-        /* Control Panel */
         .control-card {
             background: white; padding: 15px 25px; border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
@@ -21,17 +20,10 @@
         }
         
         .filter-group { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 5px 15px; border-radius: 30px; border: 1px solid #cbd5e1; }
-        .filter-label { font-weight: bold; font-size: 13px; color: #64748b; }
         .filter-select { border: none; background: transparent; font-weight: bold; color: #0f172a; outline: none; font-size: 14px; }
-
-        .btn-print {
-            background: var(--primary); color: white; border: none; padding: 8px 25px; 
-            border-radius: 30px; font-weight: 600; font-size: 14px; transition: 0.2s;
-            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
-        }
+        .btn-print { background: var(--primary); color: white; border: none; padding: 8px 25px; border-radius: 30px; font-weight: 600; font-size: 14px; transition: 0.2s; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3); }
         .btn-print:hover { transform: translateY(-2px); background: #0369a1; }
 
-        /* Receipt Page (A5) */
         .receipt-page {
             width: var(--a5-width); min-height: var(--a5-height);
             background: white; padding: 10mm;
@@ -40,7 +32,6 @@
             margin-bottom: 20px; page-break-after: always;
         }
 
-        /* Content */
         .r-header { display: flex; justify-content: space-between; border-bottom: 2px solid #334155; padding-bottom: 10px; margin-bottom: 10px; }
         .r-title { font-size: 18pt; font-weight: 800; color: #0f172a; }
         .room-box { border: 2px solid #0f172a; border-radius: 8px; padding: 5px 15px; text-align: center; }
@@ -69,7 +60,7 @@
 
         @media print {
             body { background: white; padding: 0; display: block; }
-            .control-card, .status-bar, #loadingMsg, #noDataMsg, .manual-box { display: none !important; }
+            .control-card, #loadingMsg, #noDataMsg { display: none !important; }
             .receipt-page { box-shadow: none; margin: 0; width: 100%; height: auto; border: none; page-break-after: always; }
             @page { size: A5 portrait; margin: 0; }
         }
@@ -79,85 +70,44 @@
 
     <div class="control-card">
         <h5 class="m-0 fw-bold text-primary me-3"><i class="fas fa-receipt"></i> พิมพ์ใบเสร็จ</h5>
-        
         <div class="filter-group">
             <span class="filter-label">เดือน:</span>
             <input type="month" id="monthSelector" class="filter-select" onchange="loadData()">
         </div>
-
         <div class="filter-group">
             <span class="filter-label">พิมพ์:</span>
             <select id="printScope" class="filter-select" onchange="toggleFilter()">
-                <option value="ALL">ทั้งหมด (Batch Print)</option>
-                <option value="ZONE">แยกตามตึก (Zone)</option>
-                <option value="SINGLE">ห้องเดียว (Single)</option>
+                <option value="ALL">ทั้งหมด</option>
+                <option value="ZONE">แยกตามตึก</option>
+                <option value="SINGLE">ห้องเดียว</option>
             </select>
         </div>
-
         <div class="filter-group" id="zoneFilter" style="display:none;">
-            <span class="filter-label">เลือกตึก:</span>
             <select id="zoneSelector" class="filter-select" onchange="renderReceipts()">
-                <option value="A">ตึก A</option><option value="B">ตึก B</option>
-                <option value="C">ตึก C</option><option value="D">ตึก D</option>
-                <option value="E">ตึก E</option><option value="F">ตึก F</option>
-                <option value="G">ตึก G</option><option value="H">ตึก H</option>
-                <option value="I">ตึก I</option><option value="J">ตึก J</option>
-                <option value="K">ตึก K</option><option value="L">ตึก L</option>
-                <option value="M">ตึก M</option><option value="N">ตึก N</option>
-                <option value="O">ตึก O</option><option value="P">ตึก P</option>
+                <option value="A">ตึก A</option><option value="B">ตึก B</option><option value="C">ตึก C</option>
+                <option value="D">ตึก D</option><option value="E">ตึก E</option><option value="F">ตึก F</option>
+                <option value="G">ตึก G</option><option value="H">ตึก H</option><option value="I">ตึก I</option>
+                <option value="J">ตึก J</option><option value="K">ตึก K</option><option value="L">ตึก L</option>
+                <option value="M">ตึก M</option><option value="N">ตึก N</option><option value="O">ตึก O</option><option value="P">ตึก P</option>
             </select>
         </div>
-
         <div class="filter-group" id="roomFilter" style="display:none;">
-            <span class="filter-label">เลือกห้อง:</span>
-            <select id="roomSelector" class="filter-select" onchange="renderReceipts()">
-                <option>-</option>
-            </select>
+            <select id="roomSelector" class="filter-select" onchange="renderReceipts()"><option>-</option></select>
         </div>
-
-        <button class="btn-print ms-2" onclick="window.print()">
-            <i class="fas fa-print"></i> สั่งพิมพ์ทันที
-        </button>
-        
-        <a href="index.html" class="btn btn-light border rounded-pill ms-2 fw-bold" style="font-size:13px;">กลับเมนู</a>
+        <button class="btn-print ms-2" onclick="window.print()">พิมพ์ทันที</button>
+        <a href="index.html" class="btn btn-light border rounded-pill ms-2 fw-bold" style="font-size:13px;">กลับ</a>
     </div>
 
-    <div id="loadingMsg" class="text-center mt-5" style="display:none;">
-        <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
-        <p class="mt-2 text-muted">กำลังโหลดข้อมูล...</p>
-    </div>
-
-    <div id="noDataMsg" class="text-center mt-5 text-danger fw-bold" style="display:none;">
-        <i class="fas fa-exclamation-triangle fa-2x"></i><br>
-        ไม่พบข้อมูลของเดือนนี้<br>
-        <span class="small text-muted">กรุณาไปที่เมนู "บันทึกมิเตอร์" แล้วกดปุ่ม "บันทึก" 1 ครั้งเพื่อสร้างข้อมูลครับ</span>
-    </div>
-
+    <div id="loadingMsg" class="text-center mt-5" style="display:none;"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p>กำลังโหลด...</p></div>
+    <div id="noDataMsg" class="text-center mt-5 text-danger fw-bold" style="display:none;">ไม่พบข้อมูลเดือนนี้</div>
     <div id="receiptContainer"></div>
 
-    <div class="manual-box mt-5 p-4 bg-white border rounded shadow-sm text-muted" style="max-width: 800px;">
-        <h6 class="fw-bold text-dark"><i class="fas fa-book"></i> คู่มือการพิมพ์ใบเสร็จ</h6>
-        <ul class="mb-0 small">
-            <li><b>1. เลือกรูปแบบการพิมพ์:</b>
-                <ul>
-                    <li><b>ทั้งหมด:</b> พิมพ์ทุกห้องรวดเดียว (เหมาะสำหรับตัดกระดาษแจกสิ้นเดือน)</li>
-                    <li><b>แยกตามตึก:</b> เลือกพิมพ์เฉพาะโซน A, B, C...</li>
-                    <li><b>ห้องเดียว:</b> เลือกพิมพ์เฉพาะห้องที่ต้องการ (เช่น ลูกค้ามาขอใบเสร็จย้อนหลัง)</li>
-                </ul>
-            </li>
-            <li><b>2. การแก้ไข:</b> หากเห็นตัวเลขผิด หรือต้องการเพิ่มข้อความ สามารถ <b>คลิกบนใบเสร็จแล้วพิมพ์แก้ได้เลย</b> ก่อนกดสั่งพิมพ์</li>
-            <li><b>3. การตั้งค่าเครื่องพิมพ์:</b> เลือกขนาดกระดาษเป็น <b>A5</b> (ถ้ามี) หรือพิมพ์ใส่ A4 แล้วตัดครึ่ง</li>
-        </ul>
-    </div>
-
 <script>
-    // ✅ Link หอพัก v.2
     const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec"; 
     let currentData = [], monthNames=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
 
     window.onload = function() {
-        const now = new Date();
-        document.getElementById('monthSelector').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+        document.getElementById('monthSelector').value = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
         loadData();
     };
 
@@ -174,46 +124,24 @@
         document.getElementById('noDataMsg').style.display = 'none';
         document.getElementById('receiptContainer').innerHTML = '';
 
-        fetch(API_URL+"?action=load&key="+k)
-        .then(r=>r.json())
-        .then(res=>{ 
+        fetch(API_URL+"?action=load&key="+k).then(r=>r.json()).then(res=>{ 
             document.getElementById('loadingMsg').style.display = 'none';
             if(res.status==="success" && res.data) {
                 const d = JSON.parse(res.data);
                 currentData = Array.isArray(d) ? d : d.rooms||[];
                 if(currentData.length === 0) document.getElementById('noDataMsg').style.display = 'block';
-                else {
-                    populateRoomSelector();
-                    renderReceipts();
-                }
-            } else { 
-                currentData=[]; 
-                document.getElementById('noDataMsg').style.display = 'block';
-            }
-        })
-        .catch(()=>{ 
-            document.getElementById('loadingMsg').style.display = 'none';
-            document.getElementById('noDataMsg').style.display = 'block';
-        });
+                else { populateRoomSelector(); renderReceipts(); }
+            } else { currentData=[]; document.getElementById('noDataMsg').style.display = 'block'; }
+        }).catch(()=>{ document.getElementById('loadingMsg').style.display = 'none'; });
     }
 
     function populateRoomSelector() {
-        const rS = document.getElementById('roomSelector');
-        rS.innerHTML = '';
-        currentData.forEach((r, idx) => {
-            if(!r.isCommon) {
-                let opt = document.createElement('option');
-                opt.value = idx;
-                opt.innerText = r.id;
-                rS.appendChild(opt);
-            }
-        });
+        const rS = document.getElementById('roomSelector'); rS.innerHTML = '';
+        currentData.forEach((r, idx) => { if(!r.isCommon) { let opt = document.createElement('option'); opt.value = idx; opt.innerText = r.id; rS.appendChild(opt); }});
     }
 
     function renderReceipts() {
-        const container = document.getElementById('receiptContainer');
-        container.innerHTML = '';
-        
+        const container = document.getElementById('receiptContainer'); container.innerHTML = '';
         const scope = document.getElementById('printScope').value;
         const mKey = document.getElementById('monthSelector').value;
         const [y,m] = mKey.split('-').map(Number);
@@ -221,36 +149,36 @@
         const todayStr = new Date().toLocaleDateString('th-TH');
 
         let roomsToPrint = [];
-
-        if (scope === 'ALL') {
-            roomsToPrint = currentData.filter(r => !r.isCommon);
-        } else if (scope === 'ZONE') {
-            const z = document.getElementById('zoneSelector').value;
-            roomsToPrint = currentData.filter(r => !r.isCommon && r.id.startsWith(z));
-        } else if (scope === 'SINGLE') {
-            const idx = document.getElementById('roomSelector').value;
-            if(currentData[idx]) roomsToPrint = [currentData[idx]];
-        }
+        if (scope === 'ALL') roomsToPrint = currentData.filter(r => !r.isCommon);
+        else if (scope === 'ZONE') { const z = document.getElementById('zoneSelector').value; roomsToPrint = currentData.filter(r => !r.isCommon && r.id.startsWith(z)); }
+        else if (scope === 'SINGLE') { const idx = document.getElementById('roomSelector').value; if(currentData[idx]) roomsToPrint = [currentData[idx]]; }
 
         if (roomsToPrint.length === 0) return;
 
         roomsToPrint.forEach(r => {
             const wn=parseFloat(r.w_new)||0, wo=parseFloat(r.w_old)||0, wr=parseFloat(r.w_rate)||0;
-            let wu=0, wt=0; 
-            if(r.w_new && r.w_old){ 
-                let d=wn-wo; 
-                wu = d; // แสดงหน่วยจริง
-                let chargeUnits = (d<4) ? 4 : d; // 
-                wt = chargeUnits * wr;
-            }
+            let wu = (r.w_new && r.w_old) ? (wn-wo) : 0;
+            let chargeW = (!r.isCommon && wu < 4) ? 4 : wu;
+            let wt = chargeW * wr;
             
             const en=parseFloat(r.e_new)||0, eo=parseFloat(r.e_old)||0, er=parseFloat(r.e_rate)||0;
             let eu=0, et=0; if(r.e_new && r.e_old){ eu=en-eo; et=eu*er; }
 
-            const rent=parseFloat(r.rent)||0, cust=parseFloat(r.custom)||0, net=parseFloat(r.internet)||0;
-            const extra=parseFloat(r.extra)||0;
+            const rent=parseFloat(r.rent)||0;
+            const net=parseFloat(r.custom)||0; // custom is now Internet
+            const extra=parseFloat(r.extra)||0; // extra is Other/Debt
 
-            const total = rent + cust + net + wt + et + extra;
+            const total = rent + net + wt + et + extra;
+
+            // Generate Extra Items List (if available)
+            let extraRows = '';
+            if (r.extra_items && r.extra_items.length > 0) {
+                r.extra_items.forEach(item => {
+                    extraRows += `<tr><td class="ps-3 small text-muted">- ${item.name}</td><td class="value small text-muted">${parseFloat(item.price).toLocaleString()}</td></tr>`;
+                });
+            } else if (extra !== 0) {
+                extraRows = `<tr><td class="text-danger">อื่นๆ (Others)</td><td class="value text-danger" contenteditable="true">${extra.toLocaleString()}</td></tr>`;
+            }
 
             const html = `
             <div class="receipt-page">
@@ -269,9 +197,9 @@
                 <div class="mb-2">
                     <div class="th-water"><i class="fas fa-tint"></i> ค่าน้ำประปา (Water)</div>
                     <table class="table-util">
-                        <tr><td>จดครั้งนี้ (New)</td><td class="val-col" contenteditable="true">${r.w_new}</td></tr>
-                        <tr><td>จดครั้งก่อน (Old)</td><td class="val-col" contenteditable="true">${r.w_old}</td></tr>
-                        <tr><td>หน่วยที่ใช้ (Units) ${(wn-wo)<4?'':''}</td><td class="val-col">${wu}</td></tr>
+                        <tr><td>จดครั้งนี้</td><td class="val-col">${r.w_new}</td></tr>
+                        <tr><td>จดครั้งก่อน</td><td class="val-col">${r.w_old}</td></tr>
+                        <tr><td>หน่วยที่ใช้ (ขั้นต่ำ 4)</td><td class="val-col">${wu}</td></tr>
                         <tr class="sum-row"><td>รวมค่าน้ำ (${wr}บ./หน่วย)</td><td class="val-col">${wt.toLocaleString()}</td></tr>
                     </table>
                 </div>
@@ -279,9 +207,9 @@
                 <div class="mb-2">
                     <div class="th-elec"><i class="fas fa-bolt"></i> ค่าไฟฟ้า (Electricity)</div>
                     <table class="table-util">
-                        <tr><td>จดครั้งนี้ (New)</td><td class="val-col" contenteditable="true">${r.e_new}</td></tr>
-                        <tr><td>จดครั้งก่อน (Old)</td><td class="val-col" contenteditable="true">${r.e_old}</td></tr>
-                        <tr><td>หน่วยที่ใช้ (Units)</td><td class="val-col">${eu}</td></tr>
+                        <tr><td>จดครั้งนี้</td><td class="val-col">${r.e_new}</td></tr>
+                        <tr><td>จดครั้งก่อน</td><td class="val-col">${r.e_old}</td></tr>
+                        <tr><td>หน่วยที่ใช้</td><td class="val-col">${eu}</td></tr>
                         <tr class="sum-row"><td>รวมค่าไฟ (${er}บ./หน่วย)</td><td class="val-col">${et.toLocaleString()}</td></tr>
                     </table>
                 </div>
@@ -289,13 +217,12 @@
                 <div class="summary-box">
                     <table class="table-sum">
                         <tr><td>ค่าเช่าห้อง (Rent)</td><td class="value" contenteditable="true">${rent.toLocaleString()}</td></tr>
-                        <tr><td>ค่าส่วนกลาง (Common Fee)</td><td class="value" contenteditable="true">${cust.toLocaleString()}</td></tr>
-                        ${net > 0 ? `<tr><td>ค่าอินเทอร์เน็ต (WiFi)</td><td class="value" contenteditable="true">${net.toLocaleString()}</td></tr>` : ''}
-                        ${extra != 0 ? `<tr><td class="text-danger">อื่นๆ / หนี้ค้าง (Other/Debt)</td><td class="value text-danger" contenteditable="true">${extra.toLocaleString()}</td></tr>` : ''}
+                        ${net > 0 ? `<tr><td>ค่าอินเทอร์เน็ต (Internet)</td><td class="value" contenteditable="true">${net.toLocaleString()}</td></tr>` : ''}
                         
                         <tr><td>รวมค่าน้ำ</td><td class="value">${wt.toLocaleString()}</td></tr>
                         <tr><td>รวมค่าไฟ</td><td class="value">${et.toLocaleString()}</td></tr>
-                    </table>
+                        
+                        ${extraRows} </table>
                     <div class="grand-total">
                         <span>ยอดสุทธิ (Total)</span>
                         <span contenteditable="true">${total.toLocaleString()} บาท</span>
@@ -306,16 +233,13 @@
                     <div class="d-flex justify-content-between align-items-end">
                         <div contenteditable="true">
                             <strong>กำหนดชำระ:</strong> ภายในวันที่ 5 ของเดือน<br>
-                            <strong>ช่องทางชำระ:</strong> โอนเข้าบัญชี หรือ เงินสดที่สำนักงาน<br>
-                            <span class="text-danger small">*ชำระล่าช้ามีค่าปรับวันละ 100 บาท</span>
+                            <strong>ช่องทาง:</strong> โอน/เงินสด<br>
+                            <span class="text-danger small">*ล่าช้าปรับวันละ 100 บาท</span>
                         </div>
-                        <div class="text-end">
-                            ผู้รับเงิน ...................................<br>
-                        </div>
+                        <div class="text-end">ผู้รับเงิน ...................................<br>${todayStr}</div>
                     </div>
                 </div>
             </div>`;
-            
             container.insertAdjacentHTML('beforeend', html);
         });
     }
