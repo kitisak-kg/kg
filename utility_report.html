@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สรุปค่าน้ำ-ค่าไฟ (6 เดือน) - K&G</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --primary: #0284c7; --bg: #f8fafc; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); padding: 30px; color: #334155; }
+        
+        .main-card {
+            background: white; border-radius: 16px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 30px; max-width: 1200px; margin: 0 auto;
+        }
+
+        .table-custom { width: 100%; border-collapse: collapse; }
+        .table-custom th, .table-custom td { 
+            padding: 15px; text-align: center; border: 1px solid #e2e8f0; 
+            vertical-align: middle;
+        }
+        .table-custom th { background: #f1f5f9; color: #475569; font-weight: 700; }
+        
+        /* Highlight Rows */
+        .row-water { background-color: #f0f9ff; }
+        .row-elec { background-color: #fff7ed; }
+        
+        .val-water { color: #0284c7; font-weight: 800; font-size: 1.1rem; }
+        .val-elec { color: #c2410c; font-weight: 800; font-size: 1.1rem; }
+        
+        .th-main { background: #0f172a !important; color: white !important; font-size: 1.1rem; width: 200px; }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .main-card { box-shadow: none; border: none; }
+            .btn-zone { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="m-0 fw-bold text-primary"><i class="fas fa-chart-line"></i> สรุปค่าน้ำ-ค่าไฟ (6 เดือนล่าสุด)</h4>
+            <div class="btn-zone">
+                <button class="btn btn-outline-primary rounded-pill me-2" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์</button>
+                <a href="index.html" class="btn btn-secondary rounded-pill">กลับเมนู</a>
+            </div>
+        </div>
+
+        <div id="loading" class="text-center py-5">
+            <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+            <p class="mt-2 text-muted">กำลังคำนวณยอดเงิน...</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table-custom" id="summaryTable" style="display:none;">
+                <thead>
+                    <tr id="headerRow">
+                        <th class="th-main">ค่าใช้จ่าย / เดือน</th>
+                        </tr>
+                </thead>
+                <tbody>
+                    <tr class="row-water" id="waterRow">
+                        <td class="text-start fw-bold ps-4"><i class="fas fa-tint"></i> ค่าน้ำประปา</td>
+                        </tr>
+                    <tr class="row-elec" id="elecRow">
+                        <td class="text-start fw-bold ps-4"><i class="fas fa-bolt"></i> ค่าไฟฟ้า</td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="mt-4 text-center small text-muted">
+            * ยอดเงินคำนวณจาก (หน่วยที่ใช้ x เรทของแต่ละห้อง) รวมถึงส่วนกลาง
+        </div>
+    </div>
+
+<script>
+    // ✅ Link หอพัก v.2
+    const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec"; 
+    const monthNames = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+
+    window.onload = function() {
+        loadReport();
+    };
+
+    function loadReport() {
+        fetch(API_URL + "?action=loadUtilityReport")
+        .then(r => r.json())
+        .then(res => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('summaryTable').style.display = 'table';
+            
+            if(res.status === "success") {
+                renderTable(res.months, res.data);
+            } else {
+                alert("โหลดข้อมูลไม่สำเร็จ");
+            }
+        })
+        .catch(err => {
+            document.getElementById('loading').innerHTML = '<span class="text-danger">เชื่อมต่อไม่ได้ (Offline)</span>';
+        });
+    }
+
+    function renderTable(months, data) {
+        const headerRow = document.getElementById('headerRow');
+        const waterRow = document.getElementById('waterRow');
+        const elecRow = document.getElementById('elecRow');
+
+        // Loop สร้าง 6 คอลัมน์ (หรือเท่าที่มี)
+        months.forEach((mKey, index) => {
+            // 1. Header (Format: พ.ย. 68)
+            let [y, m] = mKey.split('-');
+            let mName = monthNames[parseInt(m)-1];
+            let yThai = parseInt(y) + 543;
+            let shortYear = String(yThai).slice(-2);
+            
+            let th = document.createElement('th');
+            th.innerHTML = `${mName} ${shortYear}`;
+            headerRow.appendChild(th);
+
+            // 2. Data
+            let stats = data[index];
+            
+            // Water Cell
+            let tdWater = document.createElement('td');
+            tdWater.className = 'val-water';
+            tdWater.innerHTML = stats.water.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            waterRow.appendChild(tdWater);
+
+            // Elec Cell
+            let tdElec = document.createElement('td');
+            tdElec.className = 'val-elec';
+            tdElec.innerHTML = stats.elec.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            elecRow.appendChild(tdElec);
+        });
+
+        // ถ้าข้อมูลไม่ถึง 6 เดือน ให้เติมช่องว่างให้สวยงาม
+        for(let i=months.length; i<6; i++) {
+            headerRow.innerHTML += `<th class="text-muted">-</th>`;
+            waterRow.innerHTML += `<td>-</td>`;
+            elecRow.innerHTML += `<td>-</td>`;
+        }
+    }
+</script>
+</body>
+</html>
