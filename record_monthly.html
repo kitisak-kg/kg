@@ -34,12 +34,8 @@
             border-bottom: 1px solid #cbd5e1; border-right: 1px solid #e2e8f0;
             text-align: center; font-size: 13px;
         }
-        /* แถวที่ 1: ตรึงชิดบนสุด สูง 45px */
         thead tr:nth-child(1) th { top: 0; height: 45px; border-bottom: none; }
-        /* แถวที่ 2: ตรึงต่อจากแถวแรก (ที่ความสูง 45px) */
         thead tr:nth-child(2) th { top: 45px; padding-top: 5px; padding-bottom: 5px; border-top: 1px solid #cbd5e1; }
-        
-        /* Fix Borders for rowspan */
         thead tr:nth-child(1) th[rowspan="2"] { border-bottom: 1px solid #cbd5e1; z-index: 21; }
 
         /* Color Headers */
@@ -110,12 +106,12 @@
         </div>
         <div class="d-flex gap-2">
             <a href="index.html" class="btn btn-light border rounded-pill fw-bold">กลับเมนู</a>
+            <button class="btn btn-info rounded-pill fw-bold px-3 text-white" onclick="loadData()"><i class="fas fa-sync-alt"></i> อัปเดต</button>
             <button class="btn btn-success rounded-pill fw-bold px-4" onclick="saveToCloud()"><i class="fas fa-save"></i> บันทึก</button>
         </div>
     </div>
 
-    <div class="toolbar" id="toolbarContainer">
-        </div>
+    <div class="toolbar" id="toolbarContainer"></div>
 
     <div class="table-container">
         <table id="meterTable">
@@ -144,12 +140,34 @@
     
     <button class="btn-add-room" onclick="addNewRowSmart()">+ เพิ่มห้องใหม่</button>
 
+    <div class="mt-4 p-3 bg-white border rounded shadow-sm text-muted small">
+        <h6 class="fw-bold mb-2 text-dark"><i class="fas fa-book"></i> คู่มือการใช้งาน: ระบบบันทึกมิเตอร์</h6>
+        <div class="row">
+            <div class="col-md-6">
+                <ul class="mb-0 ps-3">
+                    <li class="mb-1"><b>1. เลือกเดือน:</b> เลือกเดือนที่ต้องการจดมิเตอร์ที่มุมซ้ายบน หากเคยจดไว้แล้ว ข้อมูลเก่าจะแสดงขึ้นมา</li>
+                    <li class="mb-1"><b>2. กดอัปเดต:</b> หากไม่แน่ใจว่าข้อมูลล่าสุดหรือไม่ ให้กดปุ่ม <span class="badge bg-info text-dark">อัปเดต</span> เพื่อดึงข้อมูลปัจจุบัน</li>
+                    <li class="mb-1"><b>3. การจดเลข:</b> ใส่เลขมิเตอร์ในช่อง <b>"ใหม่"</b> ระบบจะคำนวณเงินให้อัตโนมัติ (ค่าน้ำขั้นต่ำ 4 หน่วย)</li>
+                    <li class="mb-1"><b>4. ส่วนกลาง/อื่นๆ:</b> เลือกแท็บ "อื่นๆ (ส่วนกลาง)" ด้านบน เพื่อจดมิเตอร์น้ำ-ไฟ ส่วนกลาง แยกต่างหาก</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul class="mb-0 ps-3">
+                    <li class="mb-1"><b>5. แยกบิล (Split Bill):</b> กรณีผู้เช่าอยู่ไม่ครบเดือน ให้กดปุ่ม ➗ เพื่อแยกห้องเป็น 2 แถว แล้วคิดเงินแยกช่วงเวลา</li>
+                    <li class="mb-1"><b>6. แก้ไขหัวข้อ:</b> ชื่อหัวข้อ "ส่วนกลาง/เน็ต/อื่นๆ" สามารถคลิกแล้วพิมพ์เปลี่ยนชื่อได้ตามต้องการ</li>
+                    <li class="mb-1"><b>7. การบันทึก:</b> เมื่อตรวจสอบความถูกต้องแล้ว ต้องกดปุ่ม <span class="badge bg-success">บันทึก</span> ทุกครั้ง</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <div class="status-bar" id="statusMsg"><i class="fas fa-check-circle text-success"></i> พร้อมใช้งาน</div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec"; 
+    // 🔥 LINK UPDATED: เชื่อมต่อกับ หอพัก v.2
+    const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec"; 
     
     let currentData = [];
     let currentHeaders = { rent:'ค่าเช่า', custom:'ส่วนกลาง', net:'เน็ต', extra:'อื่นๆ/หนี้' }; 
@@ -177,7 +195,7 @@
                 currentData = Array.isArray(d) ? d : d.rooms||[];
                 if(d.headers) currentHeaders = d.headers;
             } else {
-                createDefaultStructure();
+                createDefaultStructure(); // Fallback if empty or new month
             }
             applyHeaders();
             renderTable();
@@ -186,7 +204,7 @@
         .catch(err => {
             createDefaultStructure();
             renderTable();
-            updateStatus("โหลด Local (Error)");
+            updateStatus("โหมดออฟไลน์ (หรือเดือนใหม่)");
         });
     }
 
@@ -195,7 +213,7 @@
         ZONES.forEach(z => {
             for(let i=1; i<=ROOMS_PER_ZONE; i++) currentData.push(createEmptyRow(z+i));
         });
-        ["ปั้มบาดาล1","ปั้มบาดาล2","ปั้มส่งแท้ง+3","ตู้ซักผ้า","กล้องA","กล้องC","กล้องG","กล้องF","ของชำป่ายาง"].forEach(c => {
+        ["ปั้มบาดาล1","ปั้มบาดาล2","ปั้มส่งแท้ง+3","ตู้ซักผ้า","กล้องA","กล้องC","กล้องG","กล้องF","ของชํ่าป่ายาง"].forEach(c => {
             currentData.push(createEmptyRow(c, true));
         });
     }
@@ -225,16 +243,13 @@
         currentHeaders.extra = document.getElementById('head_extra').value;
     }
 
-    // --- Toolbar: Zones + Sort ---
+    // --- Toolbar ---
     function renderToolbar() {
         const tb = document.getElementById('toolbarContainer');
         let html = `<button class="btn-zone btn-all active" onclick="filterZone('ALL')">ทั้งหมด</button>`;
         ZONES.forEach(z => html += `<button class="btn-zone" onclick="filterZone('${z}')">${z}</button>`);
         
-        // 1. เพิ่มปุ่ม "อื่นๆ (ส่วนกลาง)"
         html += `<button class="btn-zone" onclick="filterZone('OTHERS')">อื่นๆ (ส่วนกลาง)</button>`;
-        
-        // 3. ปุ่มเรียง (Sort)
         html += `<button class="btn-sort" onclick="sortRooms()"><i class="fas fa-sort-alpha-down"></i> เรียงห้อง (Sort)</button>`;
         
         tb.innerHTML = html;
@@ -260,7 +275,6 @@
         if(currentZone === 'ALL') {
             displayData = currentData;
         } else if (currentZone === 'OTHERS') {
-            // Filter: NOT starting with A-P + number
             displayData = currentData.filter(r => {
                 const startsWithZone = ZONES.some(z => r.id.startsWith(z) && !isNaN(parseInt(r.id.substring(z.length))));
                 return !startsWithZone; 
@@ -303,7 +317,7 @@
         setupNavigation();
     }
 
-    // --- Calculation ---
+    // --- Calculation & Actions ---
     function calc(idx, type, val, field) {
         if(field === 'old') currentData[idx][type+'_old'] = val;
         if(field === 'new') currentData[idx][type+'_new'] = val;
@@ -342,7 +356,6 @@
         if(gElem) gElem.value = total.toLocaleString();
     }
 
-    // --- Action Logic ---
     function splitRow(idx) {
         let original = currentData[idx];
         let newRow = JSON.parse(JSON.stringify(original));
@@ -353,14 +366,13 @@
         renderTable();
     }
 
-    // 2. Smart Add Room (Logic Update)
     function addNewRowSmart() {
         let newId = "New";
         let isCom = false;
         
         if(currentZone === 'OTHERS') {
             newId = "ส่วนกลางใหม่";
-            isCom = true; // Auto flag as common
+            isCom = true;
         } else if (currentZone !== 'ALL') {
             let maxNum = 0;
             currentData.forEach(r => {
@@ -371,7 +383,6 @@
             });
             newId = currentZone + (maxNum + 1);
         }
-
         currentData.push(createEmptyRow(newId, isCom));
         renderTable();
         window.scrollTo(0, document.body.scrollHeight);
@@ -384,14 +395,13 @@
         }
     }
 
-    // 3. Sort Logic
     function sortRooms() {
         if(!confirm("ต้องการเรียงลำดับห้องใหม่?")) return;
         currentData.sort((a, b) => {
             const parse = (id) => {
                 const match = id.match(/^([A-Z]+)(\d+)$/);
                 if (match) return [match[1], parseInt(match[2])];
-                return ['ZZZ', id]; // Others go last
+                return ['ZZZ', id];
             };
             const [zA, nA] = parse(a.id);
             const [zB, nB] = parse(b.id);
