@@ -85,11 +85,9 @@
         <h4 class="m-0 fw-bold text-primary"><i class="fas fa-users-cog"></i> ระบบจัดการผู้เช่า</h4>
         <div>
             <a href="index.html" class="btn btn-sm btn-light border fw-bold me-2 rounded-pill px-3">กลับ</a>
-            
             <button class="btn btn-sm btn-info fw-bold px-3 rounded-pill text-white me-2" onclick="loadData()">
                 <i class="fas fa-sync-alt"></i> อัปเดตล่าสุด
             </button>
-            
             <button class="btn btn-sm btn-success fw-bold px-4 rounded-pill" onclick="saveToCloud()">
                 <i class="fas fa-save"></i> บันทึกข้อมูล
             </button>
@@ -137,18 +135,28 @@
         </div>
     </div>
 
-    <div class="mt-4 p-3 bg-light border rounded text-muted small">
-        <h6 class="fw-bold mb-2"><i class="fas fa-book"></i> คู่มือการใช้งานระบบ</h6>
-        <ol class="m-0 ps-3">
-            <li class="mb-1"><b>กด "อัปเดตล่าสุด" เสมอ:</b> ก่อนเริ่มแก้ไขข้อมูล ให้กดปุ่มสีฟ้า <span class="badge bg-info text-dark">อัปเดตล่าสุด</span> ก่อนทุกครั้ง เพื่อดึงข้อมูลปัจจุบันจากระบบป้องกันความผิดพลาด</li>
-            <li class="mb-1"><b>การแก้ไขข้อมูล:</b> คลิกที่ช่องแล้วพิมพ์แก้ไขได้ทันที สามารถใช้ลูกศร ⬆️⬇️⬅️➡️ เพื่อเลื่อนช่องได้เหมือน Excel</li>
-            <li class="mb-1"><b>สถานะห้อง:</b> 
-                🟡 <b>แจ้งย้าย</b> = ให้ระบุวันย้ายออกในช่อง "หมายเหตุ" / 
-                🔴 <b>ค้าง/หนี</b> = ห้ามลบแถวทิ้งจนกว่าจะเคลียร์ยอดหนี้ครบถ้วน
-            </li>
-            <li class="mb-1"><b>การจองห้อง:</b> หากมีผู้จองห้อง ให้กดปุ่ม [+ เพิ่ม] ที่ช่องด้านขวา (คิวรอห้อง) แทนการใส่ข้อมูลในตารางหลักทันที</li>
-            <li><b>การบันทึก:</b> เมื่อแก้ไขข้อมูลเสร็จสิ้น ต้องกดปุ่ม <span class="badge bg-success">บันทึกข้อมูล</span> ทันที เพื่ออัปเดตข้อมูลเข้าระบบฐานข้อมูลออนไลน์</li>
-        </ol>
+    <div class="mt-4 p-3 bg-white border rounded shadow-sm text-muted small">
+        <h6 class="fw-bold mb-2 text-dark"><i class="fas fa-book"></i> คู่มือการใช้งาน: ระบบจัดการผู้เช่า</h6>
+        <div class="row">
+            <div class="col-md-6">
+                <ul class="mb-0 ps-3">
+                    <li class="mb-1"><b>1. การเริ่มต้น:</b> กดปุ่ม <span class="badge bg-info text-dark">อัปเดตล่าสุด</span> ทุกครั้งก่อนเริ่มงาน เพื่อดึงข้อมูลปัจจุบัน</li>
+                    <li class="mb-1"><b>2. การแก้ไข:</b> คลิกช่องที่ต้องการแล้วพิมพ์แก้ได้เลย (ใช้ลูกศร ⬆️⬇️⬅️➡️ เลื่อนช่องได้)</li>
+                    <li class="mb-1"><b>3. การวางข้อมูล (Paste):</b> รองรับการก๊อปปี้ข้อมูลจาก Excel มาวางทับได้ทีละหลายช่อง</li>
+                    <li class="mb-1"><b>4. ย้ายตำแหน่ง:</b> ใช้เมาส์คลิกค้างที่ขีด <b>≡</b> ด้านหน้าสุดเพื่อลากสลับแถว</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul class="mb-0 ps-3">
+                    <li class="mb-1"><b>5. สถานะห้อง:</b> 
+                        🟡 <b>แจ้งย้าย</b> = ระบุวันที่ออกในหมายเหตุ / 
+                        🔴 <b>ค้าง/หนี</b> = ห้ามลบแถวทิ้งจนกว่าจะเคลียร์หนี้
+                    </li>
+                    <li class="mb-1"><b>6. คิวจอง:</b> ผู้ที่จองไว้ให้ใส่ข้อมูลใน "คิวรอห้อง" (ด้านขวา) อย่าเพิ่งใส่ในตารางหลัก</li>
+                    <li class="mb-1"><b>7. การบันทึก:</b> ต้องกดปุ่ม <span class="badge bg-success">บันทึกข้อมูล</span> เพื่อส่งข้อมูลเข้าระบบออนไลน์</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -156,7 +164,7 @@
 <div class="status-bar" id="statusMsg">ระบบพร้อมทำงาน</div>
 
 <script>
-// API URL (Updated)
+// ✅ ลิงก์หอพัก v.2 (ถูกต้อง)
 const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec";
 
 const ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
@@ -265,6 +273,65 @@ function renderTable() {
         <td><input type="number" class="cell-input nav-item text-danger text-end fw-bold" data-r="${idx}" data-c="7" value="${t.debt}" onchange="updateData(${idx},'debt',this.value)"></td>
         <td><input class="cell-input nav-item" data-r="${idx}" data-c="8" value="${t.note}" onchange="updateData(${idx},'note',this.value)"></td>`;
         tb.appendChild(tr);
+    });
+    
+    setupNavigation(); // Activate Arrow Keys
+}
+
+// ✅ Navigation Logic (Enhanced)
+function setupNavigation() {
+    const inputs = document.querySelectorAll('.nav-item');
+    const cols = 9; // Number of navigable columns per row
+
+    inputs.forEach((input, i) => {
+        input.onkeydown = (e) => {
+            const key = e.key;
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(key)) {
+                if (key === 'ArrowLeft' && input.selectionStart > 0) return;
+                if (key === 'ArrowRight' && input.selectionStart < input.value.length) return;
+
+                e.preventDefault(); // Stop Spinner/Scrolling
+
+                const r = parseInt(input.dataset.r);
+                const c = parseInt(input.dataset.c);
+                let nextR = r, nextC = c;
+
+                if (key === 'ArrowUp') nextR--;
+                if (key === 'ArrowDown' || key === 'Enter') nextR++;
+                if (key === 'ArrowLeft') nextC--;
+                if (key === 'ArrowRight' || key === 'Tab') nextC++;
+
+                const target = document.querySelector(`.nav-item[data-r="${nextR}"][data-c="${nextC}"]`);
+                if (target) {
+                    target.focus();
+                    if (target.select) target.select();
+                }
+            }
+        };
+        
+        // Paste Logic
+        input.onpaste = (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            const rows = text.split(/\r?\n/).filter(x => x !== '');
+            const startR = parseInt(input.dataset.r);
+            const startC = parseInt(input.dataset.c);
+            const fields = ['id','status','name','phone','deposit','start','end','debt','note'];
+
+            rows.forEach((rowStr, rOffset) => {
+                const cells = rowStr.split('\t');
+                cells.forEach((val, cOffset) => {
+                    const targetR = startR + rOffset;
+                    const targetC = startC + cOffset;
+                    if (tenants[targetR] && fields[targetC]) {
+                        const fieldName = fields[targetC];
+                        tenants[targetR][fieldName] = val.trim();
+                        if(fieldName === 'name' && val.trim() !== '') tenants[targetR].status = 'Active';
+                    }
+                });
+            });
+            renderTable();
+        };
     });
 }
 
