@@ -3,236 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>โพยเงินทอน - หอพัก K&G</title>
+    <title>โพยเงินทอน (Cheat Sheet) - หอพัก K&G</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <style>
         :root { --primary: #0284c7; --bg: #f3f6f9; }
         body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); color: #0f172a; padding: 20px; }
-
-        /* Control Panel (Hidden on print) */
-        .control-panel {
-            background: white; padding: 15px; border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;
-            display: flex; gap: 15px; align-items: center; flex-wrap: wrap;
-        }
+        .control-panel { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         .filter-group { display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 5px 15px; border-radius: 20px; }
         .filter-select { border: none; background: transparent; font-weight: bold; color: #0f172a; outline: none; }
         .btn-print { background: var(--primary); color: white; border: none; padding: 8px 25px; border-radius: 20px; font-weight: bold; }
-        .btn-print:hover { background: #0369a1; }
-
-        /* A4 Page Layout */
-        .a4-page {
-            background: white; width: 210mm; min-height: 297mm; 
-            margin: 0 auto; padding: 10mm; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            position: relative; margin-bottom: 30px;
-        }
-
-        /* 2 Column Layout */
+        .a4-page { background: white; width: 210mm; min-height: 297mm; margin: 0 auto; padding: 10mm; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative; margin-bottom: 30px; }
         .page-content { display: flex; gap: 10mm; height: 100%; }
-        .col-half { flex: 1; display: flex; flex-direction: column; gap: 0; } /* Gap 0 to merge borders */
-
-        /* Room Block Style */
-        .room-block {
-            border: 2px solid #0f172a; margin-bottom: -2px; /* Overlap borders */
-            display: flex; height: 24mm; /* Fixed height for consistency */
-        }
-        
-        .room-id {
-            width: 15mm; background: #0f172a; color: white;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16pt; font-weight: 800; text-align: center;
-        }
-
+        .col-half { flex: 1; display: flex; flex-direction: column; gap: 0; }
+        .room-block { border: 2px solid #0f172a; margin-bottom: -2px; display: flex; height: 24mm; }
+        .room-id { width: 15mm; background: #0f172a; color: white; display: flex; align-items: center; justify-content: center; font-size: 16pt; font-weight: 800; text-align: center; }
         .info-area { flex: 1; display: flex; flex-direction: column; }
-        
-        /* Top Row: Total & Expected Cash */
-        .row-top { 
-            display: flex; border-bottom: 1px dashed #cbd5e1; height: 50%; 
-            align-items: center; padding: 0 5px;
-        }
-        /* Bottom Row: Change */
-        .row-bot { 
-            display: flex; height: 50%; 
-            align-items: center; padding: 0 5px; background: #f8fafc;
-        }
-
+        .row-top { display: flex; border-bottom: 1px dashed #cbd5e1; height: 50%; align-items: center; padding: 0 5px; }
+        .row-bot { display: flex; height: 50%; align-items: center; padding: 0 5px; background: #f8fafc; }
         .label { font-size: 9pt; color: #64748b; margin-right: 5px; min-width: 30px; }
         .value { font-size: 11pt; font-weight: 700; color: #0f172a; }
-        .value-change { font-size: 12pt; font-weight: 800; color: #dc2626; } /* Highlight Change */
-
-        .stamp-area {
-            width: 35mm; border-left: 2px solid #0f172a;
-            display: flex; align-items: center; justify-content: center;
-            color: #e2e8f0; font-size: 10pt; font-weight: bold; text-align: center;
-            background: white;
-        }
-
-        /* Header on Page */
+        .value-change { font-size: 12pt; font-weight: 800; color: #dc2626; }
+        .stamp-area { width: 35mm; border-left: 2px solid #0f172a; display: flex; align-items: center; justify-content: center; color: #e2e8f0; font-size: 10pt; font-weight: bold; text-align: center; background: white; }
         .page-header { text-align: center; font-weight: bold; margin-bottom: 10px; font-size: 14pt; border-bottom: 2px solid #0f172a; padding-bottom: 5px; }
-
-        @media print {
-            body { background: white; padding: 0; }
-            .control-panel, #statusMsg { display: none !important; }
-            .a4-page { box-shadow: none; margin: 0; width: 100%; height: auto; page-break-after: always; }
-            @page { size: A4; margin: 0; }
-        }
+        @media print { body { background: white; padding: 0; } .control-panel, #statusMsg { display: none !important; } .a4-page { box-shadow: none; margin: 0; width: 100%; height: auto; page-break-after: always; } @page { size: A4; margin: 0; } }
     </style>
 </head>
 <body>
 
     <div class="control-panel">
         <h5 class="m-0 fw-bold text-primary"><i class="fas fa-calculator"></i> โพยเงินทอน (Cheat Sheet)</h5>
-        
         <div class="filter-group">
             <span class="small text-muted fw-bold">เดือน:</span>
             <input type="month" id="monthSelector" class="filter-select" onchange="loadData()">
         </div>
-
         <div class="filter-group">
             <span class="small text-muted fw-bold">คู่โซน:</span>
-            <select id="zonePairSelector" class="filter-select" onchange="renderSheets()">
-                </select>
+            <select id="zonePairSelector" class="filter-select" onchange="renderSheets()"></select>
         </div>
-
-        <button class="btn-print ms-auto" onclick="window.print()">
-            <i class="fas fa-print"></i> พิมพ์หน้านี้
-        </button>
-        <a href="index.html" class="btn btn-light border rounded-pill fw-bold" style="font-size:13px;">กลับเมนู</a>
+        <button class="btn-print ms-auto" onclick="window.print()">พิมพ์</button>
+        <a href="index.html" class="btn btn-light border rounded-pill fw-bold" style="font-size:13px;">กลับ</a>
     </div>
 
     <div id="printArea"></div>
-
     <div id="statusMsg" class="text-center mt-5 text-muted"><i class="fas fa-spinner fa-spin"></i> กำลังโหลด...</div>
 
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec"; 
-    
-    // Config: Pair Zones for Left/Right Columns
-    const ZONE_PAIRS = [
-        ['A', 'B'], ['C', 'D'], ['E', 'F'], 
-        ['G', 'H'], ['I', 'J'], ['K', 'L'], 
-        ['M', 'N'], ['O', 'P']
-    ];
-    
+    const ZONE_PAIRS = [['A', 'B'], ['C', 'D'], ['E', 'F'], ['G', 'H'], ['I', 'J'], ['K', 'L'], ['M', 'N'], ['O', 'P']];
     let currentData = [];
     const monthNames = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
 
     window.onload = function() {
-        const now = new Date();
-        document.getElementById('monthSelector').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-        
-        // Setup Dropdown
+        document.getElementById('monthSelector').value = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
         const sel = document.getElementById('zonePairSelector');
-        sel.innerHTML = '<option value="ALL">พิมพ์ทั้งหมด (ทุกคู่)</option>';
-        ZONE_PAIRS.forEach(pair => {
-            sel.innerHTML += `<option value="${pair[0]}-${pair[1]}">โซน ${pair[0]} & ${pair[1]}</option>`;
-        });
-
+        sel.innerHTML = '<option value="ALL">พิมพ์ทั้งหมด</option>';
+        ZONE_PAIRS.forEach(pair => sel.innerHTML += `<option value="${pair[0]}-${pair[1]}">โซน ${pair[0]} & ${pair[1]}</option>`);
         loadData();
     };
 
     function loadData() {
         const k = document.getElementById('monthSelector').value;
         document.getElementById('statusMsg').style.display = 'block';
-        document.getElementById('printArea').innerHTML = '';
-
-        fetch(API_URL+"?action=load&key="+k)
-        .then(r=>r.json())
-        .then(res=>{ 
+        fetch(API_URL+"?action=load&key="+k).then(r=>r.json()).then(res=>{ 
             document.getElementById('statusMsg').style.display = 'none';
             if(res.status==="success" && res.data) {
                 const d = JSON.parse(res.data);
                 currentData = Array.isArray(d) ? d : d.rooms||[];
                 renderSheets();
-            } else { 
-                currentData=[]; 
-                document.getElementById('printArea').innerHTML = '<div class="text-center mt-5 text-muted">ไม่พบข้อมูล (กรุณาบันทึกมิเตอร์ก่อน)</div>';
-            }
-        })
-        .catch(()=>{ 
-            document.getElementById('statusMsg').style.display = 'none';
-            alert("โหลดข้อมูลไม่ได้ (Offline)");
-        });
+            } else { currentData=[]; document.getElementById('printArea').innerHTML = '<div class="text-center mt-5 text-muted">ไม่พบข้อมูล</div>'; }
+        }).catch(()=>{ document.getElementById('statusMsg').style.display = 'none'; });
     }
 
     function renderSheets() {
-        const container = document.getElementById('printArea');
-        container.innerHTML = '';
-        
+        const container = document.getElementById('printArea'); container.innerHTML = '';
         const selectedPair = document.getElementById('zonePairSelector').value;
         const mKey = document.getElementById('monthSelector').value;
         const [y,m] = mKey.split('-').map(Number);
         const headerStr = `เดือน ${monthNames[m-1]} ${y+543}`;
 
-        // Loop through pairs or specific pair
         let pairsToPrint = (selectedPair === 'ALL') ? ZONE_PAIRS : [selectedPair.split('-')];
 
         pairsToPrint.forEach(pair => {
-            const zoneL = pair[0];
-            const zoneR = pair[1];
-
-            // Get Rooms
-            const roomsL = getRoomsInZone(zoneL);
-            const roomsR = getRoomsInZone(zoneR);
-
-            // Create A4 Page
+            const roomsL = getRoomsInZone(pair[0]);
+            const roomsR = getRoomsInZone(pair[1]);
+            
             let html = `
             <div class="a4-page">
-                <div class="page-header">
-                    โพยเงินทอน (Cheat Sheet) - ${headerStr} [โซน ${zoneL} & ${zoneR}]
-                </div>
+                <div class="page-header">โพยเงินทอน (Cheat Sheet) - ${headerStr} [โซน ${pair[0]} & ${pair[1]}]</div>
                 <div class="page-content">
-                    <div class="col-half">
-                        ${renderRoomList(roomsL)}
-                    </div>
-                    
-                    <div class="col-half">
-                        ${renderRoomList(roomsR)}
-                    </div>
+                    <div class="col-half">${renderRoomList(roomsL)}</div>
+                    <div class="col-half">${renderRoomList(roomsR)}</div>
                 </div>
             </div>`;
-            
             container.insertAdjacentHTML('beforeend', html);
         });
     }
 
     function getRoomsInZone(z) {
-        return currentData.filter(r => r.id.startsWith(z) && !r.isCommon)
-                          .sort((a,b) => {
-                              // Sort A1, A2, A10 logic
-                              let nA = parseInt(a.id.replace(z,''))||0;
-                              let nB = parseInt(b.id.replace(z,''))||0;
-                              return nA - nB;
-                          });
+        return currentData.filter(r => r.id.startsWith(z) && !r.isCommon).sort((a,b) => {
+            let nA = parseInt(a.id.replace(z,''))||0; let nB = parseInt(b.id.replace(z,''))||0;
+            return nA - nB;
+        });
     }
 
     function renderRoomList(rooms) {
         if(rooms.length === 0) return '<div class="text-center p-3 text-muted">ไม่มีข้อมูล</div>';
-        
         let html = '';
         rooms.forEach(r => {
-            // 1. Calculate Total (Grand Total)
             const wn=parseFloat(r.w_new)||0, wo=parseFloat(r.w_old)||0, wr=parseFloat(r.w_rate)||0;
-            let wt = (r.w_new && r.w_old) ? (Math.max(4, Math.max(0,wn-wo)) * wr) : 0; // Min 4
+            let wt = (r.w_new && r.w_old) ? (Math.max(4, Math.max(0,wn-wo)) * wr) : 0;
             
             const en=parseFloat(r.e_new)||0, eo=parseFloat(r.e_old)||0, er=parseFloat(r.e_rate)||0;
             let et = (r.e_new && r.e_old) ? Math.max(0, en-eo) * er : 0;
 
-            const rent = (parseFloat(r.rent)||0) + (parseFloat(r.custom)||0) + (parseFloat(r.internet)||0);
-            const extra = parseFloat(r.extra)||0;
+            const rent = parseFloat(r.rent)||0;
+            const net = parseFloat(r.custom)||0; // custom = Net
+            const extra = parseFloat(r.extra)||0; // extra = Others
             
-            const total = Math.round(rent + wt + et + extra); // Round to integer
-
-            // 2. Predict Cash (Ceiling 1000)
+            const total = Math.round(rent + net + extra + wt + et);
             let pay = Math.ceil(total / 1000) * 1000;
-            if(pay === total) pay += 1000; // Case exact 4000 -> expect 5000 maybe? Or keep same. Let's keep logic simple: Next 1000.
-            // Adjust logic: if total 3200 -> pay 4000. If 4000 -> pay 4000 (usually transfer) or 5000.
-            // Let's stick to standard ceiling: 3200 -> 4000.
-            
-            // 3. Calc Change
+            if(pay === total) pay += 1000;
             const change = pay - total;
 
             html += `
@@ -247,9 +139,7 @@
                         <span class="label">ทอน:</span> <span class="value-change">${change.toLocaleString()}</span>
                     </div>
                 </div>
-                <div class="stamp-area">
-                    (ตราประทับ)
-                </div>
+                <div class="stamp-area"></div>
             </div>`;
         });
         return html;
