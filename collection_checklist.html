@@ -9,19 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --primary: #0284c7;
-            --bg: #f3f6f9;
-        }
+        :root { --primary: #0284c7; --bg: #f3f6f9; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); color: #334155; padding: 20px; }
 
-        body { 
-            font-family: 'Sarabun', sans-serif; 
-            background-color: var(--bg); 
-            color: #334155;
-            padding: 20px;
-        }
-
-        /* Control Panel (Hide on Print) */
+        /* Control Panel */
         .control-card {
             background: white; padding: 15px 20px; border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
@@ -45,7 +36,7 @@
         .a4-page {
             background: white; width: 210mm; min-height: 297mm; 
             margin: 0 auto; padding: 10mm; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-bottom: 20px; position: relative;
+            margin-bottom: 20px; position: relative; page-break-after: always;
         }
 
         /* Table Style */
@@ -54,21 +45,19 @@
             background-color: #f1f5f9; border: 1px solid #94a3b8; 
             padding: 5px; text-align: center; font-weight: 700; color: #334155;
         }
-        .check-table td { 
-            border: 1px solid #cbd5e1; padding: 4px 6px; vertical-align: middle;
-        }
+        .check-table td { border: 1px solid #cbd5e1; padding: 4px 6px; vertical-align: middle; }
         
         .room-col { font-weight: 800; text-align: center; font-size: 12pt; }
         .num-col { text-align: right; }
         .total-col { font-weight: 800; text-align: right; background-color: #f8fafc; }
-        .chk-col { text-align: center; color: #cbd5e1; }
-        .chk-box { width: 15px; height: 15px; border: 1px solid #94a3b8; display: inline-block; vertical-align: middle; }
+        .chk-col { text-align: center; color: #cbd5e1; font-size: 10px; }
+        .chk-box { width: 12px; height: 12px; border: 1px solid #94a3b8; display: inline-block; margin-right: 3px; }
 
         /* Print Settings */
         @media print {
             body { background: white; padding: 0; }
-            .control-card, .status-bar, #loadingMsg { display: none !important; }
-            .a4-page { box-shadow: none; margin: 0; width: 100%; page-break-after: always; border: none; }
+            .control-card, #loadingMsg { display: none !important; }
+            .a4-page { box-shadow: none; margin: 0; width: 100%; border: none; }
             @page { size: A4; margin: 0; }
         }
     </style>
@@ -76,7 +65,7 @@
 <body>
 
     <div class="control-card">
-        <h5 class="m-0 fw-bold text-primary me-3"><i class="fas fa-clipboard-list"></i> ใบเช็คลิสต์</h5>
+        <h5 class="m-0 fw-bold text-primary me-3"><i class="fas fa-clipboard-list"></i> ใบเช็คลิสต์เก็บเงิน</h5>
         
         <div class="filter-group">
             <span class="small fw-bold text-muted">เดือน:</span>
@@ -91,7 +80,8 @@
                 <option value="D">D</option><option value="E">E</option><option value="F">F</option>
                 <option value="G">G</option><option value="H">H</option><option value="I">I</option>
                 <option value="J">J</option><option value="K">K</option><option value="L">L</option>
-                <option value="M">M</option><option value="N">N</option>
+                <option value="M">M</option><option value="N">N</option><option value="O">O</option><option value="P">P</option>
+                <option value="OTHERS" class="text-primary fw-bold">อื่นๆ (ส่วนกลาง)</option>
             </select>
         </div>
 
@@ -109,8 +99,12 @@
     <div id="printArea"></div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec"; 
-    let currentData = [], monthNames=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+    // 🔥 LINK UPDATED: หอพัก v.2
+    const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec"; 
+    
+    let currentData = [];
+    const monthNames = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+    const ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
 
     window.onload = function() {
         const now = new Date();
@@ -131,9 +125,15 @@
                 const d = JSON.parse(res.data);
                 currentData = Array.isArray(d) ? d : d.rooms||[];
                 renderChecklist();
-            } else { currentData=[]; renderChecklist(); }
+            } else { 
+                currentData=[]; 
+                document.getElementById('printArea').innerHTML = '<div class="text-center text-muted mt-5">ไม่พบข้อมูล (กรุณากด "บันทึก" ที่หน้าจดมิเตอร์ก่อน)</div>';
+            }
         })
-        .catch(()=>{ document.getElementById('loadingMsg').style.display = 'none'; currentData=[]; renderChecklist(); });
+        .catch(()=>{ 
+            document.getElementById('loadingMsg').style.display = 'none'; 
+            alert("โหลดข้อมูลไม่ได้ (Offline)");
+        });
     }
 
     function renderChecklist() {
@@ -145,16 +145,26 @@
         const [y,m] = mKey.split('-').map(Number);
         const headerStr = `ประจำเดือน: ${monthNames[m-1]} ${y+543}`;
 
-        // Filter Rooms
-        let rooms = currentData.filter(r => !r.isCommon);
-        if(zone !== 'ALL') rooms = rooms.filter(r => r.id.startsWith(zone));
+        // Filter Logic
+        let rooms = [];
+        if (zone === 'ALL') {
+            rooms = currentData;
+        } else if (zone === 'OTHERS') {
+            // Filter ส่วนกลาง (ที่ไม่ใช่ A-P)
+            rooms = currentData.filter(r => {
+                const isStandardZone = ZONES.some(z => r.id.startsWith(z) && !isNaN(parseInt(r.id.substring(z.length))));
+                return !isStandardZone;
+            });
+        } else {
+            rooms = currentData.filter(r => r.id.startsWith(zone) && !isNaN(parseInt(r.id.substring(zone.length))));
+        }
 
-        if(rooms.length === 0) {
-            container.innerHTML = '<div class="text-center text-muted mt-5">ไม่พบข้อมูล (กรุณากด "บันทึก" ที่หน้าจดมิเตอร์ก่อน)</div>';
+        if(rooms.length === 0 && currentData.length > 0) {
+            container.innerHTML = '<div class="text-center text-muted mt-5">ไม่พบข้อมูลในโซนนี้</div>';
             return;
         }
 
-        // Split into pages (approx 25 rows per page)
+        // Split into pages (25 rows per page)
         const ROWS_PER_PAGE = 25;
         for (let i = 0; i < rooms.length; i += ROWS_PER_PAGE) {
             const chunk = rooms.slice(i, i + ROWS_PER_PAGE);
@@ -165,7 +175,7 @@
                     <h4 class="fw-bold m-0">📋 ใบเช็คลิสต์เก็บเงิน (K&G)</h4>
                     <div class="text-end">
                         <div class="fw-bold">${headerStr}</div>
-                        <div class="small text-muted">โซน: ${zone === 'ALL' ? 'ทั้งหมด' : zone}</div>
+                        <div class="small text-muted">โซน: ${zone === 'ALL' ? 'ทั้งหมด' : (zone==='OTHERS'?'ส่วนกลาง':zone)}</div>
                     </div>
                 </div>
 
@@ -185,17 +195,18 @@
                     <tbody>`;
 
             chunk.forEach(r => {
-                // Calc
+                // Calculation Logic
                 const wn=parseFloat(r.w_new)||0, wo=parseFloat(r.w_old)||0, wr=parseFloat(r.w_rate)||0;
                 let wt=0; 
                 if(r.w_new && wn>=wo){ 
                     let d=wn-wo; 
-                    let chargeUnits = (d<4) ? 4 : d;
+                    let chargeUnits = (!r.isCommon && d<4) ? 4 : d; // Min 4 for rooms
                     wt = chargeUnits * wr;
                 }
 
                 const en=parseFloat(r.e_new)||0, eo=parseFloat(r.e_old)||0, er=parseFloat(r.e_rate)||0;
-                let et=0; if(r.e_new && en>=eo){ let d=en-eo; et=d*er; }
+                let et=0; 
+                if(r.e_new && en>=eo){ let d=en-eo; et=d*er; }
 
                 const rent = (parseFloat(r.rent)||0) + (parseFloat(r.custom)||0) + (parseFloat(r.internet)||0);
                 const extra = parseFloat(r.extra)||0;
@@ -210,8 +221,8 @@
                     <td class="num-col text-danger" contenteditable="true">${extra!=0 ? extra.toLocaleString() : '-'}</td>
                     <td class="total-col" contenteditable="true">${total.toLocaleString()}</td>
                     <td class="chk-col">
-                        <div class="chk-box"></div> สด<br>
-                        <div class="chk-box"></div> โอน
+                        <span class="chk-box"></span>สด<br>
+                        <span class="chk-box"></span>โอน
                     </td>
                     <td contenteditable="true"></td>
                 </tr>`;
@@ -221,7 +232,7 @@
                     </tbody>
                 </table>
                 <div class="position-absolute bottom-0 end-0 p-4 small text-muted">
-                    ผู้ตรวจสอบ ........................................ วันที่ .......................
+                    ผู้ตรวจสอบ ........................................ วันที่ ....................... (หน้า ${Math.floor(i/ROWS_PER_PAGE)+1})
                 </div>
             </div>`;
 
