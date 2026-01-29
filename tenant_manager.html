@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จัดการผู้เช่า (V.1 Core) - K&G</title>
+    <title>จัดการผู้เช่า - K&G</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -17,44 +17,47 @@
             padding: 20px; padding-bottom: 80px;
         }
 
-        /* 1. Layout: Centered & Stable */
         .main-container {
             max-width: 1600px;
-            margin: 0 auto; /* กึ่งกลาง */
+            margin: 0 auto;
             background: white;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
-        /* 2. Table: Excel Grid Style */
-        .table-container {
-            overflow-x: auto;
-            border: 1px solid var(--border);
-            max-height: 80vh; /* Scroll แนวตั้งได้ถ้าข้อมูลเยอะ */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .filter-bar { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; }
+        .btn-zone { 
+            border: 1px solid #cbd5e1; background: white; color: #64748b; 
+            border-radius: 20px; padding: 4px 15px; font-weight: 700; font-size: 13px; 
+            white-space: nowrap; transition: 0.2s; 
         }
-        
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            min-width: 1200px; /* บังคับกว้างขั้นต่ำ กันบีบ */
-        }
-        
-        th { 
-            position: sticky; top: 0; 
-            background: #f8fafc; color: #475569; 
-            padding: 8px; border: 1px solid var(--border);
-            font-size: 13px; text-align: center; z-index: 10;
-            white-space: nowrap;
-        }
-        
-        td { 
-            border: 1px solid var(--border); 
-            padding: 0; height: 35px; vertical-align: middle;
-        }
+        .btn-zone:hover { background: #f1f5f9; }
+        .btn-zone.active { background: #0f172a; color: white; border-color: #0f172a; }
 
-        /* 3. Input Mechanics (Non-Negotiable) */
-        /* ลบ Spinner ออกให้เกลี้ยง */
+        .btn-sort {
+            background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;
+            border-radius: 20px; padding: 4px 15px; font-weight: 700; font-size: 13px;
+            transition: 0.2s; cursor: pointer;
+        }
+        .btn-sort:hover { background: #0284c7; color: white; }
+
+        .table-container { overflow-x: auto; border: 1px solid var(--border); max-height: 80vh; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        th { 
+            position: sticky; top: 0; background: #f8fafc; color: #475569; 
+            padding: 8px; border: 1px solid var(--border);
+            font-size: 13px; text-align: center; z-index: 10; white-space: nowrap;
+        }
+        td { border: 1px solid var(--border); padding: 0; height: 35px; vertical-align: middle; background: white; }
+
+        .drag-handle {
+            cursor: grab; color: #94a3b8; font-weight: bold; font-size: 16px; user-select: none;
+        }
+        .drag-handle:active { cursor: grabbing; color: #0f172a; }
+        tr.dragging { opacity: 0.5; background: #f1f5f9; }
+
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
@@ -64,31 +67,24 @@
             font-family: 'Sarabun'; font-size: 13px; outline: none; background: transparent;
             transition: background 0.1s; display: block;
         }
-        
-        /* Focus State: ชัดเจนแต่ไม่แสบตา */
         .cell-input:focus { background: #e0f2fe; box-shadow: inset 0 0 0 2px var(--primary); }
-        
         .cell-select {
             width: 100%; height: 100%; border: none; padding: 0 5px; 
             font-family: 'Sarabun'; font-size: 13px; outline: none; background: transparent; cursor: pointer;
         }
         .cell-select:focus { background: #e0f2fe; }
 
-        /* Status Colors (Visual Aid) */
         .st-active { color: #166534; background: #dcfce7; }
         .st-empty { color: #94a3b8; background: #f8fafc; }
         .st-moving { color: #854d0e; background: #fef9c3; }
         .st-debt { color: #991b1b; background: #fee2e2; }
 
-        /* Buttons & UI */
         .del-btn { color: #ef4444; border: none; background: none; cursor: pointer; opacity: 0.3; transition: 0.2s; font-size: 14px; }
         .del-btn:hover { opacity: 1; transform: scale(1.2); }
         
         .btn-add { 
-            width: 100%; padding: 10px; 
-            background: #f1f5f9; border: 2px dashed var(--border); 
-            color: #64748b; font-weight: bold; margin-top: 15px; 
-            cursor: pointer; transition: 0.2s; 
+            width: 100%; padding: 10px; background: #f1f5f9; border: 2px dashed var(--border); 
+            color: #64748b; font-weight: bold; margin-top: 15px; cursor: pointer; transition: 0.2s; 
         }
         .btn-add:hover { background: #e2e8f0; color: #334155; border-color: #94a3b8; }
 
@@ -99,7 +95,6 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
         }
         
-        /* Waiting List Side Panel Style */
         .wait-item { border: 1px solid #e2e8f0; padding: 8px; margin-bottom: 5px; border-radius: 6px; position: relative; background: #fff; }
     </style>
 </head>
@@ -107,7 +102,7 @@
 
 <div class="main-container">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="m-0 fw-bold text-primary"><i class="fas fa-users-cog"></i> จัดการผู้เช่า (Tenant Manager)</h4>
+        <h4 class="m-0 fw-bold text-primary"><i class="fas fa-users-cog"></i> ระบบจัดการผู้เช่า</h4>
         <div>
             <a href="index.html" class="btn btn-sm btn-light border fw-bold me-2 rounded-pill px-3">กลับเมนู</a>
             <button class="btn btn-sm btn-success fw-bold px-4 rounded-pill" onclick="saveToCloud()"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
@@ -116,10 +111,16 @@
 
     <div class="row">
         <div class="col-lg-9">
+            <div class="toolbar">
+                <div class="filter-bar" id="zoneFilterContainer"></div>
+                <button class="btn-sort" onclick="sortRooms()"><i class="fas fa-sort-alpha-down"></i> เรียงห้อง (Sort)</button>
+            </div>
+
             <div class="table-container">
                 <table id="tenantTable">
                     <thead>
                         <tr>
+                            <th style="width: 40px;">≡</th>
                             <th style="width: 40px;">#</th>
                             <th style="width: 80px;">ห้อง</th>
                             <th style="width: 130px;">สถานะ</th>
@@ -135,6 +136,7 @@
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
+            
             <button class="btn-add" onclick="addNewRow()">+ เพิ่มห้องใหม่</button>
         </div>
 
@@ -150,249 +152,182 @@
     </div>
 </div>
 
-<div class="status-bar" id="statusMsg">พร้อมใช้งาน</div>
+<div class="status-bar" id="statusMsg">ระบบพร้อมทำงาน</div>
 
 <script>
-    // --- Config ---
-    const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec";
-    
-    // Default Data (A1-P20) - Safety Net
-    const ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
-    const ROOMS_PER_ZONE = 20;
+const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec";
+const ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+const ROOMS_PER_ZONE = 20;
 
-    let tenants = [];
-    let waitingList = [];
+let tenants = [];
+let waitingList = [];
+let currentZone = 'ALL';
+let draggedItem = null;
 
-    window.onload = function() {
-        loadData();
-    };
+window.onload = function() {
+    renderZoneFilter();
+    loadData();
+};
 
-    // --- 1. Data Loading & Safety ---
-    function loadData() {
-        updateStatus("กำลังโหลด...", true);
-        fetch(API_URL + "?action=loadTenants")
-            .then(r => r.json())
-            .then(res => {
-                if(res.status==="success") {
-                    // Check if data exists, if not generate default
-                    if (res.tenants && res.tenants.length > 0) {
-                        tenants = res.tenants;
-                    } else {
-                        tenants = generateDefaultRooms();
-                    }
-                    waitingList = res.waiting || [];
-                } else {
-                    tenants = generateDefaultRooms();
-                }
-                renderTable();
-                renderWaitingList();
-                updateStatus("ข้อมูลล่าสุด");
-            })
-            .catch(err => {
-                console.error(err);
-                tenants = generateDefaultRooms(); // Offline fallback
-                renderTable();
-                updateStatus("โหมดออฟไลน์ (โหลดไม่สำเร็จ)");
-            });
-    }
-
-    function generateDefaultRooms() {
-        let arr = [];
-        ZONES.forEach(z => {
-            for(let i=1; i<=ROOMS_PER_ZONE; i++) {
-                arr.push(createEmptyRow(z+i));
-            }
-        });
-        return arr;
-    }
-
-    function createEmptyRow(id) {
-        return { id: id, status: 'Empty', name: '', phone: '', deposit: '', start: '', end: '', debt: '', note: '' };
-    }
-
-    // --- 2. Core Rendering ---
-    function renderTable() {
-        const tb = document.getElementById('tableBody');
-        tb.innerHTML = '';
-
-        tenants.forEach((t, idx) => {
-            let stClass = 'st-empty';
-            if(t.status === 'Active') stClass = 'st-active';
-            else if(t.status === 'MovingOut') stClass = 'st-moving';
-            else if(t.status === 'Debt') stClass = 'st-debt';
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="text-center"><button class="del-btn" tabindex="-1" onclick="deleteRow(${idx})">&times;</button></td>
-                <td><input type="text" class="cell-input text-center fw-bold nav-item" data-r="${idx}" data-c="0" value="${t.id}" onchange="updateData(${idx}, 'id', this.value)"></td>
-                <td class="${stClass}">
-                    <select class="cell-select nav-item" data-r="${idx}" data-c="1" onchange="updateStatus(${idx}, this.value)">
-                        <option value="Active" ${t.status==='Active'?'selected':''}>🟢 อยู่ปกติ</option>
-                        <option value="Empty" ${t.status==='Empty'?'selected':''}>⚪ ว่าง</option>
-                        <option value="MovingOut" ${t.status==='MovingOut'?'selected':''}>🟡 แจ้งย้าย</option>
-                        <option value="Debt" ${t.status==='Debt'?'selected':''}>🔴 ค้าง/หนี</option>
-                    </select>
-                </td>
-                <td><input type="text" class="cell-input nav-item" data-r="${idx}" data-c="2" value="${t.name||''}" onchange="updateData(${idx}, 'name', this.value)"></td>
-                <td><input type="text" class="cell-input nav-item" data-r="${idx}" data-c="3" value="${t.phone||''}" onchange="updateData(${idx}, 'phone', this.value)"></td>
-                <td><input type="number" class="cell-input nav-item text-end" data-r="${idx}" data-c="4" value="${t.deposit||''}" onchange="updateData(${idx}, 'deposit', this.value)"></td>
-                <td><input type="date" class="cell-input nav-item" data-r="${idx}" data-c="5" value="${t.start||''}" onchange="updateData(${idx}, 'start', this.value)"></td>
-                <td><input type="date" class="cell-input nav-item" data-r="${idx}" data-c="6" value="${t.end||''}" onchange="updateData(${idx}, 'end', this.value)"></td>
-                <td><input type="number" class="cell-input nav-item text-danger text-end fw-bold" data-r="${idx}" data-c="7" value="${t.debt||''}" onchange="updateData(${idx}, 'debt', this.value)"></td>
-                <td><input type="text" class="cell-input nav-item" data-r="${idx}" data-c="8" value="${t.note||''}" onchange="updateData(${idx}, 'note', this.value)"></td>
-            `;
-            tb.appendChild(tr);
-        });
-
-        attachNavEvents();
-    }
-
-    // --- 3. Data Mechanics ---
-    function updateData(idx, field, val) {
-        tenants[idx][field] = val;
-        // Auto-Status Logic: If Name filled & Status is Empty -> Active
-        if (field === 'name' && val.trim() !== '' && tenants[idx].status === 'Empty') {
-            tenants[idx].status = 'Active';
-            renderTable(); // Re-render to show Green color
-        }
-    }
-
-    function updateStatus(idx, val) {
-        tenants[idx].status = val;
-        renderTable();
-    }
-
-    function addNewRow() {
-        tenants.push(createEmptyRow("New"));
-        renderTable();
-        // Scroll to bottom
-        window.scrollTo(0, document.body.scrollHeight);
-    }
-
-    function deleteRow(idx) {
-        if(confirm("ยืนยันลบแถวนี้?")) {
-            tenants.splice(idx, 1);
-            renderTable();
-        }
-    }
-
-    // --- 4. Navigation & Paste (The Important Part) ---
-    function attachNavEvents() {
-        const inputs = document.querySelectorAll('.nav-item');
-        
-        inputs.forEach(input => {
-            // Navigation
-            input.onkeydown = (e) => {
-                const key = e.key;
-                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(key)) {
-                    // Logic to prioritize Navigation over Text Cursor
-                    if (key === 'ArrowLeft' && input.selectionStart > 0) return;
-                    if (key === 'ArrowRight' && input.selectionStart < input.value.length) return;
-
-                    e.preventDefault();
-
-                    const r = parseInt(input.dataset.r);
-                    const c = parseInt(input.dataset.c);
-                    let nextR = r, nextC = c;
-
-                    if (key === 'ArrowUp') nextR--;
-                    if (key === 'ArrowDown' || key === 'Enter') nextR++;
-                    if (key === 'ArrowLeft') nextC--;
-                    if (key === 'ArrowRight') nextC++;
-
-                    // Find target
-                    const target = document.querySelector(`.nav-item[data-r="${nextR}"][data-c="${nextC}"]`);
-                    if (target) {
-                        target.focus();
-                        if (target.select) target.select();
-                    }
-                }
-            };
-
-            // Smart Paste (Multi-Row/Col)
-            input.onpaste = (e) => {
-                e.preventDefault();
-                const text = (e.clipboardData || window.clipboardData).getData('text');
-                const rows = text.split(/\r?\n/).filter(x => x !== '');
-                
-                const startR = parseInt(input.dataset.r);
-                const startC = parseInt(input.dataset.c);
-                const fields = ['id','status','name','phone','deposit','start','end','debt','note'];
-
-                rows.forEach((rowStr, rOffset) => {
-                    const cells = rowStr.split('\t');
-                    cells.forEach((val, cOffset) => {
-                        const targetR = startR + rOffset;
-                        const targetC = startC + cOffset;
-                        
-                        if (tenants[targetR] && fields[targetC]) {
-                            const fieldName = fields[targetC];
-                            tenants[targetR][fieldName] = val.trim();
-                            
-                            // Paste Trigger: Auto-Active
-                            if(fieldName === 'name' && val.trim() !== '') {
-                                tenants[targetR].status = 'Active';
-                            }
-                        }
-                    });
-                });
-                renderTable();
-            };
-        });
-    }
-
-    // --- 5. Waiting List Logic ---
-    function addWaitList() {
-        let name = prompt("ชื่อคนจอง:");
-        if(name) {
-            let room = prompt("จองห้อง (ถ้ามี):", "");
-            let phone = prompt("เบอร์โทร:");
-            waitingList.push({ name, room, phone });
-            renderWaitingList();
-        }
-    }
-    function removeWait(i) {
-        if(confirm("ลบ?")) { waitingList.splice(i, 1); renderWaitingList(); }
-    }
-    function renderWaitingList() {
-        const c = document.getElementById('waitingListContainer'); c.innerHTML = '';
-        waitingList.forEach((w, i) => {
-            c.innerHTML += `
-            <div class="wait-item position-relative">
-                <small class="text-primary fw-bold">[${w.room||'ไม่ระบุ'}]</small> <b>${w.name}</b>
-                <div class="small text-muted">${w.phone||'-'}</div>
-                <button class="btn btn-sm text-danger position-absolute top-0 end-0" onclick="removeWait(${i})">&times;</button>
-            </div>`;
-        });
-    }
-
-    // --- 6. Save ---
-    function saveToCloud() {
-        updateStatus("กำลังบันทึก...", true);
-        fetch(API_URL + "?action=saveTenants", { 
-            method: "POST", 
-            body: JSON.stringify({ tenants: tenants, waiting: waitingList }) 
-        })
+function loadData() {
+    updateStatus("กำลังดึงข้อมูล...", true);
+    fetch(API_URL + "?action=loadTenants")
         .then(r => r.json())
         .then(res => {
-            if(res.status === "success") {
-                updateStatus("✅ บันทึกสำเร็จ");
-                alert("บันทึกเรียบร้อยครับ!");
+            if(res.status==="success") {
+                tenants = (res.tenants && res.tenants.length) ? res.tenants : generateDefaultRooms();
+                waitingList = res.waiting || [];
             } else {
-                updateStatus("❌ Error");
-                alert("เกิดข้อผิดพลาด: " + res.message);
+                tenants = generateDefaultRooms();
             }
+            renderTable();
+            renderWaitingList();
+            updateStatus("✅ ข้อมูลล่าสุด");
         })
-        .catch(err => {
-            updateStatus("❌ เชื่อมต่อไม่ได้");
-            console.error(err);
+        .catch(() => {
+            tenants = generateDefaultRooms();
+            renderTable();
+            updateStatus("⚠️ โหมดออฟไลน์");
         });
-    }
+}
 
-    function updateStatus(msg, loading=false) {
-        const el = document.getElementById('statusMsg');
-        el.innerHTML = loading ? `<i class="fas fa-spinner fa-spin"></i> ${msg}` : msg;
+function generateDefaultRooms() {
+    let arr = [];
+    ZONES.forEach(z => {
+        for(let i=1;i<=ROOMS_PER_ZONE;i++) arr.push(createEmptyRow(z+i));
+    });
+    return arr;
+}
+
+function createEmptyRow(id) {
+    return { id, status:'Empty', name:'', phone:'', deposit:'', start:'', end:'', debt:'', note:'' };
+}
+
+function renderZoneFilter() {
+    const c = document.getElementById('zoneFilterContainer');
+    c.innerHTML = `<button class="btn-zone active" onclick="filterZone('ALL')">ทั้งหมด</button>`;
+    ZONES.forEach(z => c.innerHTML += `<button class="btn-zone" onclick="filterZone('${z}')">${z}</button>`);
+}
+
+function filterZone(z) {
+    currentZone = z;
+    document.querySelectorAll('.btn-zone').forEach(b => {
+        b.classList.toggle('active', b.innerText === (z==='ALL'?'ทั้งหมด':z));
+    });
+    renderTable();
+}
+
+function renderTable() {
+    const tb = document.getElementById('tableBody');
+    tb.innerHTML = '';
+
+    let display = currentZone==='ALL' ? tenants : tenants.filter(t => t.id.startsWith(currentZone));
+
+    display.forEach(t => {
+        let idx = tenants.indexOf(t);
+        let stClass = t.status==='Active'?'st-active':t.status==='MovingOut'?'st-moving':t.status==='Debt'?'st-debt':'st-empty';
+
+        const tr = document.createElement('tr');
+        tr.setAttribute('draggable', true);
+        tr.dataset.idx = idx;
+
+        tr.addEventListener('dragstart', handleDragStart);
+        tr.addEventListener('dragover', handleDragOver);
+        tr.addEventListener('drop', handleDrop);
+        tr.addEventListener('dragend', handleDragEnd);
+
+        tr.innerHTML = `
+        <td class="text-center drag-handle">≡</td>
+        <td class="text-center"><button class="del-btn" onclick="deleteRow(${idx})">&times;</button></td>
+        <td><input class="cell-input text-center fw-bold nav-item" data-r="${idx}" data-c="0" value="${t.id}" onchange="updateData(${idx},'id',this.value)"></td>
+        <td class="${stClass}">
+            <select class="cell-select nav-item" data-r="${idx}" data-c="1" onchange="updateStatusRow(${idx},this.value)">
+                <option value="Active" ${t.status==='Active'?'selected':''}>🟢 อยู่ปกติ</option>
+                <option value="Empty" ${t.status==='Empty'?'selected':''}>⚪ ว่าง</option>
+                <option value="MovingOut" ${t.status==='MovingOut'?'selected':''}>🟡 แจ้งย้าย</option>
+                <option value="Debt" ${t.status==='Debt'?'selected':''}>🔴 ค้าง/หนี</option>
+            </select>
+        </td>
+        <td><input class="cell-input nav-item" data-r="${idx}" data-c="2" value="${t.name}" onchange="updateData(${idx},'name',this.value)"></td>
+        <td><input class="cell-input nav-item" data-r="${idx}" data-c="3" value="${t.phone}" onchange="updateData(${idx},'phone',this.value)"></td>
+        <td><input type="number" class="cell-input nav-item text-end" data-r="${idx}" data-c="4" value="${t.deposit}" onchange="updateData(${idx},'deposit',this.value)"></td>
+        <td><input type="date" class="cell-input nav-item" data-r="${idx}" data-c="5" value="${t.start}" onchange="updateData(${idx},'start',this.value)"></td>
+        <td><input type="date" class="cell-input nav-item" data-r="${idx}" data-c="6" value="${t.end}" onchange="updateData(${idx},'end',this.value)"></td>
+        <td><input type="number" class="cell-input nav-item text-danger text-end fw-bold" data-r="${idx}" data-c="7" value="${t.debt}" onchange="updateData(${idx},'debt',this.value)"></td>
+        <td><input class="cell-input nav-item" data-r="${idx}" data-c="8" value="${t.note}" onchange="updateData(${idx},'note',this.value)"></td>`;
+        tb.appendChild(tr);
+    });
+}
+
+function handleDragStart(e){ draggedItem=this; this.classList.add('dragging'); }
+function handleDragOver(e){ e.preventDefault(); }
+function handleDrop(e){
+    e.preventDefault();
+    if(draggedItem!==this){
+        let s=+draggedItem.dataset.idx,t=+this.dataset.idx;
+        let m=tenants.splice(s,1)[0];
+        tenants.splice(t,0,m);
+        renderTable();
     }
+}
+function handleDragEnd(){ this.classList.remove('dragging'); draggedItem=null; }
+
+function sortRooms(){
+    if(!confirm("ต้องการเรียงเลขห้องใหม่ใช่ไหม?")) return;
+    tenants.sort((a,b)=>{
+        const p=x=>{let m=x.match(/^([A-Z]+)(\d+)/);return m?[m[1],+m[2]]:[x,0]};
+        let [za,na]=p(a.id),[zb,nb]=p(b.id);
+        return za===zb?na-nb:za<zb?-1:1;
+    });
+    renderTable();
+}
+
+function updateData(i,f,v){
+    tenants[i][f]=v;
+    if(f==='name' && v.trim() && tenants[i].status==='Empty'){
+        tenants[i].status='Active';
+        renderTable();
+    }
+}
+function updateStatusRow(i,v){ tenants[i].status=v; renderTable(); }
+function addNewRow(){ tenants.push(createEmptyRow("New")); renderTable(); }
+function deleteRow(i){ if(confirm("ยืนยันลบแถวนี้?")){ tenants.splice(i,1); renderTable(); } }
+
+function addWaitList(){
+    let name=prompt("ชื่อคนจอง:");
+    if(name){
+        let room=prompt("จองห้อง:", "");
+        let phone=prompt("เบอร์โทร:");
+        waitingList.push({name,room,phone});
+        renderWaitingList();
+    }
+}
+function removeWait(i){ if(confirm("ลบ?")){ waitingList.splice(i,1); renderWaitingList(); } }
+function renderWaitingList(){
+    const c=document.getElementById('waitingListContainer'); c.innerHTML='';
+    waitingList.forEach((w,i)=>{
+        c.innerHTML+=`
+        <div class="wait-item">
+            <small class="text-primary fw-bold">[${w.room||'ไม่ระบุ'}]</small> <b>${w.name}</b>
+            <div class="small text-muted">${w.phone||'-'}</div>
+            <button class="btn btn-sm text-danger position-absolute top-0 end-0" onclick="removeWait(${i})">&times;</button>
+        </div>`;
+    });
+}
+
+function saveToCloud(){
+    updateStatus("กำลังบันทึกข้อมูล...",true);
+    fetch(API_URL+"?action=saveTenants",{method:"POST",body:JSON.stringify({tenants,waiting:waitingList})})
+    .then(r=>r.json())
+    .then(res=>{
+        updateStatus(res.status==="success"?"✅ บันทึกสำเร็จ":"❌ เกิดข้อผิดพลาด");
+    })
+    .catch(()=>updateStatus("❌ เชื่อมต่อเน็ตไม่ได้"));
+}
+
+function updateStatus(msg,loading=false){
+    document.getElementById('statusMsg').innerHTML = loading ? `<i class="fas fa-spinner fa-spin"></i> ${msg}` : msg;
+}
 </script>
 
 </body>
