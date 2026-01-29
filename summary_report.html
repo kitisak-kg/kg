@@ -11,55 +11,23 @@
     <style>
         :root { --primary: #0284c7; --bg: #f8fafc; }
         body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); padding: 20px; color: #334155; }
-        
-        .control-card {
-            background: white; padding: 15px 25px; border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 20px;
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
-        }
-
-        /* Dashboard Cards */
-        .stat-card {
-            background: white; border-radius: 16px; padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;
-            height: 100%; transition: 0.3s; position: relative; overflow: hidden;
-        }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
-        .stat-icon {
-            position: absolute; right: -10px; bottom: -10px; font-size: 80px; opacity: 0.1;
-            transform: rotate(-15deg);
-        }
-        .stat-title { font-size: 14px; color: #64748b; font-weight: 600; }
+        .control-card { background: white; padding: 15px 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .stat-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; height: 100%; position: relative; overflow: hidden; }
+        .stat-icon { position: absolute; right: -10px; bottom: -10px; font-size: 80px; opacity: 0.1; transform: rotate(-15deg); }
         .stat-value { font-size: 28px; font-weight: 800; color: #0f172a; margin-top: 5px; }
-        .stat-sub { font-size: 12px; color: #16a34a; font-weight: 600; display: flex; align-items: center; gap: 3px; }
-
-        /* Table */
         .report-table { width: 100%; font-size: 13px; border-collapse: collapse; background: white; }
-        .report-table th { background: #f1f5f9; padding: 8px; text-align: center; border: 1px solid #e2e8f0; color: #475569; }
+        .report-table th { background: #f1f5f9; padding: 8px; text-align: center; border: 1px solid #e2e8f0; }
         .report-table td { padding: 6px 8px; border: 1px solid #e2e8f0; vertical-align: middle; }
-        
-        .row-zone-header { background: #e0f2fe; font-weight: 800; color: #0369a1; text-align: left !important; padding-left: 15px !important; }
-        .row-common-header { background: #ffedd5; font-weight: 800; color: #c2410c; text-align: left !important; padding-left: 15px !important; }
-        
+        .row-zone-header { background: #e0f2fe; font-weight: 800; color: #0369a1; }
+        .row-common-header { background: #ffedd5; font-weight: 800; color: #c2410c; }
         .col-money { text-align: right; font-weight: 600; }
         .col-total { text-align: right; font-weight: 800; color: #0f172a; background: #f8fafc; }
-
-        /* Print Settings */
-        @media print {
-            body { background: white; padding: 0; }
-            .control-card, .btn { display: none !important; }
-            .stat-card { border: 1px solid #94a3b8; box-shadow: none; padding: 10px; }
-            .stat-icon { display: none; }
-            .stat-value { font-size: 20px; }
-            .container { max-width: 100% !important; width: 100%; }
-            @page { size: A4; margin: 10mm; }
-        }
+        @media print { .no-print { display: none !important; } .container { max-width: 100% !important; } @page { size: A4; margin: 10mm; } }
     </style>
 </head>
 <body>
 
 <div class="container" style="max-width: 1200px;">
-    
     <div class="control-card no-print">
         <div class="d-flex align-items-center gap-3">
             <h4 class="m-0 fw-bold text-primary"><i class="fas fa-chart-pie"></i> รายงานสรุปยอด</h4>
@@ -69,219 +37,119 @@
             </div>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-primary rounded-pill fw-bold px-4" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์รายงาน</button>
-            <a href="index.html" class="btn btn-light border rounded-pill fw-bold">กลับเมนู</a>
+            <button class="btn btn-primary rounded-pill fw-bold px-4" onclick="window.print()">พิมพ์รายงาน</button>
+            <a href="index.html" class="btn btn-light border rounded-pill fw-bold">กลับ</a>
         </div>
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-md-3 col-6">
-            <div class="stat-card border-bottom border-4 border-primary">
-                <i class="fas fa-money-bill-wave stat-icon text-primary"></i>
-                <div class="stat-title">รายรับรวมสุทธิ (Grand Total)</div>
-                <div class="stat-value text-primary" id="card_grand_total">0</div>
-                <div class="stat-sub"><i class="fas fa-check-circle"></i> ยอดที่ต้องเก็บจริง</div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6">
-            <div class="stat-card border-bottom border-4 border-success">
-                <i class="fas fa-home stat-icon text-success"></i>
-                <div class="stat-title">ค่าเช่า + ส่วนกลาง</div>
-                <div class="stat-value text-success" id="card_rent_total">0</div>
-                <div class="stat-sub" id="room_count">0 ห้อง</div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6">
-            <div class="stat-card border-bottom border-4 border-info">
-                <i class="fas fa-tint stat-icon text-info"></i>
-                <div class="stat-title">ค่าน้ำ + ค่าไฟ</div>
-                <div class="stat-value text-info" id="card_util_total">0</div>
-                <div class="stat-sub">รายได้สาธารณูปโภค</div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6">
-            <div class="stat-card border-bottom border-4 border-warning">
-                <i class="fas fa-wifi stat-icon text-warning"></i>
-                <div class="stat-title">อื่นๆ (เน็ต/หนี้/ปรับ)</div>
-                <div class="stat-value text-warning" id="card_other_total">0</div>
-                <div class="stat-sub">รายได้เสริม</div>
-            </div>
-        </div>
+        <div class="col-md-3 col-6"><div class="stat-card border-bottom border-4 border-primary"><i class="fas fa-money-bill-wave stat-icon text-primary"></i><div>รายรับรวมสุทธิ</div><div class="stat-value text-primary" id="card_grand_total">0</div></div></div>
+        <div class="col-md-3 col-6"><div class="stat-card border-bottom border-4 border-success"><i class="fas fa-home stat-icon text-success"></i><div>ค่าเช่า + เน็ต</div><div class="stat-value text-success" id="card_rent_total">0</div></div></div>
+        <div class="col-md-3 col-6"><div class="stat-card border-bottom border-4 border-info"><i class="fas fa-tint stat-icon text-info"></i><div>ค่าน้ำ + ค่าไฟ</div><div class="stat-value text-info" id="card_util_total">0</div></div></div>
+        <div class="col-md-3 col-6"><div class="stat-card border-bottom border-4 border-warning"><i class="fas fa-list-ul stat-icon text-warning"></i><div>อื่นๆ (จิปาถะ)</div><div class="stat-value text-warning" id="card_other_total">0</div></div></div>
     </div>
 
     <div class="bg-white p-4 rounded-4 shadow-sm border">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold m-0"><i class="fas fa-list-alt"></i> รายละเอียดตามโซน (Breakdown by Zone)</h5>
+            <h5 class="fw-bold m-0"><i class="fas fa-list-alt"></i> รายละเอียดตามโซน</h5>
             <span class="small text-muted">ข้อมูล ณ วันที่ <span id="printDate">-</span></span>
         </div>
-        
         <table class="report-table">
             <thead>
                 <tr>
                     <th style="width:10%;">โซน/ห้อง</th>
-                    <th style="width:15%;">ค่าเช่า</th>
-                    <th style="width:10%;">ส่วนกลาง</th>
+                    <th style="width:20%;">ค่าเช่า</th>
+                    <th style="width:15%;">ค่าเน็ต</th>
                     <th style="width:10%;">ค่าน้ำ</th>
                     <th style="width:10%;">ค่าไฟ</th>
-                    <th style="width:10%;">เน็ต</th>
-                    <th style="width:10%;">อื่นๆ/หนี้</th>
+                    <th style="width:10%;">อื่นๆ</th>
                     <th style="width:25%;">รวมสุทธิ</th>
                 </tr>
             </thead>
-            <tbody id="reportBody">
-                </tbody>
+            <tbody id="reportBody"></tbody>
         </table>
     </div>
-
 </div>
 
-<div id="loadingMsg" class="position-fixed top-50 start-50 translate-middle bg-white p-4 rounded shadow text-center" style="display:none; z-index:2000;">
-    <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
-    <div class="mt-2 fw-bold">กำลังประมวลผล...</div>
-</div>
+<div id="loadingMsg" class="position-fixed top-50 start-50 translate-middle bg-white p-4 rounded shadow text-center" style="display:none; z-index:2000;"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i></div>
 
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec"; 
-    
-    // โซนปกติ (A-P)
     const STANDARD_ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
 
     window.onload = function() {
-        const now = new Date();
-        document.getElementById('monthSelector').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-        document.getElementById('printDate').innerText = now.toLocaleDateString('th-TH');
+        document.getElementById('monthSelector').value = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
+        document.getElementById('printDate').innerText = new Date().toLocaleDateString('th-TH');
         loadData();
     };
 
     function loadData() {
         const k = document.getElementById('monthSelector').value;
         document.getElementById('loadingMsg').style.display = 'block';
-        
-        fetch(API_URL+"?action=load&key="+k)
-        .then(r=>r.json())
-        .then(res=>{ 
+        fetch(API_URL+"?action=load&key="+k).then(r=>r.json()).then(res=>{ 
             document.getElementById('loadingMsg').style.display = 'none';
-            if(res.status==="success" && res.data) {
-                renderReport(JSON.parse(res.data));
-            } else {
-                renderReport([]);
-                alert("ไม่พบข้อมูลของเดือนนี้ กรุณากดบันทึกที่หน้า 'จดมิเตอร์' ก่อนครับ");
-            }
-        })
-        .catch(()=>{ 
-            document.getElementById('loadingMsg').style.display = 'none';
-            alert("เชื่อมต่อข้อมูลไม่สำเร็จ");
-        });
+            if(res.status==="success" && res.data) renderReport(JSON.parse(res.data));
+            else { renderReport([]); alert("ไม่พบข้อมูล"); }
+        }).catch(()=>{ document.getElementById('loadingMsg').style.display = 'none'; });
     }
 
     function renderReport(data) {
         const rooms = Array.isArray(data) ? data : data.rooms||[];
         const tb = document.getElementById('reportBody'); tb.innerHTML = '';
         
-        // ตัวแปรสำหรับรวมยอด
-        let gRent=0, gCust=0, gWater=0, gElec=0, gNet=0, gExtra=0, gTotal=0;
-        let countRooms = 0;
-
-        // Grouping Logic (ใช้ Flag isCommon เป็นหลัก!)
-        const zones = {};
-        const commonKey = "COMMON_AREA"; // Key สำหรับส่วนกลาง
+        let gRent=0, gNet=0, gWater=0, gElec=0, gExtra=0, gTotal=0;
+        const zones = {}; const commonKey = "COMMON_AREA";
 
         rooms.forEach(r => {
-            let zoneKey = commonKey; // Default ไว้ก่อน
-            
-            // 1. ถ้ามี Flag ว่าเป็นส่วนกลาง -> โยนเข้า COMMON_AREA ทันที
-            if (r.isCommon === true) {
-                zoneKey = commonKey;
-            } 
-            // 2. ถ้าไม่ใช่ส่วนกลาง -> เช็คตัวอักษรแรก
-            else {
-                const firstChar = r.id.charAt(0).toUpperCase();
-                if (STANDARD_ZONES.includes(firstChar)) {
-                    zoneKey = firstChar;
-                } else {
-                    // ถ้าชื่อแปลกๆ ที่ไม่มีใน A-P แต่ไม่ได้ติ๊กส่วนกลางมา
-                    // ก็ให้ไปอยู่ส่วนกลางเพื่อความปลอดภัย (หรือจะสร้างโซน Other ก็ได้)
-                    zoneKey = commonKey;
-                }
-            }
-
+            let zoneKey = r.isCommon ? commonKey : (STANDARD_ZONES.includes(r.id.charAt(0)) ? r.id.charAt(0) : commonKey);
             if(!zones[zoneKey]) zones[zoneKey] = [];
             zones[zoneKey].push(r);
         });
 
-        // Sort: เรียง A-P ขึ้นก่อน, COMMON_AREA ไว้ล่างสุด
-        const sortedKeys = Object.keys(zones).sort((a,b) => {
-            if(a === commonKey) return 1; // Common ไปหลังสุด
-            if(b === commonKey) return -1;
-            return a.localeCompare(b);
-        });
-
-        sortedKeys.forEach(zone => {
-            // สร้าง Header หัวข้อโซน
-            let headerTitle = (zone === commonKey) ? "🔹 ส่วนกลาง / อื่นๆ" : `ตึก ${zone}`;
-            let headerClass = (zone === commonKey) ? "row-common-header" : "row-zone-header";
-            
-            tb.innerHTML += `<tr><td colspan="8" class="${headerClass}">${headerTitle}</td></tr>`;
+        Object.keys(zones).sort((a,b)=>(a===commonKey?1:(b===commonKey?-1:a.localeCompare(b)))).forEach(zone => {
+            let title = (zone === commonKey) ? "🔹 ส่วนกลาง / อื่นๆ" : `ตึก ${zone}`;
+            let cls = (zone === commonKey) ? "row-common-header" : "row-zone-header";
+            tb.innerHTML += `<tr><td colspan="7" class="${cls}">${title}</td></tr>`;
             
             zones[zone].forEach(r => {
-                // คำนวณยอดเงิน
                 const rent = parseFloat(r.rent)||0;
-                const cust = parseFloat(r.custom)||0;
-                const net = parseFloat(r.internet)||0;
-                const extra = parseFloat(r.extra)||0;
+                const net = parseFloat(r.custom)||0; // custom = Net
+                const extra = parseFloat(r.extra)||0; // extra = Others
 
-                // ค่าน้ำ
                 const wn=parseFloat(r.w_new)||0, wo=parseFloat(r.w_old)||0, wr=parseFloat(r.w_rate)||0;
-                let wt=0; 
-                if(r.w_new && wn>=wo){ 
-                    let d=wn-wo; 
-                    // ถ้าเป็นส่วนกลาง ไม่ต้องมีขั้นต่ำ, ถ้าห้องพักมีขั้นต่ำ 4
-                    let charge = (zone !== commonKey && d<4) ? 4 : d; 
-                    wt = charge*wr; 
-                }
+                let wt=0; if(r.w_new && wn>=wo){ let d=wn-wo; let charge=(!r.isCommon && d<4)?4:d; wt=charge*wr; }
 
-                // ค่าไฟ
                 const en=parseFloat(r.e_new)||0, eo=parseFloat(r.e_old)||0, er=parseFloat(r.e_rate)||0;
                 let et=0; if(r.e_new && en>=eo){ et=(en-eo)*er; }
 
-                const subTotal = rent + cust + net + extra + wt + et;
-
-                // รวมยอดเข้ากองกลาง
-                gRent+=rent; gCust+=cust; gNet+=net; gExtra+=extra; gWater+=wt; gElec+=et; gTotal+=subTotal;
-                
-                // นับห้องเฉพาะที่เป็นตึกพักอาศัย (ส่วนกลางไม่นับเป็น Occupancy)
-                if(zone !== commonKey) countRooms++;
+                const subTotal = rent + net + extra + wt + et;
+                gRent+=rent; gNet+=net; gExtra+=extra; gWater+=wt; gElec+=et; gTotal+=subTotal;
 
                 tb.innerHTML += `
                 <tr>
                     <td class="text-center">${r.id}</td>
                     <td class="col-money text-muted">${rent.toLocaleString()}</td>
-                    <td class="col-money text-muted">${cust.toLocaleString()}</td>
+                    <td class="col-money text-muted">${net.toLocaleString()}</td>
                     <td class="col-money">${wt.toLocaleString()}</td>
                     <td class="col-money">${et.toLocaleString()}</td>
-                    <td class="col-money text-muted">${net.toLocaleString()}</td>
                     <td class="col-money text-danger">${extra.toLocaleString()}</td>
                     <td class="col-total">${subTotal.toLocaleString()}</td>
                 </tr>`;
             });
         });
 
-        // อัปเดตการ์ดสรุปด้านบน
         document.getElementById('card_grand_total').innerText = gTotal.toLocaleString() + " ฿";
-        document.getElementById('card_rent_total').innerText = (gRent + gCust).toLocaleString() + " ฿";
+        document.getElementById('card_rent_total').innerText = (gRent + gNet).toLocaleString() + " ฿";
         document.getElementById('card_util_total').innerText = (gWater + gElec).toLocaleString() + " ฿";
-        document.getElementById('card_other_total').innerText = (gNet + gExtra).toLocaleString() + " ฿";
-        document.getElementById('room_count').innerText = countRooms + " ห้องพัก";
+        document.getElementById('card_other_total').innerText = gExtra.toLocaleString() + " ฿";
 
-        // แถวรวมยอดสุดท้าย (Footer Row)
         tb.innerHTML += `
             <tr style="border-top: 3px double #000;">
                 <td class="text-center fw-bold bg-primary text-white">รวมทั้งสิ้น</td>
                 <td class="col-money fw-bold bg-light">${gRent.toLocaleString()}</td>
-                <td class="col-money fw-bold bg-light">${gCust.toLocaleString()}</td>
+                <td class="col-money fw-bold bg-light">${gNet.toLocaleString()}</td>
                 <td class="col-money fw-bold bg-light">${gWater.toLocaleString()}</td>
                 <td class="col-money fw-bold bg-light">${gElec.toLocaleString()}</td>
-                <td class="col-money fw-bold bg-light">${gNet.toLocaleString()}</td>
                 <td class="col-money fw-bold bg-light text-danger">${gExtra.toLocaleString()}</td>
                 <td class="col-total bg-warning text-dark fs-5">${gTotal.toLocaleString()}</td>
             </tr>
