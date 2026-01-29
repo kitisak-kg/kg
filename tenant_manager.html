@@ -136,12 +136,27 @@
             </div>
         </div>
     </div>
+
+    <div class="mt-4 p-3 bg-light border rounded text-muted small">
+        <h6 class="fw-bold mb-2"><i class="fas fa-book"></i> คู่มือการใช้งานระบบ</h6>
+        <ol class="m-0 ps-3">
+            <li class="mb-1"><b>กด "อัปเดตล่าสุด" เสมอ:</b> ก่อนเริ่มแก้ไขข้อมูล ให้กดปุ่มสีฟ้า <span class="badge bg-info text-dark">อัปเดตล่าสุด</span> ก่อนทุกครั้ง เพื่อดึงข้อมูลปัจจุบันจากระบบป้องกันความผิดพลาด</li>
+            <li class="mb-1"><b>การแก้ไขข้อมูล:</b> คลิกที่ช่องแล้วพิมพ์แก้ไขได้ทันที สามารถใช้ลูกศร ⬆️⬇️⬅️➡️ เพื่อเลื่อนช่องได้เหมือน Excel</li>
+            <li class="mb-1"><b>สถานะห้อง:</b> 
+                🟡 <b>แจ้งย้าย</b> = ให้ระบุวันย้ายออกในช่อง "หมายเหตุ" / 
+                🔴 <b>ค้าง/หนี</b> = ห้ามลบแถวทิ้งจนกว่าจะเคลียร์ยอดหนี้ครบถ้วน
+            </li>
+            <li class="mb-1"><b>การจองห้อง:</b> หากมีผู้จองห้อง ให้กดปุ่ม [+ เพิ่ม] ที่ช่องด้านขวา (คิวรอห้อง) แทนการใส่ข้อมูลในตารางหลักทันที</li>
+            <li><b>การบันทึก:</b> เมื่อแก้ไขข้อมูลเสร็จสิ้น ต้องกดปุ่ม <span class="badge bg-success">บันทึกข้อมูล</span> ทันที เพื่ออัปเดตข้อมูลเข้าระบบฐานข้อมูลออนไลน์</li>
+        </ol>
+    </div>
+
 </div>
 
 <div class="status-bar" id="statusMsg">ระบบพร้อมทำงาน</div>
 
 <script>
-// 🔥 ลิงก์ Script ของหอพัก v.2
+// API URL (Updated)
 const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec";
 
 const ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
@@ -166,7 +181,7 @@ function loadData() {
                 if (res.tenants && res.tenants.length > 0) {
                     tenants = res.tenants;
                 } else {
-                    tenants = generateDefaultRooms(); // Fallback if sheet empty
+                    tenants = generateDefaultRooms(); 
                 }
                 waitingList = res.waiting || [];
                 renderTable();
