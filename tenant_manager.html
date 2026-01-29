@@ -10,22 +10,14 @@
     
     <style>
         :root { --primary: #0284c7; --bg: #f3f6f9; --border: #cbd5e1; }
-        
-        body { 
-            font-family: 'Sarabun', sans-serif; 
-            background-color: var(--bg); 
-            padding: 20px; padding-bottom: 80px;
-        }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); padding: 20px; padding-bottom: 80px; }
 
         .main-container {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            max-width: 1600px; margin: 0 auto; background: white;
+            padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
+        /* Buttons & Toolbar */
         .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .filter-bar { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; }
         .btn-zone { 
@@ -43,6 +35,7 @@
         }
         .btn-sort:hover { background: #0284c7; color: white; }
 
+        /* Table */
         .table-container { overflow-x: auto; border: 1px solid var(--border); max-height: 80vh; }
         table { width: 100%; border-collapse: collapse; min-width: 1200px; }
         th { 
@@ -52,16 +45,10 @@
         }
         td { border: 1px solid var(--border); padding: 0; height: 35px; vertical-align: middle; background: white; }
 
-        .drag-handle {
-            cursor: grab; color: #94a3b8; font-weight: bold; font-size: 16px; user-select: none;
-        }
-        .drag-handle:active { cursor: grabbing; color: #0f172a; }
-        tr.dragging { opacity: 0.5; background: #f1f5f9; }
-
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        /* Inputs */
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
-
+        
         .cell-input {
             width: 100%; height: 100%; border: none; padding: 0 8px; 
             font-family: 'Sarabun'; font-size: 13px; outline: none; background: transparent;
@@ -74,27 +61,20 @@
         }
         .cell-select:focus { background: #e0f2fe; }
 
+        /* Status Colors */
         .st-active { color: #166534; background: #dcfce7; }
         .st-empty { color: #94a3b8; background: #f8fafc; }
         .st-moving { color: #854d0e; background: #fef9c3; }
         .st-debt { color: #991b1b; background: #fee2e2; }
 
+        /* Utils */
+        .drag-handle { cursor: grab; color: #94a3b8; font-weight: bold; font-size: 16px; user-select: none; }
         .del-btn { color: #ef4444; border: none; background: none; cursor: pointer; opacity: 0.3; transition: 0.2s; font-size: 14px; }
         .del-btn:hover { opacity: 1; transform: scale(1.2); }
-        
-        .btn-add { 
-            width: 100%; padding: 10px; background: #f1f5f9; border: 2px dashed var(--border); 
-            color: #64748b; font-weight: bold; margin-top: 15px; cursor: pointer; transition: 0.2s; 
-        }
+        .btn-add { width: 100%; padding: 10px; background: #f1f5f9; border: 2px dashed var(--border); color: #64748b; font-weight: bold; margin-top: 15px; cursor: pointer; transition: 0.2s; }
         .btn-add:hover { background: #e2e8f0; color: #334155; border-color: #94a3b8; }
 
-        .status-bar { 
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
-            background: #0f172a; color: white; padding: 8px 25px; 
-            border-radius: 30px; font-size: 12px; z-index: 1000; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
-        }
-        
+        .status-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 8px 25px; border-radius: 30px; font-size: 12px; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .wait-item { border: 1px solid #e2e8f0; padding: 8px; margin-bottom: 5px; border-radius: 6px; position: relative; background: #fff; }
     </style>
 </head>
@@ -104,8 +84,15 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="m-0 fw-bold text-primary"><i class="fas fa-users-cog"></i> ระบบจัดการผู้เช่า</h4>
         <div>
-            <a href="index.html" class="btn btn-sm btn-light border fw-bold me-2 rounded-pill px-3">กลับเมนู</a>
-            <button class="btn btn-sm btn-success fw-bold px-4 rounded-pill" onclick="saveToCloud()"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
+            <a href="index.html" class="btn btn-sm btn-light border fw-bold me-2 rounded-pill px-3">กลับ</a>
+            
+            <button class="btn btn-sm btn-info fw-bold px-3 rounded-pill text-white me-2" onclick="loadData()">
+                <i class="fas fa-sync-alt"></i> อัปเดตล่าสุด
+            </button>
+            
+            <button class="btn btn-sm btn-success fw-bold px-4 rounded-pill" onclick="saveToCloud()">
+                <i class="fas fa-save"></i> บันทึกข้อมูล
+            </button>
         </div>
     </div>
 
@@ -113,7 +100,7 @@
         <div class="col-lg-9">
             <div class="toolbar">
                 <div class="filter-bar" id="zoneFilterContainer"></div>
-                <button class="btn-sort" onclick="sortRooms()"><i class="fas fa-sort-alpha-down"></i> เรียงห้อง (Sort)</button>
+                <button class="btn-sort" onclick="sortRooms()"><i class="fas fa-sort-alpha-down"></i> เรียงห้อง</button>
             </div>
 
             <div class="table-container">
@@ -136,7 +123,6 @@
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
-            
             <button class="btn-add" onclick="addNewRow()">+ เพิ่มห้องใหม่</button>
         </div>
 
@@ -155,7 +141,7 @@
 <div class="status-bar" id="statusMsg">ระบบพร้อมทำงาน</div>
 
 <script>
-// 🔥 แก้ไข Link ให้ถูกต้องตรงนี้ครับ (Script ของหอพัก v.2)
+// 🔥 ลิงก์ Script ของหอพัก v.2
 const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec";
 
 const ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
@@ -172,24 +158,30 @@ window.onload = function() {
 };
 
 function loadData() {
-    updateStatus("กำลังดึงข้อมูล...", true);
+    updateStatus("กำลังดึงข้อมูลจาก Cloud...", true);
     fetch(API_URL + "?action=loadTenants")
         .then(r => r.json())
         .then(res => {
             if(res.status==="success") {
-                tenants = (res.tenants && res.tenants.length) ? res.tenants : generateDefaultRooms();
+                if (res.tenants && res.tenants.length > 0) {
+                    tenants = res.tenants;
+                } else {
+                    tenants = generateDefaultRooms(); // Fallback if sheet empty
+                }
                 waitingList = res.waiting || [];
+                renderTable();
+                renderWaitingList();
+                updateStatus("✅ ข้อมูลอัปเดตแล้ว");
             } else {
-                tenants = generateDefaultRooms();
+                alert("โหลดข้อมูลผิดพลาด: " + res.message);
+                updateStatus("❌ โหลดไม่ได้");
             }
-            renderTable();
-            renderWaitingList();
-            updateStatus("✅ ข้อมูลล่าสุด");
         })
-        .catch(() => {
-            tenants = generateDefaultRooms();
+        .catch(err => {
+            console.error(err);
+            if(tenants.length === 0) tenants = generateDefaultRooms();
             renderTable();
-            updateStatus("⚠️ โหมดออฟไลน์");
+            updateStatus("⚠️ เชื่อมต่อไม่ได้ (Offline)");
         });
 }
 
