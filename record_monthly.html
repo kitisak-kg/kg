@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>บันทึกมิเตอร์ (Free Style) - หอพัก K&G</title>
+    <title>ระบบบันทึกมิเตอร์ - หอพัก K&G</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -19,21 +19,39 @@
         }
 
         /* Table Styling */
-        .table-container { background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow-x: auto; max-height: 80vh; }
+        .table-container { 
+            background: white; border-radius: 8px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+            overflow-x: auto; max-height: 80vh; 
+            border: 1px solid #cbd5e1;
+        }
         table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1400px; }
         
-        th { 
-            position: sticky; top: 0; background: #f1f5f9; color: #475569; 
-            padding: 5px; border-bottom: 2px solid #cbd5e1; border-right: 1px solid #e2e8f0;
-            font-size: 13px; text-align: center; z-index: 10;
+        /* --- STICKY HEADER FIX --- */
+        thead th { 
+            position: sticky; z-index: 20; 
+            background: #f1f5f9; color: #475569;
+            border-bottom: 1px solid #cbd5e1; border-right: 1px solid #e2e8f0;
+            text-align: center; font-size: 13px;
         }
+        /* แถวที่ 1: ตรึงชิดบนสุด สูง 45px */
+        thead tr:nth-child(1) th { top: 0; height: 45px; border-bottom: none; }
+        /* แถวที่ 2: ตรึงต่อจากแถวแรก (ที่ความสูง 45px) */
+        thead tr:nth-child(2) th { top: 45px; padding-top: 5px; padding-bottom: 5px; border-top: 1px solid #cbd5e1; }
         
-        /* Editable Headers */
-        .th-edit { background: #fff; border: 1px dashed #cbd5e1; color: #0f172a; cursor: text; padding: 5px; min-width: 80px; }
-        .th-edit:focus { background: #e0f2fe; outline: 2px solid var(--primary); }
+        /* Fix Borders for rowspan */
+        thead tr:nth-child(1) th[rowspan="2"] { border-bottom: 1px solid #cbd5e1; z-index: 21; }
 
-        .th-water { background: #e0f2fe; color: #0284c7; }
-        .th-elec { background: #ffedd5; color: #c2410c; }
+        /* Color Headers */
+        .th-water { background: #e0f2fe !important; color: #0284c7; }
+        .th-elec { background: #ffedd5 !important; color: #c2410c; }
+
+        /* Editable Headers Input */
+        .th-edit { 
+            background: #fff; border: 1px dashed #cbd5e1; color: #0f172a; 
+            cursor: text; padding: 2px 5px; width: 100%; text-align: center; font-weight: bold;
+        }
+        .th-edit:focus { background: #e0f2fe; outline: 2px solid var(--primary); }
 
         td { border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; padding: 0; height: 35px; }
 
@@ -50,17 +68,22 @@
         .col-calc { background: #f8fafc; color: #64748b; font-weight: 600; pointer-events: none; }
         .col-money { font-weight: bold; color: #0f172a; }
         
-        /* Zone Tabs */
-        .zone-tabs { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 10px; }
+        /* Zone Tabs & Sort */
+        .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 5px; }
         .btn-zone {
             border: 1px solid #cbd5e1; background: white; color: #64748b; 
-            border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: bold; 
-            white-space: nowrap; cursor: pointer; transition: 0.2s;
+            border-radius: 20px; padding: 4px 12px; font-size: 13px; font-weight: bold; 
+            white-space: nowrap; cursor: pointer; transition: 0.2s; flex-shrink: 0;
         }
         .btn-zone:hover { background: #f1f5f9; }
         .btn-zone.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .btn-all { border: 2px solid #0f172a; color: #0f172a; }
-        .btn-all.active { background: #0f172a; color: white; }
+        
+        .btn-sort {
+            background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;
+            border-radius: 20px; padding: 4px 15px; font-weight: 700; font-size: 13px;
+            transition: 0.2s; cursor: pointer; white-space: nowrap; margin-left: auto;
+        }
+        .btn-sort:hover { background: #0284c7; color: white; }
 
         .btn-add-room { width: 100%; padding: 10px; border: 2px dashed #cbd5e1; background: #f8fafc; color: #64748b; font-weight: bold; margin-top: 10px; transition: 0.2s; }
         .btn-add-room:hover { background: #e2e8f0; color: #334155; border-color: #94a3b8; }
@@ -79,7 +102,7 @@
     
     <div class="control-bar">
         <div class="d-flex align-items-center gap-3">
-            <h5 class="m-0 fw-bold text-primary"><i class="fas fa-edit"></i> บันทึกมิเตอร์ (Free Style)</h5>
+            <h5 class="m-0 fw-bold text-primary"><i class="fas fa-edit"></i> ระบบบันทึกมิเตอร์</h5>
             <div class="d-flex align-items-center bg-light px-3 py-1 rounded-pill border">
                 <span class="small fw-bold text-muted me-2">เดือน:</span>
                 <input type="month" id="monthPicker" style="border:none; background:transparent; font-weight:bold; color:#0284c7; outline:none;" onchange="loadData()">
@@ -91,7 +114,8 @@
         </div>
     </div>
 
-    <div class="zone-tabs" id="zoneTabs"></div>
+    <div class="toolbar" id="toolbarContainer">
+        </div>
 
     <div class="table-container">
         <table id="meterTable">
@@ -102,10 +126,10 @@
                     <th colspan="4" class="th-water">💧 ประปา (ขั้นต่ำ 4)</th>
                     <th colspan="4" class="th-elec">⚡ ไฟฟ้า</th>
                     
-                    <th rowspan="2" style="width:80px;"><input type="text" class="cell-input th-edit fw-bold text-center" id="head_rent" value="ค่าเช่า" onchange="saveHeader()"></th>
-                    <th rowspan="2" style="width:80px;"><input type="text" class="cell-input th-edit fw-bold text-center" id="head_custom" value="ส่วนกลาง" onchange="saveHeader()"></th>
-                    <th rowspan="2" style="width:80px;"><input type="text" class="cell-input th-edit fw-bold text-center" id="head_net" value="เน็ต" onchange="saveHeader()"></th>
-                    <th rowspan="2" style="width:100px;"><input type="text" class="cell-input th-edit fw-bold text-center text-danger" id="head_extra" value="อื่นๆ/หนี้" onchange="saveHeader()"></th>
+                    <th rowspan="2" style="width:80px;"><input type="text" class="th-edit" id="head_rent" value="ค่าเช่า" onchange="saveHeader()"></th>
+                    <th rowspan="2" style="width:80px;"><input type="text" class="th-edit" id="head_custom" value="ส่วนกลาง" onchange="saveHeader()"></th>
+                    <th rowspan="2" style="width:80px;"><input type="text" class="th-edit" id="head_net" value="เน็ต" onchange="saveHeader()"></th>
+                    <th rowspan="2" style="width:100px;"><input type="text" class="th-edit text-danger" id="head_extra" value="อื่นๆ/หนี้" onchange="saveHeader()"></th>
                     
                     <th rowspan="2" style="width:90px;">รวมสุทธิ</th>
                 </tr>
@@ -118,7 +142,7 @@
         </table>
     </div>
     
-    <button class="btn-add-room" onclick="addNewRow()">+ เพิ่มห้องใหม่</button>
+    <button class="btn-add-room" onclick="addNewRowSmart()">+ เพิ่มห้องใหม่</button>
 
 </div>
 
@@ -128,7 +152,7 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec"; 
     
     let currentData = [];
-    let currentHeaders = { rent:'ค่าเช่า', custom:'ส่วนกลาง', net:'เน็ต', extra:'อื่นๆ/หนี้' }; // Default Headers
+    let currentHeaders = { rent:'ค่าเช่า', custom:'ส่วนกลาง', net:'เน็ต', extra:'อื่นๆ/หนี้' }; 
     let currentZone = 'ALL';
     
     const ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
@@ -137,7 +161,7 @@
     window.onload = function() {
         const now = new Date();
         document.getElementById('monthPicker').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-        renderZoneTabs();
+        renderToolbar();
         loadData();
     };
 
@@ -151,7 +175,7 @@
             if(res.status==="success" && res.data) {
                 const d = JSON.parse(res.data);
                 currentData = Array.isArray(d) ? d : d.rooms||[];
-                if(d.headers) currentHeaders = d.headers; // Load saved headers
+                if(d.headers) currentHeaders = d.headers;
             } else {
                 createDefaultStructure();
             }
@@ -169,22 +193,17 @@
     function createDefaultStructure() {
         currentData = [];
         ZONES.forEach(z => {
-            for(let i=1; i<=ROOMS_PER_ZONE; i++) {
-                currentData.push(createEmptyRow(z+i));
-            }
+            for(let i=1; i<=ROOMS_PER_ZONE; i++) currentData.push(createEmptyRow(z+i));
         });
-        // Common areas
-        ["ปั้มบาดาล1","ปั้มบาดาล2","ปั้มส่งแท้ง+3","ตู้ซักผ้า","กล้องA","กล้องC","กล้องG","กล้องF","ของชํ่าป่ายาง"].forEach(c => {
+        ["ปั้มบาดาล1","ปั้มบาดาล2","ปั้มส่งแท้ง+3","ตู้ซักผ้า","กล้องA","กล้องC","กล้องG","กล้องF","ของชำป่ายาง"].forEach(c => {
             currentData.push(createEmptyRow(c, true));
         });
     }
 
     function createEmptyRow(id, isCommon=false) {
-        // Set specific rents
         let rent = 3300; 
         if(id === 'B1') rent = 4000;
-        else if(id === 'M1') rent = 0;
-        else if(isCommon) rent = 0;
+        else if(id === 'M1' || isCommon) rent = 0;
 
         return {
             id: id, w_old: '', w_new: '', w_rate: 30, e_old: '', e_new: '', e_rate: 8,
@@ -192,14 +211,13 @@
         };
     }
 
-    // --- Headers Logic ---
+    // --- Headers ---
     function applyHeaders() {
         document.getElementById('head_rent').value = currentHeaders.rent || 'ค่าเช่า';
         document.getElementById('head_custom').value = currentHeaders.custom || 'ส่วนกลาง';
         document.getElementById('head_net').value = currentHeaders.net || 'เน็ต';
         document.getElementById('head_extra').value = currentHeaders.extra || 'อื่นๆ/หนี้';
     }
-
     function saveHeader() {
         currentHeaders.rent = document.getElementById('head_rent').value;
         currentHeaders.custom = document.getElementById('head_custom').value;
@@ -207,18 +225,29 @@
         currentHeaders.extra = document.getElementById('head_extra').value;
     }
 
-    // --- Zone Logic ---
-    function renderZoneTabs() {
-        const bar = document.getElementById('zoneTabs');
-        bar.innerHTML = `<button class="btn-zone btn-all active" onclick="filterZone('ALL')">ทั้งหมด</button>`;
-        ZONES.forEach(z => {
-            bar.innerHTML += `<button class="btn-zone" onclick="filterZone('${z}')">${z}</button>`;
-        });
+    // --- Toolbar: Zones + Sort ---
+    function renderToolbar() {
+        const tb = document.getElementById('toolbarContainer');
+        let html = `<button class="btn-zone btn-all active" onclick="filterZone('ALL')">ทั้งหมด</button>`;
+        ZONES.forEach(z => html += `<button class="btn-zone" onclick="filterZone('${z}')">${z}</button>`);
+        
+        // 1. เพิ่มปุ่ม "อื่นๆ (ส่วนกลาง)"
+        html += `<button class="btn-zone" onclick="filterZone('OTHERS')">อื่นๆ (ส่วนกลาง)</button>`;
+        
+        // 3. ปุ่มเรียง (Sort)
+        html += `<button class="btn-sort" onclick="sortRooms()"><i class="fas fa-sort-alpha-down"></i> เรียงห้อง (Sort)</button>`;
+        
+        tb.innerHTML = html;
     }
 
     function filterZone(z) {
         currentZone = z;
-        document.querySelectorAll('.btn-zone').forEach(b => b.classList.toggle('active', b.innerText === (z==='ALL'?'ทั้งหมด':z)));
+        document.querySelectorAll('.btn-zone').forEach(b => {
+            let isActive = (z==='ALL' && b.innerText==='ทั้งหมด') || 
+                           (z==='OTHERS' && b.innerText.includes('อื่นๆ')) || 
+                           (b.innerText === z);
+            b.classList.toggle('active', isActive);
+        });
         renderTable();
     }
 
@@ -227,19 +256,21 @@
         const tb = document.getElementById('tableBody');
         tb.innerHTML = '';
 
-        // Filter Data based on Zone
         let displayData = [];
         if(currentZone === 'ALL') {
-            displayData = currentData; // Show All
+            displayData = currentData;
+        } else if (currentZone === 'OTHERS') {
+            // Filter: NOT starting with A-P + number
+            displayData = currentData.filter(r => {
+                const startsWithZone = ZONES.some(z => r.id.startsWith(z) && !isNaN(parseInt(r.id.substring(z.length))));
+                return !startsWithZone; 
+            });
         } else {
-            // Show only rooms starting with Zone letter (e.g., 'A')
-            displayData = currentData.filter(r => r.id.startsWith(currentZone));
+            displayData = currentData.filter(r => r.id.startsWith(currentZone) && !isNaN(parseInt(r.id.substring(currentZone.length))));
         }
 
         displayData.forEach(r => {
-            // Find real index in main array to bind events correctly
             let realIdx = currentData.indexOf(r);
-
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="text-center" style="white-space:nowrap;">
@@ -288,9 +319,7 @@
     function calculateRowUI(idx) {
         const r = currentData[idx];
         
-        let wn = parseFloat(r.w_new) || 0;
-        let wo = parseFloat(r.w_old) || 0;
-        let wr = parseFloat(r.w_rate) || 0;
+        let wn = parseFloat(r.w_new) || 0, wo = parseFloat(r.w_old) || 0, wr = parseFloat(r.w_rate) || 0;
         let wTotal = 0;
         if(r.w_new && r.w_old) {
             let diff = Math.max(0, wn - wo);
@@ -300,25 +329,17 @@
         let wElem = document.getElementById(`w_total_${idx}`);
         if(wElem) wElem.value = wTotal;
 
-        let en = parseFloat(r.e_new) || 0;
-        let eo = parseFloat(r.e_old) || 0;
-        let er = parseFloat(r.e_rate) || 0;
+        let en = parseFloat(r.e_new) || 0, eo = parseFloat(r.e_old) || 0, er = parseFloat(r.e_rate) || 0;
         let eTotal = 0;
         if(r.e_new && r.e_old) {
-            let diff = Math.max(0, en - eo);
-            eTotal = diff * er;
+            eTotal = Math.max(0, en - eo) * er;
         }
         let eElem = document.getElementById(`e_total_${idx}`);
         if(eElem) eElem.value = eTotal;
 
-        let rent = parseFloat(r.rent) || 0;
-        let cust = parseFloat(r.custom) || 0;
-        let net = parseFloat(r.internet) || 0;
-        let ext = parseFloat(r.extra) || 0;
-        
-        let grand = rent + cust + net + ext + wTotal + eTotal;
+        let total = (parseFloat(r.rent)||0) + (parseFloat(r.custom)||0) + (parseFloat(r.internet)||0) + (parseFloat(r.extra)||0) + wTotal + eTotal;
         let gElem = document.getElementById(`grand_total_${idx}`);
-        if(gElem) gElem.value = grand.toLocaleString();
+        if(gElem) gElem.value = total.toLocaleString();
     }
 
     // --- Action Logic ---
@@ -332,10 +353,27 @@
         renderTable();
     }
 
-    function addNewRow() {
-        currentData.push(createEmptyRow("New"));
+    // 2. Smart Add Room (Logic Update)
+    function addNewRowSmart() {
+        let newId = "New";
+        let isCom = false;
+        
+        if(currentZone === 'OTHERS') {
+            newId = "ส่วนกลางใหม่";
+            isCom = true; // Auto flag as common
+        } else if (currentZone !== 'ALL') {
+            let maxNum = 0;
+            currentData.forEach(r => {
+                if(r.id.startsWith(currentZone)) {
+                    let num = parseInt(r.id.replace(currentZone, ''));
+                    if(!isNaN(num) && num > maxNum) maxNum = num;
+                }
+            });
+            newId = currentZone + (maxNum + 1);
+        }
+
+        currentData.push(createEmptyRow(newId, isCom));
         renderTable();
-        // Scroll to bottom
         window.scrollTo(0, document.body.scrollHeight);
     }
 
@@ -346,19 +384,32 @@
         }
     }
 
+    // 3. Sort Logic
+    function sortRooms() {
+        if(!confirm("ต้องการเรียงลำดับห้องใหม่?")) return;
+        currentData.sort((a, b) => {
+            const parse = (id) => {
+                const match = id.match(/^([A-Z]+)(\d+)$/);
+                if (match) return [match[1], parseInt(match[2])];
+                return ['ZZZ', id]; // Others go last
+            };
+            const [zA, nA] = parse(a.id);
+            const [zB, nB] = parse(b.id);
+            if (zA < zB) return -1;
+            if (zA > zB) return 1;
+            if (typeof nA === 'number' && typeof nB === 'number') return nA - nB;
+            return a.id.localeCompare(b.id);
+        });
+        renderTable();
+    }
+
     function setupNavigation() {
         const inputs = document.querySelectorAll('.nav-input');
         const gridWidth = 11; 
-
         inputs.forEach((input, i) => {
             input.onkeydown = (e) => {
-                if(e.key.startsWith('Arrow')) {
-                    // Simple nav logic (might be slightly off if rows filtered, but good enough for now)
-                    // For perfect nav in filtered view, we'd need to map visual rows to inputs. 
-                    // Keeping it simple: Standard Tab/Shift-Tab works natively too.
-                }
+                if(e.key.startsWith('Arrow')) { /* Nav Logic */ }
             };
-            // Paste logic same as before (omitted for brevity, assume standard paste works on input)
              input.onpaste = (e) => {
                 e.preventDefault();
                 const pasteData = (e.clipboardData || window.clipboardData).getData('text');
@@ -381,15 +432,9 @@
 
     function saveToCloud() {
         updateStatus("กำลังบันทึก...", true);
-        // Include headers in save data
-        const saveData = {
-            rooms: currentData,
-            headers: currentHeaders
-        };
-        
         fetch(API_URL + "?action=save&key=" + document.getElementById('monthPicker').value, {
             method: "POST",
-            body: JSON.stringify(saveData)
+            body: JSON.stringify({ rooms: currentData, headers: currentHeaders })
         })
         .then(r => r.json())
         .then(res => {
