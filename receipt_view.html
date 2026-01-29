@@ -9,22 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --primary: #0284c7;
-            --bg: #f3f6f9;
-            --a5-width: 148mm;
-            --a5-height: 209mm; 
-        }
+        :root { --primary: #0284c7; --bg: #f3f6f9; --a5-width: 148mm; --a5-height: 209mm; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); color: #334155; display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
 
-        body { 
-            font-family: 'Sarabun', sans-serif; 
-            background-color: var(--bg); 
-            color: #334155;
-            display: flex; flex-direction: column; align-items: center;
-            padding: 30px 20px;
-        }
-
-        /* Control Panel (Hidden on Print) */
+        /* Control Panel */
         .control-card {
             background: white; padding: 15px 25px; border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
@@ -32,10 +20,7 @@
             margin-bottom: 30px; width: 100%; max-width: 1000px; border: 1px solid #e2e8f0;
         }
         
-        .filter-group {
-            display: flex; align-items: center; gap: 10px; 
-            background: #f8fafc; padding: 5px 15px; border-radius: 30px; border: 1px solid #cbd5e1;
-        }
+        .filter-group { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 5px 15px; border-radius: 30px; border: 1px solid #cbd5e1; }
         .filter-label { font-weight: bold; font-size: 13px; color: #64748b; }
         .filter-select { border: none; background: transparent; font-weight: bold; color: #0f172a; outline: none; font-size: 14px; }
 
@@ -46,19 +31,16 @@
         }
         .btn-print:hover { transform: translateY(-2px); background: #0369a1; }
 
-        /* Receipt Page (A5 Layout) */
+        /* Receipt Page (A5) */
         .receipt-page {
-            width: var(--a5-width);
-            min-height: var(--a5-height);
+            width: var(--a5-width); min-height: var(--a5-height);
             background: white; padding: 10mm;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            position: relative;
-            box-sizing: border-box;
-            margin-bottom: 20px;
-            page-break-after: always; /* ตัดหน้าอัตโนมัติ */
+            position: relative; box-sizing: border-box;
+            margin-bottom: 20px; page-break-after: always;
         }
 
-        /* Receipt Content */
+        /* Content */
         .r-header { display: flex; justify-content: space-between; border-bottom: 2px solid #334155; padding-bottom: 10px; margin-bottom: 10px; }
         .r-title { font-size: 18pt; font-weight: 800; color: #0f172a; }
         .room-box { border: 2px solid #0f172a; border-radius: 8px; padding: 5px 15px; text-align: center; }
@@ -83,13 +65,11 @@
         }
         
         .footer { margin-top: 15px; font-size: 9pt; color: #64748b; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px dashed #cbd5e1; }
-
-        /* Editable Hint */
         [contenteditable]:hover { background-color: rgba(255, 255, 0, 0.1); cursor: text; outline: 1px dashed #ccc; }
 
         @media print {
             body { background: white; padding: 0; display: block; }
-            .control-card, .status-bar, #loadingMsg, #noDataMsg { display: none !important; }
+            .control-card, .status-bar, #loadingMsg, #noDataMsg, .manual-box { display: none !important; }
             .receipt-page { box-shadow: none; margin: 0; width: 100%; height: auto; border: none; page-break-after: always; }
             @page { size: A5 portrait; margin: 0; }
         }
@@ -144,7 +124,7 @@
 
     <div id="loadingMsg" class="text-center mt-5" style="display:none;">
         <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
-        <p class="mt-2 text-muted">กำลังโหลดข้อมูล... (ถ้าค้างนาน ให้กลับไปกด "บันทึก" ที่หน้าจดมิเตอร์ก่อน)</p>
+        <p class="mt-2 text-muted">กำลังโหลดข้อมูล...</p>
     </div>
 
     <div id="noDataMsg" class="text-center mt-5 text-danger fw-bold" style="display:none;">
@@ -155,8 +135,24 @@
 
     <div id="receiptContainer"></div>
 
+    <div class="manual-box mt-5 p-4 bg-white border rounded shadow-sm text-muted" style="max-width: 800px;">
+        <h6 class="fw-bold text-dark"><i class="fas fa-book"></i> คู่มือการพิมพ์ใบเสร็จ</h6>
+        <ul class="mb-0 small">
+            <li><b>1. เลือกรูปแบบการพิมพ์:</b>
+                <ul>
+                    <li><b>ทั้งหมด:</b> พิมพ์ทุกห้องรวดเดียว (เหมาะสำหรับตัดกระดาษแจกสิ้นเดือน)</li>
+                    <li><b>แยกตามตึก:</b> เลือกพิมพ์เฉพาะโซน A, B, C...</li>
+                    <li><b>ห้องเดียว:</b> เลือกพิมพ์เฉพาะห้องที่ต้องการ (เช่น ลูกค้ามาขอใบเสร็จย้อนหลัง)</li>
+                </ul>
+            </li>
+            <li><b>2. การแก้ไข:</b> หากเห็นตัวเลขผิด หรือต้องการเพิ่มข้อความ สามารถ <b>คลิกบนใบเสร็จแล้วพิมพ์แก้ได้เลย</b> ก่อนกดสั่งพิมพ์</li>
+            <li><b>3. การตั้งค่าเครื่องพิมพ์:</b> เลือกขนาดกระดาษเป็น <b>A5</b> (ถ้ามี) หรือพิมพ์ใส่ A4 แล้วตัดครึ่ง</li>
+        </ul>
+    </div>
+
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbytJyg1eNsBSj6c10DaBp8ESrihAh1ZhB__FUUMBAbCYKh2DE0mRqFjrbJcZf6ch-Q/exec"; 
+    // ✅ Link หอพัก v.2
+    const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec"; 
     let currentData = [], monthNames=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
 
     window.onload = function() {
@@ -239,15 +235,12 @@
         if (roomsToPrint.length === 0) return;
 
         roomsToPrint.forEach(r => {
-            // Calculation Logic (ตรงกับ record_monthly.html ใหม่)
             const wn=parseFloat(r.w_new)||0, wo=parseFloat(r.w_old)||0, wr=parseFloat(r.w_rate)||0;
             let wu=0, wt=0; 
             if(r.w_new && r.w_old){ 
                 let d=wn-wo; 
-                wu=(d<4?4:d); // Min 4 units logic displayed as Used units? Usually displaying Actual unit, but charging Min 4. 
-                // Let's stick to showing Actual, but Price based on Min 4.
-                // Or better: Show actual usage, but note if min applied.
-                let chargeUnits = (d<4) ? 4 : d;
+                wu = d; // แสดงหน่วยจริง
+                let chargeUnits = (d<4) ? 4 : d; // 
                 wt = chargeUnits * wr;
             }
             
@@ -255,7 +248,7 @@
             let eu=0, et=0; if(r.e_new && r.e_old){ eu=en-eo; et=eu*er; }
 
             const rent=parseFloat(r.rent)||0, cust=parseFloat(r.custom)||0, net=parseFloat(r.internet)||0;
-            const extra=parseFloat(r.extra)||0; // New Extra/Debt field
+            const extra=parseFloat(r.extra)||0;
 
             const total = rent + cust + net + wt + et + extra;
 
@@ -278,7 +271,7 @@
                     <table class="table-util">
                         <tr><td>จดครั้งนี้ (New)</td><td class="val-col" contenteditable="true">${r.w_new}</td></tr>
                         <tr><td>จดครั้งก่อน (Old)</td><td class="val-col" contenteditable="true">${r.w_old}</td></tr>
-                        <tr><td>หน่วยที่ใช้ (Units) ${(wn-wo)<4?'(ขั้นต่ำ 4)':''}</td><td class="val-col">${wn-wo}</td></tr>
+                        <tr><td>หน่วยที่ใช้ (Units) ${(wn-wo)<4?'':''}</td><td class="val-col">${wu}</td></tr>
                         <tr class="sum-row"><td>รวมค่าน้ำ (${wr}บ./หน่วย)</td><td class="val-col">${wt.toLocaleString()}</td></tr>
                     </table>
                 </div>
@@ -318,7 +311,6 @@
                         </div>
                         <div class="text-end">
                             ผู้รับเงิน ...................................<br>
-                            วันที่พิมพ์: ${todayStr}
                         </div>
                     </div>
                 </div>
