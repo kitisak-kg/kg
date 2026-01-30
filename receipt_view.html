@@ -3,247 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>พิมพ์ใบเสร็จ - หอพัก K&G</title>
+    <title>พิมพ์ใบเสร็จ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #0284c7; --bg: #f3f6f9; --a5-width: 148mm; --a5-height: 209mm; }
-        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); color: #334155; display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
-
-        .control-card {
-            background: white; padding: 15px 25px; border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-            display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap;
-            margin-bottom: 30px; width: 100%; max-width: 1000px; border: 1px solid #e2e8f0;
-        }
-        
-        .filter-group { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 5px 15px; border-radius: 30px; border: 1px solid #cbd5e1; }
-        .filter-select { border: none; background: transparent; font-weight: bold; color: #0f172a; outline: none; font-size: 14px; }
-        .btn-print { background: var(--primary); color: white; border: none; padding: 8px 25px; border-radius: 30px; font-weight: 600; font-size: 14px; transition: 0.2s; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3); }
-        .btn-print:hover { transform: translateY(-2px); background: #0369a1; }
-
-        .receipt-page {
-            width: var(--a5-width); min-height: var(--a5-height);
-            background: white; padding: 10mm;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            position: relative; box-sizing: border-box;
-            margin-bottom: 20px; page-break-after: always;
-        }
-
-        .r-header { display: flex; justify-content: space-between; border-bottom: 2px solid #334155; padding-bottom: 10px; margin-bottom: 10px; }
-        .r-title { font-size: 18pt; font-weight: 800; color: #0f172a; }
-        .room-box { border: 2px solid #0f172a; border-radius: 8px; padding: 5px 15px; text-align: center; }
-        .room-number { font-size: 22pt; font-weight: 800; line-height: 1; }
-        
-        .table-util { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 10pt; }
-        .th-water { background: #e0f2fe; color: #0369a1; padding: 3px 8px; font-weight: 700; border-radius: 4px 4px 0 0; }
-        .th-elec { background: #fff7ed; color: #c2410c; padding: 3px 8px; font-weight: 700; border-radius: 4px 4px 0 0; }
-        .table-util td { padding: 2px 8px; border-bottom: 1px dashed #e2e8f0; }
-        .val-col { text-align: right; font-weight: 600; }
-        .sum-row td { background-color: #f8fafc; font-weight: 800; border-top: 1px solid #cbd5e1; }
-
-        .summary-box { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; margin-top: 10px; }
-        .table-sum { width: 100%; font-size: 11pt; }
-        .table-sum td { padding: 3px 5px; }
-        .table-sum .value { text-align: right; font-weight: 700; }
-        
-        .grand-total {
-            background-color: #0f172a; color: white; font-size: 14pt; font-weight: 800;
-            padding: 8px 15px; border-radius: 6px; margin-top: 10px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        
-        .footer { margin-top: 15px; font-size: 9pt; color: #64748b; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px dashed #cbd5e1; }
-        [contenteditable]:hover { background-color: rgba(255, 255, 0, 0.1); cursor: text; outline: 1px dashed #ccc; }
-
-        @media print {
-            body { background: white; padding: 0; display: block; }
-            .control-card, #loadingMsg, #noDataMsg { display: none !important; }
-            .receipt-page { box-shadow: none; margin: 0; width: 100%; height: auto; border: none; page-break-after: always; }
-            @page { size: A5 portrait; margin: 0; }
-        }
+        body { font-family: 'Sarabun', sans-serif; background: #f3f6f9; padding: 20px; }
+        .receipt-page { width: 148mm; min-height: 209mm; background: white; padding: 10mm; margin: 0 auto 20px; page-break-after: always; position: relative; }
+        .r-header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
+        .table-util, .table-sum { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .table-util th, .table-util td, .table-sum td { border: 1px solid #ddd; padding: 4px; }
+        .text-right { text-align: right; }
+        .bg-head { background: #eee; font-weight: bold; }
+        .master-controls { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #ccc; max-width: 800px; margin-left: auto; margin-right: auto; }
+        @media print { .no-print { display: none !important; } body { background: white; padding: 0; } .receipt-page { margin: 0; box-shadow: none; } }
     </style>
 </head>
 <body>
 
-    <div class="control-card">
-        <h5 class="m-0 fw-bold text-primary me-3"><i class="fas fa-receipt"></i> พิมพ์ใบเสร็จ</h5>
-        <div class="filter-group">
-            <span class="filter-label">เดือน:</span>
-            <input type="month" id="monthSelector" class="filter-select" onchange="loadData()">
+    <div class="no-print">
+        <div class="master-controls shadow-sm">
+            <h5 class="fw-bold text-primary">🛠️ ตั้งค่าบิล (ต้นฉบับ)</h5>
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label>เลือกเดือนข้อมูล:</label>
+                    <input type="month" id="monthSelector" class="form-control form-control-sm" onchange="loadData()">
+                </div>
+                <div class="col-md-4">
+                    <label>หัวข้อรอบบิล (แก้แล้วเปลี่ยนทุกใบ):</label>
+                    <input type="text" id="masterPeriod" class="form-control form-control-sm" onkeyup="updateAllReceipts()" placeholder="เช่น 1-31 มกราคม 2569">
+                </div>
+                <div class="col-md-3">
+                    <label>เลือกพิมพ์:</label>
+                    <select id="zoneSelector" class="form-select form-select-sm" onchange="renderReceipts()">
+                        <option value="ALL">ทั้งหมด</option>
+                        <option value="A">ตึก A</option><option value="B">ตึก B</option>
+                        </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary btn-sm w-100" onclick="window.print()">พิมพ์</button>
+                </div>
+            </div>
+            <div class="mt-2 small text-muted">* สามารถแก้ข้อความในบิลแต่ละใบแยกกันได้ (คลิกแก้ได้เลย)</div>
         </div>
-        <div class="filter-group">
-            <span class="filter-label">พิมพ์:</span>
-            <select id="printScope" class="filter-select" onchange="toggleFilter()">
-                <option value="ALL">ทั้งหมด</option>
-                <option value="ZONE">แยกตามตึก</option>
-                <option value="SINGLE">ห้องเดียว</option>
-            </select>
-        </div>
-        <div class="filter-group" id="zoneFilter" style="display:none;">
-            <select id="zoneSelector" class="filter-select" onchange="renderReceipts()">
-                <option value="A">ตึก A</option><option value="B">ตึก B</option><option value="C">ตึก C</option>
-                <option value="D">ตึก D</option><option value="E">ตึก E</option><option value="F">ตึก F</option>
-                <option value="G">ตึก G</option><option value="H">ตึก H</option><option value="I">ตึก I</option>
-                <option value="J">ตึก J</option><option value="K">ตึก K</option><option value="L">ตึก L</option>
-                <option value="M">ตึก M</option><option value="N">ตึก N</option><option value="O">ตึก O</option><option value="P">ตึก P</option>
-            </select>
-        </div>
-        <div class="filter-group" id="roomFilter" style="display:none;">
-            <select id="roomSelector" class="filter-select" onchange="renderReceipts()"><option>-</option></select>
-        </div>
-        <button class="btn-print ms-2" onclick="window.print()">พิมพ์ทันที</button>
-        <a href="index.html" class="btn btn-light border rounded-pill ms-2 fw-bold" style="font-size:13px;">กลับ</a>
+        <div id="loadingMsg" class="text-center" style="display:none;">กำลังโหลด...</div>
     </div>
 
-    <div id="loadingMsg" class="text-center mt-5" style="display:none;"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p>กำลังโหลด...</p></div>
-    <div id="noDataMsg" class="text-center mt-5 text-danger fw-bold" style="display:none;">ไม่พบข้อมูลเดือนนี้</div>
     <div id="receiptContainer"></div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxBlGeRO9ayn4zrX-zQhrz6wGK1ke72tEeHMgxvpYyVDG8iozPhYvltB20YOCxQavw/exec"; 
-    let currentData = [], monthNames=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+    const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec";
+    let currentData = [];
+    const monthNames = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
 
     window.onload = function() {
-        document.getElementById('monthSelector').value = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
+        const now = new Date();
+        document.getElementById('monthSelector').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+        // Set Default Period Text
+        const mStr = monthNames[now.getMonth()];
+        const yStr = now.getFullYear() + 543;
+        document.getElementById('masterPeriod').value = `1-31 ${mStr} ${yStr}`;
         loadData();
     };
-
-    function toggleFilter() {
-        const scope = document.getElementById('printScope').value;
-        document.getElementById('zoneFilter').style.display = (scope === 'ZONE') ? 'flex' : 'none';
-        document.getElementById('roomFilter').style.display = (scope === 'SINGLE') ? 'flex' : 'none';
-        renderReceipts();
-    }
 
     function loadData() {
         const k = document.getElementById('monthSelector').value;
         document.getElementById('loadingMsg').style.display = 'block';
-        document.getElementById('noDataMsg').style.display = 'none';
-        document.getElementById('receiptContainer').innerHTML = '';
-
         fetch(API_URL+"?action=load&key="+k).then(r=>r.json()).then(res=>{ 
             document.getElementById('loadingMsg').style.display = 'none';
             if(res.status==="success" && res.data) {
-                const d = JSON.parse(res.data);
-                currentData = Array.isArray(d) ? d : d.rooms||[];
-                if(currentData.length === 0) document.getElementById('noDataMsg').style.display = 'block';
-                else { populateRoomSelector(); renderReceipts(); }
-            } else { currentData=[]; document.getElementById('noDataMsg').style.display = 'block'; }
-        }).catch(()=>{ document.getElementById('loadingMsg').style.display = 'none'; });
-    }
-
-    function populateRoomSelector() {
-        const rS = document.getElementById('roomSelector'); rS.innerHTML = '';
-        currentData.forEach((r, idx) => { if(!r.isCommon) { let opt = document.createElement('option'); opt.value = idx; opt.innerText = r.id; rS.appendChild(opt); }});
+                currentData = (JSON.parse(res.data)).rooms || [];
+                renderReceipts();
+            }
+        });
     }
 
     function renderReceipts() {
         const container = document.getElementById('receiptContainer'); container.innerHTML = '';
-        const scope = document.getElementById('printScope').value;
-        const mKey = document.getElementById('monthSelector').value;
-        const [y,m] = mKey.split('-').map(Number);
-        const periodStr = `${monthNames[m-1]} ${y+543}`;
-        const todayStr = new Date().toLocaleDateString('th-TH');
+        const zone = document.getElementById('zoneSelector').value;
+        const masterText = document.getElementById('masterPeriod').value;
 
-        let roomsToPrint = [];
-        if (scope === 'ALL') roomsToPrint = currentData.filter(r => !r.isCommon);
-        else if (scope === 'ZONE') { const z = document.getElementById('zoneSelector').value; roomsToPrint = currentData.filter(r => !r.isCommon && r.id.startsWith(z)); }
-        else if (scope === 'SINGLE') { const idx = document.getElementById('roomSelector').value; if(currentData[idx]) roomsToPrint = [currentData[idx]]; }
+        const list = (zone==='ALL') ? currentData.filter(r=>!r.isCommon) : currentData.filter(r=>!r.isCommon && r.id.startsWith(zone));
 
-        if (roomsToPrint.length === 0) return;
+        list.forEach(r => {
+            // Calc
+            let rent = parseFloat(r.rent)||0, net = parseFloat(r.custom)||0, extra = parseFloat(r.extra)||0;
+            let wn=parseFloat(r.w_new)||0, wo=parseFloat(r.w_old)||0, wr=parseFloat(r.w_rate)||0, wu=Math.max(0, wn-wo);
+            let chargeW = (wu < 4) ? 4 : wu; let wt = chargeW * wr;
+            let en=parseFloat(r.e_new)||0, eo=parseFloat(r.e_old)||0, er=parseFloat(r.e_rate)||0, eu=Math.max(0, en-eo);
+            let et = eu * er;
+            let total = rent + net + extra + wt + et;
 
-        roomsToPrint.forEach(r => {
-            const wn=parseFloat(r.w_new)||0, wo=parseFloat(r.w_old)||0, wr=parseFloat(r.w_rate)||0;
-            let wu = (r.w_new && r.w_old) ? (wn-wo) : 0;
-            let chargeW = (!r.isCommon && wu < 4) ? 4 : wu;
-            let wt = chargeW * wr;
-            
-            const en=parseFloat(r.e_new)||0, eo=parseFloat(r.e_old)||0, er=parseFloat(r.e_rate)||0;
-            let eu=0, et=0; if(r.e_new && r.e_old){ eu=en-eo; et=eu*er; }
-
-            const rent=parseFloat(r.rent)||0;
-            const net=parseFloat(r.custom)||0; // custom is now Internet
-            const extra=parseFloat(r.extra)||0; // extra is Other/Debt
-
-            const total = rent + net + wt + et + extra;
-
-            // Generate Extra Items List (if available)
-            let extraRows = '';
-            if (r.extra_items && r.extra_items.length > 0) {
-                r.extra_items.forEach(item => {
-                    extraRows += `<tr><td class="ps-3 small text-muted">- ${item.name}</td><td class="value small text-muted">${parseFloat(item.price).toLocaleString()}</td></tr>`;
-                });
-            } else if (extra !== 0) {
-                extraRows = `<tr><td class="text-danger">อื่นๆ (Others)</td><td class="value text-danger" contenteditable="true">${extra.toLocaleString()}</td></tr>`;
+            // Extra Items
+            let extraHtml = '';
+            if(r.extra_items && r.extra_items.length>0) {
+                r.extra_items.forEach(i => extraHtml += `<tr><td>${i.name}</td><td class="text-right">${parseFloat(i.price).toLocaleString()}</td></tr>`);
+            } else if(extra > 0) {
+                extraHtml = `<tr><td contenteditable="true" class="text-danger">อื่นๆ</td><td class="text-right text-danger" contenteditable="true">${extra.toLocaleString()}</td></tr>`;
             }
 
-            const html = `
+            container.innerHTML += `
             <div class="receipt-page">
                 <div class="r-header">
                     <div>
-                        <div class="r-title">บิลค่าเช่า (Receipt)</div>
-                        <div style="font-size:10pt;">หอพัก K&G (เค แอนด์ จี)</div>
-                        <div style="font-size:10pt; color:#64748b;">ประจำเดือน: <span style="color:#000; font-weight:bold;">${periodStr}</span></div>
+                        <h3 style="margin:0;">บิลค่าเช่า</h3>
+                        <div class="period-text" contenteditable="true">ประจำเดือน: ${masterText}</div>
                     </div>
-                    <div class="room-box">
-                        <div style="font-size:8pt; text-transform:uppercase;">ROOM NO.</div>
-                        <div class="room-number">${r.id}</div>
+                    <div style="text-align:right; border:2px solid #000; padding:5px 15px; border-radius:8px;">
+                        <small>ห้อง</small><br><b style="font-size:24px;">${r.id}</b>
                     </div>
                 </div>
 
-                <div class="mb-2">
-                    <div class="th-water"><i class="fas fa-tint"></i> ค่าน้ำประปา (Water)</div>
-                    <table class="table-util">
-                        <tr><td>จดครั้งนี้</td><td class="val-col">${r.w_new}</td></tr>
-                        <tr><td>จดครั้งก่อน</td><td class="val-col">${r.w_old}</td></tr>
-                        <tr><td>หน่วยที่ใช้ (ขั้นต่ำ 4)</td><td class="val-col">${wu}</td></tr>
-                        <tr class="sum-row"><td>รวมค่าน้ำ (${wr}บ./หน่วย)</td><td class="val-col">${wt.toLocaleString()}</td></tr>
-                    </table>
-                </div>
-
-                <div class="mb-2">
-                    <div class="th-elec"><i class="fas fa-bolt"></i> ค่าไฟฟ้า (Electricity)</div>
-                    <table class="table-util">
-                        <tr><td>จดครั้งนี้</td><td class="val-col">${r.e_new}</td></tr>
-                        <tr><td>จดครั้งก่อน</td><td class="val-col">${r.e_old}</td></tr>
-                        <tr><td>หน่วยที่ใช้</td><td class="val-col">${eu}</td></tr>
-                        <tr class="sum-row"><td>รวมค่าไฟ (${er}บ./หน่วย)</td><td class="val-col">${et.toLocaleString()}</td></tr>
-                    </table>
-                </div>
-
-                <div class="summary-box">
-                    <table class="table-sum">
-                        <tr><td>ค่าเช่าห้อง (Rent)</td><td class="value" contenteditable="true">${rent.toLocaleString()}</td></tr>
-                        ${net > 0 ? `<tr><td>ค่าอินเทอร์เน็ต (Internet)</td><td class="value" contenteditable="true">${net.toLocaleString()}</td></tr>` : ''}
-                        
-                        <tr><td>รวมค่าน้ำ</td><td class="value">${wt.toLocaleString()}</td></tr>
-                        <tr><td>รวมค่าไฟ</td><td class="value">${et.toLocaleString()}</td></tr>
-                        
-                        ${extraRows} </table>
-                    <div class="grand-total">
-                        <span>ยอดสุทธิ (Total)</span>
-                        <span contenteditable="true">${total.toLocaleString()} บาท</span>
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <div style="flex:1;">
+                        <div class="bg-head p-1">รายการค่าน้ำ</div>
+                        <table class="table-util">
+                            <tr><td>จดครั้งนี้</td><td class="text-right">${wn}</td></tr>
+                            <tr><td>จดครั้งก่อน</td><td class="text-right">${wo}</td></tr>
+                            <tr><td>หน่วยที่ใช้ (ขั้นต่ำ 4)</td><td class="text-right">${wu}</td></tr>
+                            <tr><td><b>รวม (${wr} บ./หน่วย)</b></td><td class="text-right fw-bold">${wt.toLocaleString()}</td></tr>
+                        </table>
+                    </div>
+                    <div style="flex:1;">
+                        <div class="bg-head p-1">รายการค่าไฟ</div>
+                        <table class="table-util">
+                            <tr><td>จดครั้งนี้</td><td class="text-right">${en}</td></tr>
+                            <tr><td>จดครั้งก่อน</td><td class="text-right">${eo}</td></tr>
+                            <tr><td>หน่วยที่ใช้</td><td class="text-right">${eu}</td></tr>
+                            <tr><td><b>รวม (${er} บ./หน่วย)</b></td><td class="text-right fw-bold">${et.toLocaleString()}</td></tr>
+                        </table>
                     </div>
                 </div>
 
-                <div class="footer">
-                    <div class="d-flex justify-content-between align-items-end">
-                        <div contenteditable="true">
-                            <strong>กำหนดชำระ:</strong> ภายในวันที่ 5 ของเดือน<br>
-                            <strong>ช่องทาง:</strong> โอน/เงินสด<br>
-                            <span class="text-danger small">*ล่าช้าปรับวันละ 100 บาท</span>
-                        </div>
-                        <div class="text-end">ผู้รับเงิน ...................................<br>${todayStr}</div>
-                    </div>
+                <table class="table-sum">
+                    <tr class="bg-head"><td>รายการ</td><td class="text-right" style="width:100px;">จำนวนเงิน</td></tr>
+                    <tr><td>ค่าเช่าห้อง</td><td class="text-right" contenteditable="true">${rent.toLocaleString()}</td></tr>
+                    ${net>0 ? `<tr><td>ค่าอินเทอร์เน็ต</td><td class="text-right" contenteditable="true">${net.toLocaleString()}</td></tr>` : ''}
+                    <tr><td>ค่าน้ำประปา</td><td class="text-right">${wt.toLocaleString()}</td></tr>
+                    <tr><td>ค่าไฟฟ้า</td><td class="text-right">${et.toLocaleString()}</td></tr>
+                    ${extraHtml}
+                    <tr style="background:#eee; font-size:18px; font-weight:bold;">
+                        <td>รวมสุทธิ</td><td class="text-right" contenteditable="true">${total.toLocaleString()}</td>
+                    </tr>
+                </table>
+
+                <div style="margin-top:20px; border-top:1px dashed #000; padding-top:10px; font-size:12px;" contenteditable="true">
+                    <b>กำหนดชำระ:</b> ภายในวันที่ 5 ของเดือน (ล่าช้าปรับวันละ 100 บาท)<br>
+                    <b>ช่องทางชำระ:</b> เงินสด / โอนเงิน
                 </div>
             </div>`;
-            container.insertAdjacentHTML('beforeend', html);
         });
+    }
+
+    function updateAllReceipts() {
+        const txt = document.getElementById('masterPeriod').value;
+        document.querySelectorAll('.period-text').forEach(el => el.innerText = "ประจำเดือน: " + txt);
     }
 </script>
 </body>
 </html>
-
