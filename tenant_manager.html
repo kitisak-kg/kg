@@ -32,6 +32,10 @@
         
         .cell-input { width: 100%; height: 100%; border: none; padding: 0 8px; font-family: 'Sarabun'; font-size: 13px; outline: none; background: transparent; transition: background 0.1s; display: block; }
         .cell-input:focus { background: #e0f2fe; box-shadow: inset 0 0 0 2px var(--primary); }
+        
+        /* สไตล์สำหรับช่องที่ล็อก (Read Only) */
+        .cell-locked { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; font-weight: bold; }
+        
         .cell-select { width: 100%; height: 100%; border: none; padding: 0 5px; font-family: 'Sarabun'; font-size: 13px; outline: none; background: transparent; cursor: pointer; }
         .cell-select:focus { background: #e0f2fe; }
 
@@ -110,8 +114,8 @@
         <h6 class="fw-bold mb-2"><i class="fas fa-book"></i> คู่มือการใช้งาน (สำหรับกัน)</h6>
         <ol class="m-0 ps-3">
             <li class="mb-1"><b>กด "อัปเดตล่าสุด" เสมอ:</b> ก่อนเริ่มพิมพ์หรือแก้ไขทุกครั้ง</li>
-            <li class="mb-1"><b>การแก้ไข:</b> คลิกที่ช่องแล้วพิมพ์แก้ได้เลย (เช่น ค่าเช่า, เรทน้ำ/ไฟ)</li>
-            <li class="mb-1"><b>สำคัญ:</b> ค่าเช่าที่ใส่ในหน้านี้ จะไปเป็น <b>"ค่าเช่าตั้งต้น"</b> ในหน้าจดมิเตอร์ครับ</li>
+            <li class="mb-1"><b>ค่าเช่า/เรทน้ำไฟ:</b> ถูกล็อกไว้ (Read-only) ต้องไปแก้ที่หน้า "บันทึกมิเตอร์" เท่านั้น</li>
+            <li class="mb-1"><b>วันที่:</b> เลือกจากปฏิทิน (ระบบจะบันทึกเป็นสากล แต่หน้าเว็บอาจแสดงเป็น พ.ศ. ตามการตั้งค่าเครื่อง)</li>
             <li><b>กดบันทึก:</b> เมื่อแก้ไขเสร็จแล้ว ต้องกดปุ่ม <span class="badge bg-success">บันทึกข้อมูล</span> ทันที</li>
         </ol>
     </div>
@@ -121,7 +125,8 @@
 <div class="status-bar" id="statusMsg">ระบบพร้อมทำงาน</div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxBlGeRO9ayn4zrX-zQhrz6wGK1ke72tEeHMgxvpYyVDG8iozPhYvltB20YOCxQavw/exec";
+// ✅ ตรวจสอบลิงก์ API ให้ตรงกับ Code.gs ล่าสุด
+const API_URL = "https://script.google.com/macros/s/AKfycbwcFtw8FN2Zu3dte6adaFeigGpErvee8rOGYf1oZMLjMruxHdmqI2rkDVy87GH6tqs/exec";
 const ZONES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
 const ROOMS_PER_ZONE = 20;
 
@@ -181,9 +186,9 @@ function renderTable() {
         <td><input class="cell-input nav-item" data-r="${idx}" data-c="1" value="${t.name}" onchange="updateData(${idx},'name',this.value)"></td>
         <td><input type="number" class="cell-input nav-item text-end" data-r="${idx}" data-c="2" value="${t.deposit}" onchange="updateData(${idx},'deposit',this.value)"></td>
         
-        <td><input type="number" class="cell-input nav-item text-end fw-bold text-primary" data-r="${idx}" data-c="3" value="${t.rent||3300}" onchange="updateData(${idx},'rent',this.value)"></td>
-        <td><input type="number" class="cell-input nav-item text-center text-muted" data-r="${idx}" data-c="4" value="${t.elec_rate||8}" onchange="updateData(${idx},'elec_rate',this.value)"></td>
-        <td><input type="number" class="cell-input nav-item text-center text-muted" data-r="${idx}" data-c="5" value="${t.water_rate||30}" onchange="updateData(${idx},'water_rate',this.value)"></td>
+        <td><input type="text" class="cell-input nav-item text-end fw-bold text-primary cell-locked" data-r="${idx}" data-c="3" value="${t.rent||3300}" readonly title="แก้ที่หน้าบันทึกมิเตอร์"></td>
+        <td><input type="text" class="cell-input nav-item text-center text-muted cell-locked" data-r="${idx}" data-c="4" value="${t.elec_rate||8}" readonly title="แก้ที่หน้าบันทึกมิเตอร์"></td>
+        <td><input type="text" class="cell-input nav-item text-center text-muted cell-locked" data-r="${idx}" data-c="5" value="${t.water_rate||30}" readonly title="แก้ที่หน้าบันทึกมิเตอร์"></td>
         
         <td><input type="date" class="cell-input nav-item" data-r="${idx}" data-c="6" value="${t.start}" onchange="updateData(${idx},'start',this.value)"></td>
         <td><input type="date" class="cell-input nav-item" data-r="${idx}" data-c="7" value="${t.end}" onchange="updateData(${idx},'end',this.value)"></td>
@@ -204,7 +209,6 @@ function renderTable() {
     setupNavigation();
 }
 
-// Navigation (Arrow Keys)
 function setupNavigation() {
     const inputs = document.querySelectorAll('.nav-item');
     inputs.forEach((input) => {
@@ -232,14 +236,32 @@ function updateStatusRow(i,v){ tenants[i].status=v; renderTable(); }
 function addNewRow(){ tenants.push(createEmptyRow("New")); renderTable(); }
 function deleteRow(i){ if(confirm("ลบ?")){ tenants.splice(i,1); renderTable(); } }
 
+// ✅ เพิ่ม Note ใน Waitlist
 function addWaitList(){
     let name=prompt("ชื่อคนจอง:");
-    if(name){ let room=prompt("จองห้อง:", ""); let phone=prompt("เบอร์โทร:"); waitingList.push({name,room,phone}); renderWaitingList(); }
+    if(name){ 
+        let room=prompt("จองห้อง (ถ้ามี):", ""); 
+        let phone=prompt("เบอร์โทร:"); 
+        let note=prompt("หมายเหตุ (เช่น เข้าอยู่สิ้นเดือน):"); // เพิ่มช่องหมายเหตุ
+        waitingList.push({name,room,phone,note}); 
+        renderWaitingList(); 
+    }
 }
 function removeWait(i){ if(confirm("ลบ?")){ waitingList.splice(i,1); renderWaitingList(); } }
 function renderWaitingList(){
     const c=document.getElementById('waitingListContainer'); c.innerHTML='';
-    waitingList.forEach((w,i)=>{ c.innerHTML+=`<div class="wait-item"><small class="text-primary fw-bold">[${w.room||'?'}]</small> <b>${w.name}</b><div class="small text-muted">${w.phone||'-'}</div><button class="btn btn-sm text-danger position-absolute top-0 end-0" onclick="removeWait(${i})">&times;</button></div>`; });
+    waitingList.forEach((w,i)=>{ 
+        c.innerHTML+=`
+        <div class="wait-item">
+            <div class="d-flex justify-content-between">
+                <small class="text-primary fw-bold">[${w.room||'?'}]</small>
+                <button class="btn btn-sm text-danger py-0" onclick="removeWait(${i})">&times;</button>
+            </div>
+            <b>${w.name}</b>
+            <div class="small text-muted">📞 ${w.phone||'-'}</div>
+            ${w.note ? `<div class="small text-danger bg-light px-1 mt-1 rounded border">📝 ${w.note}</div>` : ''}
+        </div>`; 
+    });
 }
 
 function saveToCloud(){
@@ -252,4 +274,3 @@ function updateStatus(msg,loading=false){ document.getElementById('statusMsg').i
 </script>
 </body>
 </html>
-
