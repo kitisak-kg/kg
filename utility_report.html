@@ -9,15 +9,28 @@
     <style>
         body { font-family: 'Sarabun', sans-serif; background: #f8fafc; padding: 20px; }
         .main-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; font-size: 13px; }
-        th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: center; vertical-align: middle; }
-        th { background: #0f172a; color: white; position: sticky; top: 0; }
+        
+        /* ปรับตารางให้กระชับ */
+        table { width: auto; border-collapse: collapse; font-size: 13px; margin: 0 auto; /* จัดกลาง */ }
+        
+        th, td { border: 1px solid #e2e8f0; padding: 6px 4px; text-align: center; vertical-align: middle; }
+        th { background: #0f172a; color: white; position: sticky; top: 0; font-size: 12px; }
         
         .room-col { background: #f1f5f9; font-weight: bold; width: 60px; font-size: 14px; }
-        .type-col { width: 50px; font-weight: bold; }
+        .type-col { width: 40px; font-weight: bold; font-size: 12px; }
         .type-w { color: #0284c7; background: #f0f9ff; }
         .type-e { color: #c2410c; background: #fff7ed; }
-        .val { font-family: monospace; font-size: 13px; }
+        
+        /* ✅ ไฮไลท์: ล็อกความกว้างช่องเดือนให้พอดีเลข 5 หลัก */
+        .col-month {
+            width: 65px;       /* กว้างพอดีเลข 5 หลัก (xx,xxx) */
+            min-width: 65px;
+            max-width: 65px;
+            font-family: monospace; /* ใช้ฟอนต์ monospace ให้เลขตรงกัน */
+            font-size: 13px;
+            white-space: nowrap; /* ห้ามขึ้นบรรทัดใหม่ */
+            overflow: hidden;
+        }
         
         @media print { .no-print { display: none; } body { background: white; padding: 0; } .main-card { box-shadow: none; } }
     </style>
@@ -63,11 +76,13 @@
         
         // 1. Headers
         const hRow = document.getElementById('headerRow');
-        hRow.innerHTML = '<th style="background:#334155;">ห้อง</th><th style="background:#334155;">ประเภท</th>';
+        hRow.innerHTML = '<th style="background:#334155; width:60px;">ห้อง</th><th style="background:#334155; width:40px;">ประเภท</th>';
+        
         months.forEach(mKey => {
             let [y, m] = mKey.split('-');
             let label = `${monthNames[parseInt(m)-1]} ${String(parseInt(y)+543).slice(-2)}`;
-            hRow.innerHTML += `<th>${label}</th>`;
+            // ใส่ class col-month ที่หัวตารางด้วย
+            hRow.innerHTML += `<th class="col-month">${label}</th>`;
         });
 
         // 2. Body
@@ -77,7 +92,8 @@
             let htmlW = `<tr><td rowspan="2" class="room-col">${rid}</td><td class="type-col type-w">น้ำ</td>`;
             months.forEach(m => {
                 let val = (data[rid][m] && data[rid][m].w) ? data[rid][m].w.toLocaleString() : "-";
-                htmlW += `<td class="val">${val}</td>`;
+                // ใส่ class col-month ที่ข้อมูล
+                htmlW += `<td class="col-month" style="color:#0284c7;">${val}</td>`;
             });
             htmlW += `</tr>`;
 
@@ -85,7 +101,8 @@
             let htmlE = `<tr><td class="type-col type-e">ไฟ</td>`;
             months.forEach(m => {
                 let val = (data[rid][m] && data[rid][m].e) ? data[rid][m].e.toLocaleString() : "-";
-                htmlE += `<td class="val">${val}</td>`;
+                // ใส่ class col-month ที่ข้อมูล
+                htmlE += `<td class="col-month" style="color:#c2410c;">${val}</td>`;
             });
             htmlE += `</tr>`;
 
